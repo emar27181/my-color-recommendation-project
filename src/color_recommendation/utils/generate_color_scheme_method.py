@@ -16,8 +16,11 @@ def generate_color_scheme(base_color_rgb, hue_differences):
 
 
 def generate_dominant_color_scheme(base_color_rgb):
-    color_scheme = generate_color_scheme(base_color_rgb, [30, 60])
-    return color_scheme
+    color_scheme1 = generate_color_scheme(base_color_rgb, [30, 60])
+    color_scheme2 = generate_color_scheme(base_color_rgb, [-30, 30])
+    color_scheme3 = generate_color_scheme(base_color_rgb, [-60, -30])
+    return color_scheme1, color_scheme2, color_scheme3
+
 
 
 def main():
