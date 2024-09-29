@@ -7,11 +7,16 @@ def print_colored_text(text, rgb):
     print(f"\033[38;2;{rgb[0]};{rgb[1]};{rgb[2]}m{text}\033[0m", end="")
 
 
+# 引数で受け取った配色を表示させる関数
+def print_color_scheme(color_scheme):
+    for color in color_scheme:
+        print_colored_text("■", color)
+
+    print("")
+
+
 # 引数で受け取った配色群を表示させる関数
 def print_color_schemes(color_schemes):
     for color_scheme_method in color_schemes:
         for color_scheme in color_scheme_method:
-            for color in color_scheme:
-                print_colored_text("■", color)
-
-            print("")
+            print_color_scheme(color_scheme)
