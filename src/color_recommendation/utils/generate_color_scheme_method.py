@@ -1,4 +1,5 @@
 from transform_color import rgb_to_hsl, hsl_to_rgb, rgb_to_hex, hex_to_rgb
+from color_utils import print_colored_text, print_color_schemes
 
 
 def generate_color_scheme(base_color_rgb, hue_differences):
@@ -79,8 +80,11 @@ def generate_hexad_color_scheme(base_color_rgb):
 
 
 def main():
-    print(generate_dominant_color_scheme([255, 0, 0]))
-    print(generate_analogy_color_scheme([255, 0, 0]))
+    recommend_color_schemes = []
+    recommend_color_schemes.append(generate_analogy_color_scheme([255, 0, 0]))
+    recommend_color_schemes.append(generate_dominant_color_scheme([255, 0, 0]))
+
+    print_color_schemes(recommend_color_schemes)
 
 
 if __name__ == '__main__':
