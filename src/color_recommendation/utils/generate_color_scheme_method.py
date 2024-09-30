@@ -1,5 +1,5 @@
-from transform_color import rgb_to_hsl, hsl_to_rgb, rgb_to_hex, hex_to_rgb
-from color_utils import print_colored_text, print_color_schemes
+from helpers.transform_color import rgb_to_hsl, hsl_to_rgb, rgb_to_hex, hex_to_rgb
+from helpers.color_utils import print_colored_text, print_color_schemes
 
 
 def generate_all_color_schemes(base_color_rgb):
