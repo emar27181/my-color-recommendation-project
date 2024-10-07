@@ -18,7 +18,13 @@ def generate_recommend_colors(data):
 
     # print(data)
     for illust_data in data:
+
+        # 空のデータを読み飛ばし
+        if not illust_data:
+            continue
+
         # あるイラストに対して推薦配色群を生成
+        # print(illust_data[0]["illustName"])
         base_color_rgb = hex_to_rgb(illust_data[0]['color'])
         recommend_color_schemes = generate_all_color_schemes(base_color_rgb)
         recommend_color_schemes = add_all_variations_color_schemes(recommend_color_schemes)
@@ -44,7 +50,9 @@ def generate_recommend_colors(data):
 
 
 def main():
-    FILE_PATH = "src/color_recommendation/data/input/test_input_simple_data.json"
+    # FILE_PATH = "src/color_recommendation/data/input/test_input_simple_data.json"
+    FILE_PATH = "src/color_recommendation/data/input/test_input_real_data.json"
+
     input_data = read_file(FILE_PATH)
     # print(f'data:', data)
 
