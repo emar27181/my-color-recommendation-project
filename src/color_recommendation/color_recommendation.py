@@ -15,18 +15,23 @@ def generate_recommend_colors(data):
 
     # print(data)
     for illust_data in data:
-        print(illust_data)
+        # あるイラストに対して推薦配色群を生成
         base_color_rgb = hex_to_rgb(illust_data[0]['color'])
         recommend_color_schemes = generate_all_color_schemes(base_color_rgb)
         recommend_color_schemes = add_all_variations_color_schemes(recommend_color_schemes)
         print_color_schemes(recommend_color_schemes)
 
-        """
-        for color_data in illust_data:
-            color = color_data['color']
-            print_colored_text("■ ", hex_to_rgb(color))
-            print(color)
-        """
+        new_illust_data = {
+            "illust_name": illust_data[0]['illustName'],
+            "color_scheme": illust_data,
+            "recommend_color_schemes": recommend_color_schemes,
+        }
+
+        print(new_illust_data)
+
+        # print(illust_data)
+
+        # 次の色が含まれているかの確認
 
     return ("test output")
 
