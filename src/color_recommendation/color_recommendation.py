@@ -4,6 +4,7 @@ from utils.add_variations_color_scheme import add_all_variations_color_schemes
 from utils.helpers.color_utils import print_colored_text, print_color_schemes
 from utils.helpers.transform_color import hex_to_rgb, transform_color_schemes_rgb_to_hex
 from utils.helpers.json_utils import convert_color_schemes_to_color_data
+from utils.check_data_is_contained_next_color import check_data_is_contained_next_color
 
 
 def read_file(file_path):
@@ -43,27 +44,28 @@ def generate_recommend_colors(data):
         # print(new_illust_data)
         output_data.append(new_illust_data)
 
-        # 次の色が含まれているかの確認
-
     # print(output_data)
     return output_data
 
 
 def main():
-    # FILE_PATH = "src/color_recommendation/data/input/test_input_simple_data.json"
-    FILE_PATH = "src/color_recommendation/data/input/test_input_real_data.json"
+    # イラストデータの読み込み
+    INPUT_FILE_PATH = "src/color_recommendation/data/input/test_input_simple_data.json"
+    # INPUT_FILE_PATH = "src/color_recommendation/data/input/test_input_real_data.json"
+    input_data = read_file(INPUT_FILE_PATH)
 
-    input_data = read_file(FILE_PATH)
-    # print(f'data:', data)
-
+    # 推薦配色群の生成
     output_data = generate_recommend_colors(input_data)
-
     OUTPUT_FILE_PATH = "src/color_recommendation/data/output/test_output_simple_data.json"
     with open(OUTPUT_FILE_PATH, 'w', encoding='utf-8') as file:
         json.dump(output_data, file, ensure_ascii=False, indent=4)
 
-    # colors = generate_recommend_colors((255, 0, 0))
-    # print(f'colors:', colors)
+    # 推薦配色群の読み込み
+    RECOMMENDED_FILE_PATH = "src/color_recommendation/data/output/test_output_simple_data.json"
+    recommended_data = read_file(RECOMMENDED_FILE_PATH)
+
+    # 次の色が含まれているかどうかの判定
+    check_data_is_contained_next_color(recommended_data)
 
 
 if __name__ == '__main__':
