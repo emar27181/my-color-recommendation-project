@@ -2,7 +2,7 @@ import json
 from utils.generate_color_scheme_method import generate_all_color_schemes
 from utils.add_variations_color_scheme import add_all_variations_color_schemes
 from utils.helpers.color_utils import print_colored_text, print_color_schemes
-from utils.helpers.transform_color import hex_to_rgb
+from utils.helpers.transform_color import hex_to_rgb, transform_color_schemes_rgb_to_hex
 
 
 def read_file(file_path):
@@ -13,6 +13,8 @@ def read_file(file_path):
 
 def generate_recommend_colors(data):
 
+    output_data = []
+
     # print(data)
     for illust_data in data:
         # あるイラストに対して推薦配色群を生成
@@ -21,27 +23,35 @@ def generate_recommend_colors(data):
         recommend_color_schemes = add_all_variations_color_schemes(recommend_color_schemes)
         print_color_schemes(recommend_color_schemes)
 
+        recommend_color_schemes_hex = transform_color_schemes_rgb_to_hex(recommend_color_schemes)
+        # print(recommend_color_schemes_hex)
+
         new_illust_data = {
             "illust_name": illust_data[0]['illustName'],
             "color_scheme": illust_data,
-            "recommend_color_schemes": recommend_color_schemes,
+            # "recommend_color_schemes_rgb": recommend_color_schemes,
+            "recommend_color_schemes_hex": recommend_color_schemes_hex,
         }
 
-        print(new_illust_data)
-
-        # print(illust_data)
+        # print(new_illust_data)
+        output_data.append(new_illust_data)
 
         # 次の色が含まれているかの確認
 
-    return ("test output")
+    print(output_data)
+    return output_data
 
 
 def main():
     FILE_PATH = "src/color_recommendation/data/input/test_input_simple_data.json"
-    data = read_file(FILE_PATH)
+    input_data = read_file(FILE_PATH)
     # print(f'data:', data)
 
-    generate_recommend_colors(data)
+    output_data = generate_recommend_colors(input_data)
+
+    OUTPUT_FILE_PATH = "src/color_recommendation/data/output/test_output_simple_data.json"
+    with open(OUTPUT_FILE_PATH, 'w', encoding='utf-8') as file:
+        json.dump(output_data, file, ensure_ascii=False, indent=4)
 
     # colors = generate_recommend_colors((255, 0, 0))
     # print(f'colors:', colors)
