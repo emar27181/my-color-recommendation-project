@@ -5,6 +5,7 @@ from utils.helpers.transform_color import hex_to_rgb
 def is_contained_color(next_color, color_schemes):
     for i in range(len(color_schemes)):
         # print(color_schemes[i])
+        print(f"--- {i+1} 配色目 -------------")
 
         for j in range(len(color_schemes[i])):
             recommend_color = color_schemes[i][j]["color"]
@@ -15,11 +16,17 @@ def is_contained_color(next_color, color_schemes):
             print(", recommend_color: ", end="")
             print_colored_text("■", hex_to_rgb(recommend_color))
 
-            print(", delta_e = ", end="")
-            print(calculate_color_difference_delta_e_cie2000(hex_to_rgb(next_color), hex_to_rgb(recommend_color)))
+            diff = calculate_color_difference_delta_e_cie2000(hex_to_rgb(next_color), hex_to_rgb(recommend_color))
+            print(f", delta_e = {diff}")
+
+            if (diff <= 40):
+                return True, i
+
+    return False, -1
 
 
 def check_data_is_contained_next_color(data):
+    illust_count = 0
     for illust_data in data:
 
         # 空のデータを読み飛ばし
@@ -31,8 +38,14 @@ def check_data_is_contained_next_color(data):
 
         # 次の色が含まれているかどうかの判定
         for i in range(len(color_scheme) - 1):
-            corrent_color = color_scheme[i]["color"]
+            print(f"\n=== {illust_count+1} 枚目のイラストの {i+1} 色目 ============")
+
+            # corrent_color = color_scheme[i]["color"]
             next_color = color_scheme[i + 1]["color"]
 
-            print(f"corrent_color: {corrent_color}, next_color: {next_color}")
-            is_contained_color(next_color, recommend_color_schemes)
+            # print(f"corrent_color: {corrent_color}, next_color: {next_color}")
+            is_contained, scheme_index = is_contained_color(next_color, recommend_color_schemes)
+            print(f"is_contained: {is_contained}, scheme_index: {scheme_index}")
+
+        # print(illust_data)
+        illust_count += 1
