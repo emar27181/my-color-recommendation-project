@@ -68,7 +68,7 @@ def check_data_is_contained_next_color(data):
         # print(recall_at_k_per_illust)
 
         data_recall_at_k_per_illust = {
-            "illust_name": "hoge",
+            "illust_name": illust_data["illust_name"],
             "recall_at_k": recall_at_k_per_illust,
         }
         data_recall_at_k.append(data_recall_at_k_per_illust)
