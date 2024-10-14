@@ -77,3 +77,4 @@ def check_data_is_contained_next_color(data):
         illust_count += 1
 
     print(data_recall_at_k)
+    return data_recall_at_k

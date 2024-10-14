@@ -65,7 +65,10 @@ def main():
     recommended_data = read_file(RECOMMENDED_FILE_PATH)
 
     # 次の色が含まれているかどうかの判定
-    check_data_is_contained_next_color(recommended_data)
+    is_contained_next_color_data = check_data_is_contained_next_color(recommended_data)
+    IS_CONTAINED_NEXT_COLOR_FILE_PATH = "src/color_recommendation/data/output/test_is_contained_next_color_simple_data.json"
+    with open(IS_CONTAINED_NEXT_COLOR_FILE_PATH, 'w', encoding='utf-8') as file:
+        json.dump(is_contained_next_color_data, file, ensure_ascii=False, indent=4)
 
 
 if __name__ == '__main__':
