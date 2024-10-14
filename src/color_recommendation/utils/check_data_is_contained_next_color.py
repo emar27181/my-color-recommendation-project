@@ -31,6 +31,8 @@ def is_contained_color(next_color, color_schemes):
 
 
 def check_data_is_contained_next_color(data):
+    data_recall_at_k = []
+
     illust_count = 0
     for illust_data in data:
 
@@ -41,10 +43,12 @@ def check_data_is_contained_next_color(data):
         color_scheme = illust_data["color_scheme"]
         recommend_color_schemes = illust_data["recommend_color_schemes"]
 
+        recall_at_k_per_illust = []
+
         # 次の色が含まれているかどうかの判定
         for i in range(len(color_scheme) - 1):
 
-            if (IS_PRINT_CONTAINED_NEXY_COLOR_INFO):
+            if (IS_PRINT_CONTAINED_NEXT_COLOR_INFO):
                 print(f"\n=== {illust_count+1} 枚目のイラストの {i+1} 色目 ============")
 
             # corrent_color = color_scheme[i]["color"]
@@ -52,7 +56,24 @@ def check_data_is_contained_next_color(data):
 
             # print(f"corrent_color: {corrent_color}, next_color: {next_color}")
             is_contained, scheme_index = is_contained_color(next_color, recommend_color_schemes)
-            print(f"is_contained: {is_contained}, scheme_index: {scheme_index}")
+            # print(f"is_contained: {is_contained}, scheme_index: {scheme_index}")
+
+            is_contained_data = {
+                "next_color_index": i + 1,
+                "k": scheme_index,
+                "is_contained_next_color": is_contained
+            }
+            recall_at_k_per_illust.append(is_contained_data)
+
+        # print(recall_at_k_per_illust)
+
+        data_recall_at_k_per_illust = {
+            "illust_name": "hoge",
+            "recall_at_k": recall_at_k_per_illust,
+        }
+        data_recall_at_k.append(data_recall_at_k_per_illust)
 
         # print(illust_data)
         illust_count += 1
+
+    print(data_recall_at_k)
