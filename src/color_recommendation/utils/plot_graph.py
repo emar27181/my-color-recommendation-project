@@ -2,14 +2,30 @@ import json
 import matplotlib.pyplot as plt
 
 
-def plot_recall_at_k(input_file_path, output_file_path):
+def plot_graph(plot_data, graph_name, output_file_path):
+    # プロット
+    plt.plot(plot_data, label=f'{graph_name}', marker='o')
+    plt.title(f'{graph_name}')
+    plt.ylim(0, 1)
+    plt.xlim(0, 60)
+    plt.xlabel('color_scheme')
+    plt.ylabel(f'{graph_name}')
+    plt.grid(True)
+
+    # ファイルに保存
+    plt.savefig(output_file_path)
+    print(f"{output_file_path} が保存されました．")
+
+
+def calculate_recall(file_path):
+
     recalls = [0] * 100
     timing_count = 0
 
-    with open(input_file_path, 'r') as f:
+    with open(file_path, 'r') as f:
         data = json.load(f)
 
-    print(f"{input_file_path} が読み込まれました．")
+    print(f"{file_path} が読み込まれました．")
 
     # print(len(data))
 
@@ -28,21 +44,15 @@ def plot_recall_at_k(input_file_path, output_file_path):
         # print(recalls[i])
         recalls[i] = round(100 * (recalls[i] / timing_count)) / 100
 
+    return recalls
+
+
+def plot_recall_at_k(input_file_path, output_file_path):
+
+    recalls = calculate_recall(input_file_path)
+    plot_graph(recalls, 'recall', output_file_path)
     # print(timing_count)
     # print(recalls)
-
-    # プロット
-    plt.plot(recalls, marker='o')
-    plt.title('Recalls Plot')
-    plt.ylim(0, 1)
-    plt.xlim(0, 60)
-    plt.xlabel('Index')
-    plt.ylabel('Recall Values')
-    plt.grid(True)
-
-    # ファイルに保存
-    plt.savefig(output_file_path)
-    print(f"{output_file_path} が保存されました．")
 
 
 def main():
