@@ -11,6 +11,7 @@ from utils.plot_graph import plot_recall_at_k
 def read_file(file_path):
     with open(file_path, 'r') as f:
         data = json.load(f)
+        print(f"{file_path} が読み込まれました．")
         return data
 
 
@@ -46,10 +47,13 @@ def generate_recommend_colors(data):
         output_data.append(new_illust_data)
 
     # print(output_data)
+
     return output_data
 
 
 def run_all(file_name):
+    print(f"=== {file_name} ====================")
+
     # イラストデータの読み込み
     USED_COLORS_FILE_PATH = f"src/color_recommendation/data/input/used_colors_{file_name}.json"
     used_colors_data = read_file(USED_COLORS_FILE_PATH)
@@ -59,16 +63,20 @@ def run_all(file_name):
     RECOMMEND_COLORS_FILE_PATH = f"src/color_recommendation/data/output/recommend_colors_{file_name}.json"
     with open(RECOMMEND_COLORS_FILE_PATH, 'w', encoding='utf-8') as file:
         json.dump(recommend_colors_data, file, ensure_ascii=False, indent=4)
+        print(f"{RECOMMEND_COLORS_FILE_PATH} が保存されました．")
 
     # 次の色が含まれているかどうかの判定とデータの作成
     is_contained_next_color_data = check_data_is_contained_next_color(recommend_colors_data)
     IS_CONTAINED_NEXT_COLOR_FILE_PATH = f"src/color_recommendation/data/output/is_contained_next_color_{file_name}.json"
     with open(IS_CONTAINED_NEXT_COLOR_FILE_PATH, 'w', encoding='utf-8') as file:
         json.dump(is_contained_next_color_data, file, ensure_ascii=False, indent=4)
+        print(f"{IS_CONTAINED_NEXT_COLOR_FILE_PATH} が保存されました．")
 
     # グラフの生成
     GRAPH_PATH = f'src/color_recommendation/data/output/recall_at_k_{file_name}.png'
     plot_recall_at_k(IS_CONTAINED_NEXT_COLOR_FILE_PATH, GRAPH_PATH)
+
+    print("")
 
 
 def main():
