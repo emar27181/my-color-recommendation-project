@@ -7,6 +7,7 @@ def hex_to_rgb(hex_color):
 
 
 def rgb_to_hex(rgb):
+    rgb = tuple(max(0, min(255, x)) for x in rgb)
     return '#{:02x}{:02x}{:02x}'.format(rgb[0], rgb[1], rgb[2])
 
 
