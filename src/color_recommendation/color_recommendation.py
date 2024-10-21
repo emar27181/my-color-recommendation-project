@@ -6,6 +6,7 @@ from utils.helpers.transform_color import hex_to_rgb, transform_color_schemes_rg
 from utils.helpers.json_utils import convert_color_schemes_to_color_data
 from utils.check_data_is_contained_next_color import check_data_is_contained_next_color
 from utils.plot_graph import plot_recall_at_k
+from utils.estimate_used_color_scheme import generate_json_used_color_scheme, save_json_used_color_scheme
 
 
 def read_file(file_path):
@@ -84,9 +85,12 @@ def run_all(file_name):
 def main():
     # all_run("src/color_recommendation/data/input/test_input_real_data.json", 'src/color_recommendation/data/output/test_recall_at_k.png')
     # all_run("sample")
-    run_all("gaako")
-    run_all("no_copyright_girl")
-    run_all("yoshi_mi_yoshi")
+    # run_all("gaako")
+    # run_all("no_copyright_girl")
+    # run_all("yoshi_mi_yoshi")
+
+    save_json_used_color_scheme("sample")
+    # generate_json_used_color_scheme("src/color_recommendation/data/input/illustration/sample/sample_input.jpg")
 
 
 if __name__ == '__main__':
