@@ -51,8 +51,6 @@ def generate_recommend_colors(data):
 
 def run_all(file_name):
     # イラストデータの読み込み
-    # INPUT_FILE_PATH = "src/color_recommendation/data/input/test_input_simple_data.json"
-    # USED_COLOR_FILE_PATH = "src/color_recommendation/data/input/test_input_real_data.json"
     USED_COLORS_FILE_PATH = f"src/color_recommendation/data/input/used_colors_{file_name}.json"
     used_colors_data = read_file(USED_COLORS_FILE_PATH)
 
@@ -62,20 +60,14 @@ def run_all(file_name):
     with open(RECOMMEND_COLORS_FILE_PATH, 'w', encoding='utf-8') as file:
         json.dump(recommend_colors_data, file, ensure_ascii=False, indent=4)
 
-    # 推薦配色群の読み込み
-    # RECOMMENDED_FILE_PATH = "src/color_recommendation/data/output/test_output_simple_data.json"
-    # recommended_data = read_file(RECOMMENDED_FILE_PATH)
-
-    # 次の色が含まれているかどうかの判定
+    # 次の色が含まれているかどうかの判定とデータの作成
     is_contained_next_color_data = check_data_is_contained_next_color(recommend_colors_data)
-    # IS_CONTAINED_NEXT_COLOR_FILE_PATH = "src/color_recommendation/data/output/test_is_contained_next_color_simple_data.json"
     IS_CONTAINED_NEXT_COLOR_FILE_PATH = f"src/color_recommendation/data/output/is_contained_next_color_{file_name}.json"
-
     with open(IS_CONTAINED_NEXT_COLOR_FILE_PATH, 'w', encoding='utf-8') as file:
         json.dump(is_contained_next_color_data, file, ensure_ascii=False, indent=4)
 
+    # グラフの生成
     GRAPH_PATH = f'src/color_recommendation/data/output/recall_at_k_{file_name}.png'
-
     plot_recall_at_k(IS_CONTAINED_NEXT_COLOR_FILE_PATH, GRAPH_PATH)
 
 
