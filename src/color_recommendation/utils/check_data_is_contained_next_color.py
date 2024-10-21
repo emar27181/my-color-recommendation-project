@@ -24,7 +24,7 @@ def is_contained_color(next_color, color_schemes):
                 print_colored_text("■", hex_to_rgb(recommend_color))
                 print(f", delta_e = {diff}")
 
-            if (diff <= 20):
+            if (diff <= 10):
                 return True, i
 
     return False, -1
@@ -76,5 +76,5 @@ def check_data_is_contained_next_color(data):
         # print(illust_data)
         illust_count += 1
 
-    print(data_recall_at_k)
+    # print(data_recall_at_k)
     return data_recall_at_k
