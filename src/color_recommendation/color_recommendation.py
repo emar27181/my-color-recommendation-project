@@ -5,6 +5,7 @@ from utils.helpers.color_utils import print_colored_text, print_color_schemes
 from utils.helpers.transform_color import hex_to_rgb, transform_color_schemes_rgb_to_hex
 from utils.helpers.json_utils import convert_color_schemes_to_color_data
 from utils.check_data_is_contained_next_color import check_data_is_contained_next_color
+from utils.plot_graph import plot_recall_at_k
 
 
 def read_file(file_path):
@@ -50,8 +51,8 @@ def generate_recommend_colors(data):
 
 def main():
     # イラストデータの読み込み
-    INPUT_FILE_PATH = "src/color_recommendation/data/input/test_input_simple_data.json"
-    # INPUT_FILE_PATH = "src/color_recommendation/data/input/test_input_real_data.json"
+    # INPUT_FILE_PATH = "src/color_recommendation/data/input/test_input_simple_data.json"
+    INPUT_FILE_PATH = "src/color_recommendation/data/input/test_input_real_data.json"
     input_data = read_file(INPUT_FILE_PATH)
 
     # 推薦配色群の生成
@@ -69,6 +70,8 @@ def main():
     IS_CONTAINED_NEXT_COLOR_FILE_PATH = "src/color_recommendation/data/output/test_is_contained_next_color_simple_data.json"
     with open(IS_CONTAINED_NEXT_COLOR_FILE_PATH, 'w', encoding='utf-8') as file:
         json.dump(is_contained_next_color_data, file, ensure_ascii=False, indent=4)
+
+    plot_recall_at_k()
 
 
 if __name__ == '__main__':
