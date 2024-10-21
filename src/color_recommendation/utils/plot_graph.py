@@ -14,7 +14,6 @@ def plot_graph(plot_data, graph_name, output_file_path):
 
     # ファイルに保存
     plt.savefig(output_file_path)
-    print(f"{output_file_path} が保存されました．")
 
 
 def calculate_recall(file_path):
@@ -24,8 +23,6 @@ def calculate_recall(file_path):
 
     with open(file_path, 'r') as f:
         data = json.load(f)
-
-    print(f"{file_path} が読み込まれました．")
 
     # print(len(data))
 

@@ -63,18 +63,20 @@ def run_all(file_name):
     RECOMMEND_COLORS_FILE_PATH = f"src/color_recommendation/data/output/recommend_colors_{file_name}.json"
     with open(RECOMMEND_COLORS_FILE_PATH, 'w', encoding='utf-8') as file:
         json.dump(recommend_colors_data, file, ensure_ascii=False, indent=4)
-        print(f"{RECOMMEND_COLORS_FILE_PATH} が保存されました．")
+        print(f"{RECOMMEND_COLORS_FILE_PATH} が保存されました．(推薦配色群の生成)")
 
     # 次の色が含まれているかどうかの判定とデータの作成
     is_contained_next_color_data = check_data_is_contained_next_color(recommend_colors_data)
     IS_CONTAINED_NEXT_COLOR_FILE_PATH = f"src/color_recommendation/data/output/is_contained_next_color_{file_name}.json"
     with open(IS_CONTAINED_NEXT_COLOR_FILE_PATH, 'w', encoding='utf-8') as file:
         json.dump(is_contained_next_color_data, file, ensure_ascii=False, indent=4)
-        print(f"{IS_CONTAINED_NEXT_COLOR_FILE_PATH} が保存されました．")
+        print(f"{IS_CONTAINED_NEXT_COLOR_FILE_PATH} が保存されました．(次の色が含まれているかどうかを保存するデータの作成)")
 
     # グラフの生成
     GRAPH_PATH = f'src/color_recommendation/data/output/recall_at_k_{file_name}.png'
+    print(f"{IS_CONTAINED_NEXT_COLOR_FILE_PATH} が読み込まれました．")
     plot_recall_at_k(IS_CONTAINED_NEXT_COLOR_FILE_PATH, GRAPH_PATH)
+    print(f"{GRAPH_PATH} が保存されました．(グラフの作成)")
 
     print("")
 
