@@ -71,7 +71,7 @@ def main():
     with open(IS_CONTAINED_NEXT_COLOR_FILE_PATH, 'w', encoding='utf-8') as file:
         json.dump(is_contained_next_color_data, file, ensure_ascii=False, indent=4)
 
-    plot_recall_at_k(IS_CONTAINED_NEXT_COLOR_FILE_PATH)
+    plot_recall_at_k(IS_CONTAINED_NEXT_COLOR_FILE_PATH, 'src/color_recommendation/data/output/test_recall_at_k.png')
 
 
 if __name__ == '__main__':

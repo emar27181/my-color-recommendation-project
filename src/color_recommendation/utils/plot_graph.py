@@ -2,14 +2,16 @@ import json
 import matplotlib.pyplot as plt
 
 
-def plot_recall_at_k(file_path):
+def plot_recall_at_k(input_file_path, output_file_path):
     recalls = [0] * 100
     timing_count = 0
 
-    with open(file_path, 'r') as f:
+    with open(input_file_path, 'r') as f:
         data = json.load(f)
 
-    print(len(data))
+    print(f"{input_file_path} が読み込まれました．")
+
+    # print(len(data))
 
     for illust_data in data:
         # print(illust_data['recall_at_k'])
@@ -26,8 +28,8 @@ def plot_recall_at_k(file_path):
         # print(recalls[i])
         recalls[i] = round(100 * (recalls[i] / timing_count)) / 100
 
-    print(timing_count)
-    print(recalls)
+    # print(timing_count)
+    # print(recalls)
 
     # プロット
     plt.plot(recalls, marker='o')
@@ -39,11 +41,12 @@ def plot_recall_at_k(file_path):
     plt.grid(True)
 
     # ファイルに保存
-    plt.savefig('src/color_recommendation/data/output/test_recall_at_k.png')
+    plt.savefig(output_file_path)
+    print(f"{output_file_path} が保存されました．")
 
 
 def main():
-    plot_recall_at_k("src/color_recommendation/data/output/test_is_contained_next_color_simple_data.json")
+    plot_recall_at_k("src/color_recommendation/data/output/test_is_contained_next_color_simple_data.json", 'src/color_recommendation/data/output/test_recall_at_k.png')
 
 
 if __name__ == '__main__':
