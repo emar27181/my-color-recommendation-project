@@ -13,7 +13,7 @@ from utils.helpers.color_utils import print_colored_text, calculate_color_differ
 SATURATION_LOWER_LIMIT = 10
 LIGHTNESS_UPPER_LIMIT = 90
 LIGHTNESS_LOWER_LIMIT = 10
-IS_PRINT_COLOR_SCHEME_BEFORE_MEREGED = True
+IS_PRINT_COLOR_SCHEME_BEFORE_MEREGED = False
 
 
 # 読み込まれた画像の使用配色を推定する関数
@@ -23,9 +23,7 @@ def estimate_used_color_scheme(image_path):
     width, height = image.size
     pixel_count = width * height
 
-    print("\n")
-    print(f"loading {image_path}")
-
+    # print("\n")
     image = image.convert('RGB')  # 画像をRGBに変換
     pixels = list(image.getdata())  # 画像のピクセルデータを取得
     color_counter = Counter(pixels)  # カラーコードとその出現回数をカウント
@@ -64,9 +62,10 @@ def estimate_used_color_scheme(image_path):
     if (IS_PRINT_COLOR_SCHEME_BEFORE_MEREGED):
         print("------ ↓ ------")
     for color, rate in merged_used_color_schemes:
-        print_colored_text("■■■■■■■■■■■■", color)
-        # print(f'Rate: {round(100*count/pixel_count)}%, Count: {count}, ColorCode: {rgb_to_hex(color)}, RGB: {color}, HSL: {rgb_to_hsl(color)}')
-        print(f'Rate: {round(10*rate)/10}%, ColorCode: {rgb_to_hex(color)}, RGB: {color}, HSL: {rgb_to_hsl(color)}')
+        if (IS_PRINT_COLOR_SCHEME_BEFORE_MEREGED):
+            print_colored_text("■■■■■■■■■■■■", color)
+            # print(f'Rate: {round(100*count/pixel_count)}%, Count: {count}, ColorCode: {rgb_to_hex(color)}, RGB: {color}, HSL: {rgb_to_hsl(color)}')
+            print(f'Rate: {round(10*rate)/10}%, ColorCode: {rgb_to_hex(color)}, RGB: {color}, HSL: {rgb_to_hsl(color)}')
 
     return merged_used_color_schemes
 
@@ -97,7 +96,8 @@ def rotate_avoid_is_head_achromatic(color_scheme):
     head_saturation = head_color[1]
 
     while (head_saturation <= 20):
-        print(f"saturation: {head_saturation}")
+        if (IS_PRINT_COLOR_SCHEME_BEFORE_MEREGED):
+            print(f"saturation: {head_saturation}")
         color_scheme.append(color_scheme.pop(0))
         head_color = rgb_to_hsl(color_scheme[0][0])
         head_saturation = head_color[1]
@@ -173,10 +173,14 @@ def save_json_used_color_scheme(illustrater_name):
     # .jpgファイルと.pngファイルの名前を同じ配列に保存
     image_files = [file for file in os.listdir(load_directory_path) if file.endswith('.jpg')] + [file for file in os.listdir(load_directory_path) if file.endswith('.png')]
 
-    print(image_files)
+    # print(image_files)
+    load_image_count = 1
 
     for file_name in image_files:
+
+        print(f"{load_directory_path}/{file_name} が読み込まれました．({load_image_count}/{len(image_files)})")
         add_json_data = generate_json_used_color_scheme(f"{load_directory_path}/{file_name}")
+        load_image_count += 1
         json_data.append(add_json_data)
 
     # print(json_data)
