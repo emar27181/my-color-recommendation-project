@@ -56,6 +56,9 @@ def generate_recommend_colors(data):
 def run_all(file_name):
     print(f"=== {file_name} ====================")
 
+    download_instagram_images(file_name)
+    print(f"@{file_name} の投稿がダウンロードされました．")
+
     # 使用色の抽出と保存
     save_json_used_color_scheme(file_name)
     print("使用色が抽出されました．")
@@ -96,8 +99,10 @@ def main():
 
     # save_json_used_color_scheme("sample")
     # generate_json_used_color_scheme("src/color_recommendation/data/input/illustration/sample/sample_input.jpg")
-    # download_instagram_images("amen27181")
-    run_all("amen27181")
+    # download_instagram_images("sa_ka_na_4")
+    run_all("trcoot")
+
+    # run_all("amen27181")
 
 
 if __name__ == '__main__':
