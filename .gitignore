@@ -2,3 +2,4 @@ venv_color_recommendation
 src/color_recommendation/data
 
 *.pyc
+tmp/
