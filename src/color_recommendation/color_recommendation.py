@@ -7,6 +7,7 @@ from utils.helpers.json_utils import convert_color_schemes_to_color_data
 from utils.check_data_is_contained_next_color import check_data_is_contained_next_color
 from utils.plot_graph import plot_recall_at_k
 from utils.estimate_used_color_scheme import generate_json_used_color_scheme, save_json_used_color_scheme
+from utils.download_instagram_images import download_instagram_images
 
 
 def read_file(file_path):
@@ -89,8 +90,9 @@ def main():
     # run_all("no_copyright_girl")
     # run_all("yoshi_mi_yoshi")
 
-    save_json_used_color_scheme("sample")
+    # save_json_used_color_scheme("sample")
     # generate_json_used_color_scheme("src/color_recommendation/data/input/illustration/sample/sample_input.jpg")
+    download_instagram_images("amen27181")
 
 
 if __name__ == '__main__':
