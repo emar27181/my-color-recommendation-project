@@ -53,14 +53,14 @@ def generate_recommend_colors(data):
     return output_data
 
 
-def run_all(file_name):
+def run_all(file_name, illust_count_limit):
     print(f"=== {file_name} ====================")
 
-    download_instagram_images(file_name)
+    download_instagram_images(file_name, illust_count_limit)
     print(f"@{file_name} の投稿がダウンロードされました．")
 
     # 使用色の抽出と保存
-    save_json_used_color_scheme(file_name)
+    save_json_used_color_scheme(file_name, illust_count_limit)
     print("使用色が抽出されました．")
 
     # イラストデータの読み込み
@@ -100,9 +100,12 @@ def main():
     # save_json_used_color_scheme("sample")
     # generate_json_used_color_scheme("src/color_recommendation/data/input/illustration/sample/sample_input.jpg")
     # download_instagram_images("sa_ka_na_4")
-    run_all("trcoot")
+    # run_all("trcoot", 100)
+    # run_all("mokmok_skd", 100)
+    # run_all("nest_virgo", 100)
+    # run_all("oz_yarimasu", 100)
 
-    # run_all("amen27181")
+    run_all("amen27181", 100)
 
 
 if __name__ == '__main__':

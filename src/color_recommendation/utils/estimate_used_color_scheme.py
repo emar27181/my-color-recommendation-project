@@ -164,7 +164,7 @@ def generate_json_used_color_scheme(image_path):
     return json_data
 
 
-def save_json_used_color_scheme(illustrater_name):
+def save_json_used_color_scheme(illustrater_name, illust_count_limit):
     json_data = []
 
     load_directory_path = f'src/color_recommendation/data/input/illustration/{illustrater_name}'
@@ -177,6 +177,8 @@ def save_json_used_color_scheme(illustrater_name):
     load_image_count = 1
 
     for file_name in image_files:
+        if (load_image_count >= illust_count_limit):
+            break
 
         print(f"{load_directory_path}/{file_name} が読み込まれました．({load_image_count}/{len(image_files)})")
         add_json_data = generate_json_used_color_scheme(f"{load_directory_path}/{file_name}")
