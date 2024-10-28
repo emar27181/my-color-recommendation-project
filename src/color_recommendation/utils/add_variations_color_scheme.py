@@ -1,6 +1,6 @@
-from generate_color_scheme_method import generate_all_color_schemes
-from transform_color import rgb_to_hsl, hsl_to_rgb
-from color_utils import print_color_scheme, print_color_schemes
+from .generate_color_scheme_method import generate_all_color_schemes
+from .helpers.transform_color import rgb_to_hsl, hsl_to_rgb
+from .helpers.color_utils import print_color_scheme, print_color_schemes
 
 
 # 明度によって配色のバリエーションを増やす関数
