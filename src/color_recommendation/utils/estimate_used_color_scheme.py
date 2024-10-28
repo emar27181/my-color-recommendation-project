@@ -8,6 +8,7 @@ from collections import Counter
 from .helpers.transform_color import rgb_to_hsl, rgb_to_hex
 from utils.helpers.color_utils import print_colored_text, calculate_color_difference_delta_e_cie2000
 from .config.constants_dev import SATURATION_LOWER_LIMIT, LIGHTNESS_LOWER_LIMIT, LIGHTNESS_UPPER_LIMIT, IS_PRINT_COLOR_SCHEME_BEFORE_MEREGED
+from colorthief import ColorThief
 # from src.color_recommendation.config.constants import SATURATION_LOWER_LIMIT, LIGHTNESS_UPPER_LIMIT, LIGHTNESS_LOWER_LIMIT
 
 
@@ -63,6 +64,38 @@ def estimate_used_color_scheme(image_path):
             print(f'Rate: {round(10*rate)/10}%, ColorCode: {rgb_to_hex(color)}, RGB: {color}, HSL: {rgb_to_hsl(color)}')
 
     return merged_used_color_schemes
+
+
+# colorthiefを使って使用色を抽出する関数
+def estimate_used_colors_by_colorthief(image_path, color_count):
+    color_thief = ColorThief(image_path)
+    palette = color_thief.get_palette(color_count, quality=10)
+
+    if (False):
+        for color in palette:
+            print_colored_text("■■■", color)
+            print("")
+
+    return palette
+
+
+# 引数で受け取ったファイルの使用色を抽出する関数(再)
+def estimate_used_colors_re(image_path):
+    palette = estimate_used_colors_by_colorthief(image_path, 30)
+
+    color_scheme = []
+    for color in palette:
+        color_scheme.append([color, -1])
+
+    merged_color_scheme = merge_similar_color(color_scheme, 15)
+
+    for color, rate in merged_color_scheme:
+        if (IS_PRINT_COLOR_SCHEME_BEFORE_MEREGED):
+            print_colored_text("■■■■■■■■■■■■", color)
+            # print(f'Rate: {round(100*count/pixel_count)}%, Count: {count}, ColorCode: {rgb_to_hex(color)}, RGB: {color}, HSL: {rgb_to_hsl(color)}')
+            print(f'Rate: {round(10*rate)/10}%, ColorCode: {rgb_to_hex(color)}, RGB: {color}, HSL: {rgb_to_hsl(color)}')
+
+    return merged_color_scheme
 
 
 # 彩度が閾値以下である色を削除する関数
@@ -129,7 +162,8 @@ def merge_similar_color(color_scheme, threshold):
 
 # 読込んだイラストの使用配色をjson形式で保存する関数
 def generate_json_used_color_scheme(image_path):
-    used_color_schemes = estimate_used_color_scheme(image_path)
+    # used_color_schemes = estimate_used_color_scheme(image_path)
+    used_color_schemes = estimate_used_colors_re(image_path)
     # print(f"used_color_schemes = { used_color_schemes}")
 
     # JSON用のリストを作成
