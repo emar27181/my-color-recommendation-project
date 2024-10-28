@@ -7,13 +7,8 @@ from PIL import Image
 from collections import Counter
 from .helpers.transform_color import rgb_to_hsl, rgb_to_hex
 from utils.helpers.color_utils import print_colored_text, calculate_color_difference_delta_e_cie2000
+from .config.constants_dev import SATURATION_LOWER_LIMIT, LIGHTNESS_LOWER_LIMIT, LIGHTNESS_UPPER_LIMIT, IS_PRINT_COLOR_SCHEME_BEFORE_MEREGED
 # from src.color_recommendation.config.constants import SATURATION_LOWER_LIMIT, LIGHTNESS_UPPER_LIMIT, LIGHTNESS_LOWER_LIMIT
-
-# 使用した配色として判定する閾値
-SATURATION_LOWER_LIMIT = 10
-LIGHTNESS_UPPER_LIMIT = 90
-LIGHTNESS_LOWER_LIMIT = 10
-IS_PRINT_COLOR_SCHEME_BEFORE_MEREGED = False
 
 
 # 読み込まれた画像の使用配色を推定する関数
