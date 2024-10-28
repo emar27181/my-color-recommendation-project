@@ -164,7 +164,8 @@ def generate_json_used_color_scheme(image_path):
     return json_data
 
 
-def save_json_used_color_scheme(illustrater_name, illust_count_limit):
+# 推定された使用色を保存する関数
+def save_estimated_used_colors(illustrater_name, illust_count_limit):
     json_data = []
 
     load_directory_path = f'src/color_recommendation/data/input/illustration/{illustrater_name}'

@@ -6,7 +6,7 @@ from utils.helpers.transform_color import hex_to_rgb, transform_color_schemes_rg
 from utils.helpers.json_utils import convert_color_schemes_to_color_data
 from utils.check_data_is_contained_next_color import check_data_is_contained_next_color
 from utils.plot_graph import plot_recall_at_k
-from utils.estimate_used_color_scheme import generate_json_used_color_scheme, save_json_used_color_scheme
+from utils.estimate_used_color_scheme import generate_json_used_color_scheme, save_estimated_used_colors
 from utils.download_instagram_images import download_instagram_images
 
 
@@ -60,7 +60,7 @@ def run_all(file_name, illust_count_limit):
     print(f"@{file_name} の投稿がダウンロードされました．")
 
     # 使用色の抽出と保存
-    save_json_used_color_scheme(file_name, illust_count_limit)
+    save_estimated_used_colors(file_name, illust_count_limit)
     print("使用色が抽出されました．")
 
     # イラストデータの読み込み
@@ -105,7 +105,7 @@ def main():
     # run_all("nest_virgo", 100)
     # run_all("oz_yarimasu", 100)
 
-    run_all("amen27181", 100)
+    save_estimated_used_colors("mokmok_skd", 100)
 
 
 if __name__ == '__main__':
