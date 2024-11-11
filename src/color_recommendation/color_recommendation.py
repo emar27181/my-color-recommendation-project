@@ -56,8 +56,8 @@ def generate_recommend_colors(data):
 def run_all(file_name, illust_count_limit):
     print(f"=== {file_name} ====================")
 
-    download_instagram_images(file_name, illust_count_limit)
-    print(f"@{file_name} の投稿がダウンロードされました．")
+    # download_instagram_images(file_name, illust_count_limit)
+    # print(f"@{file_name} の投稿がダウンロードされました．")
 
     # 使用色の抽出と保存
     save_estimated_used_colors(file_name, illust_count_limit)
