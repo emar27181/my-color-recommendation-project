@@ -91,21 +91,16 @@ def run_all(file_name, illust_count_limit):
 
 
 def main():
-    # all_run("src/color_recommendation/data/input/test_input_real_data.json", 'src/color_recommendation/data/output/test_recall_at_k.png')
-    # all_run("sample")
-    # run_all("gaako")
-    # run_all("no_copyright_girl")
-    # run_all("yoshi_mi_yoshi")
-
-    # save_json_used_color_scheme("sample")
-    # generate_json_used_color_scheme("src/color_recommendation/data/input/illustration/sample/sample_input.jpg")
-    # download_instagram_images("sa_ka_na_4")
-    # run_all("trcoot", 100)
-    # run_all("mokmok_skd", 100)
-    # run_all("nest_virgo", 100)
-    # run_all("oz_yarimasu", 100)
-
-    save_estimated_used_colors("mokmok_skd", 100)
+    run_all("gaako_instagram", 100)
+    run_all("gaako_portfolio", 100)
+    run_all("mika_pikazo", 100)
+    run_all("mokmok_skd", 100)
+    run_all("nest_virgo", 100)
+    run_all("no_copyright_girl", 100)
+    run_all("omrice4869", 100)
+    run_all("oz_yarimasu", 100)
+    run_all("sa_ka_na_4", 100)
+    run_all("trcoot", 100)
 
 
 if __name__ == '__main__':
