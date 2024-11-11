@@ -7,7 +7,7 @@ from PIL import Image
 from collections import Counter
 from .helpers.transform_color import rgb_to_hsl, rgb_to_hex
 from utils.helpers.color_utils import print_colored_text, calculate_color_difference_delta_e_cie2000
-from .config.constants_dev import SATURATION_LOWER_LIMIT, LIGHTNESS_LOWER_LIMIT, LIGHTNESS_UPPER_LIMIT, IS_PRINT_COLOR_SCHEME_BEFORE_MEREGED
+from .config.constants_dev import SATURATION_LOWER_LIMIT, LIGHTNESS_LOWER_LIMIT, LIGHTNESS_UPPER_LIMIT, IS_PRINT_COLOR_SCHEME, IS_PRINT_COLOR_SCHEME_BEFORE_MERGED
 from colorthief import ColorThief
 # from src.color_recommendation.config.constants import SATURATION_LOWER_LIMIT, LIGHTNESS_UPPER_LIMIT, LIGHTNESS_LOWER_LIMIT
 
@@ -37,7 +37,7 @@ def estimate_used_color_scheme(image_path):
             used_color_schemes.append([color, rate])
 
             # 確認用出力
-            if (IS_PRINT_COLOR_SCHEME_BEFORE_MEREGED):
+            if (IS_PRINT_COLOR_SCHEME & IS_PRINT_COLOR_SCHEME_BEFORE_MERGED):
                 print_colored_text("■■■■■■■■■■■■", color)
                 # print(f'Rate: {round(100*count/pixel_count)}%, Count: {count}, ColorCode: {rgb_to_hex(color)}, RGB: {color}, HSL: {rgb_to_hsl(color)}')
                 print(f'Rate: {round(10*rate)/10}%, ColorCode: {rgb_to_hex(color)}, RGB: {color}, HSL: {rgb_to_hsl(color)}')
@@ -52,13 +52,13 @@ def estimate_used_color_scheme(image_path):
     # merged_used_color_schemes = rotate_avoid_is_head_achromatic(merged_used_color_schemes)
 
     # 彩度が10以下または明度が10以下，90以上の色を削除
-    merged_used_color_schemes = delete_achromatic(merged_used_color_schemes)
+    # merged_used_color_schemes = delete_achromatic(merged_used_color_schemes)
 
     # 確認用出力
-    if (IS_PRINT_COLOR_SCHEME_BEFORE_MEREGED):
+    if (IS_PRINT_COLOR_SCHEME & IS_PRINT_COLOR_SCHEME_BEFORE_MERGED):
         print("------ ↓ ------")
     for color, rate in merged_used_color_schemes:
-        if (IS_PRINT_COLOR_SCHEME_BEFORE_MEREGED):
+        if (IS_PRINT_COLOR_SCHEME):
             print_colored_text("■■■■■■■■■■■■", color)
             # print(f'Rate: {round(100*count/pixel_count)}%, Count: {count}, ColorCode: {rgb_to_hex(color)}, RGB: {color}, HSL: {rgb_to_hsl(color)}')
             print(f'Rate: {round(10*rate)/10}%, ColorCode: {rgb_to_hex(color)}, RGB: {color}, HSL: {rgb_to_hsl(color)}')
@@ -90,7 +90,7 @@ def estimate_used_colors_re(image_path):
     merged_color_scheme = merge_similar_color(color_scheme, 15)
 
     for color, rate in merged_color_scheme:
-        if (IS_PRINT_COLOR_SCHEME_BEFORE_MEREGED):
+        if (IS_PRINT_COLOR_SCHEME):
             print_colored_text("■■■■■■■■■■■■", color)
             # print(f'Rate: {round(100*count/pixel_count)}%, Count: {count}, ColorCode: {rgb_to_hex(color)}, RGB: {color}, HSL: {rgb_to_hsl(color)}')
             print(f'Rate: {round(10*rate)/10}%, ColorCode: {rgb_to_hex(color)}, RGB: {color}, HSL: {rgb_to_hsl(color)}')
@@ -124,7 +124,7 @@ def rotate_avoid_is_head_achromatic(color_scheme):
     head_saturation = head_color[1]
 
     while (head_saturation <= 20):
-        if (IS_PRINT_COLOR_SCHEME_BEFORE_MEREGED):
+        if (IS_PRINT_COLOR_SCHEME):
             print(f"saturation: {head_saturation}")
         color_scheme.append(color_scheme.pop(0))
         head_color = rgb_to_hsl(color_scheme[0][0])
@@ -162,8 +162,8 @@ def merge_similar_color(color_scheme, threshold):
 
 # 読込んだイラストの使用配色をjson形式で保存する関数
 def generate_json_used_color_scheme(image_path):
-    # used_color_schemes = estimate_used_color_scheme(image_path)
-    used_color_schemes = estimate_used_colors_re(image_path)
+    used_color_schemes = estimate_used_color_scheme(image_path)
+    # used_color_schemes = estimate_used_colors_re(image_path)
     # print(f"used_color_schemes = { used_color_schemes}")
 
     # JSON用のリストを作成
