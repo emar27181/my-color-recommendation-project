@@ -4,3 +4,4 @@ src/color_recommendation/data
 *.pyc
 tmp/
 *dev.py
+*sandbox.py
