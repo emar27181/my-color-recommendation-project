@@ -1,6 +1,23 @@
 from colormath.color_objects import sRGBColor, LabColor
 from colormath.color_conversions import convert_color
 from colormath.color_diff import delta_e_cie2000
+def update_color_counts(color_counts, color):
+    """
+    色の出現回数を更新する関数
+    既存の色なら出現回数をインクリメントし、未登録の色なら追加して1で初期化する。
+
+    Args:
+        color_counts (dict): 色とその出現回数を管理する辞書
+        color (tuple): 追加したい色 (R, G, B)
+
+    Returns:
+        None
+    """
+    if color in color_counts:
+        color_counts[color] += 1  # 出現回数をインクリメント
+    else:
+        color_counts[color] = 1  # 新規色を1で初期化
+
 
 
 def quantize_color_rgb(rgb, threshold):
