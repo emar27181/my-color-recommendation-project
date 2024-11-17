@@ -14,6 +14,16 @@ def calculate_dict_value_sum(dict):
     return sum
 
 
+def transform_tuple_to_list(color_counts_tuple):
+    """tuple型の色の数を保存するデータをlist型に変換する関数"""
+    color_counts_list = []
+    sum = calculate_dict_value_sum(color_counts_tuple)
+
+    for key in color_counts_tuple:
+        color_counts_list.append([key, (color_counts_tuple[key] / sum)])
+
+    return color_counts_list
+
 
 def update_color_counts(color_counts, color):
     """
