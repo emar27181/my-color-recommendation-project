@@ -3,6 +3,11 @@ from colormath.color_conversions import convert_color
 from colormath.color_diff import delta_e_cie2000
 
 
+def quantize_color_rgb(rgb, threshold):
+    """引数で受け取ったRGB値を量子化する関数"""
+    return tuple((value // threshold) * threshold if value % threshold < 3 else (value // threshold) * threshold + threshold for value in rgb)
+
+
 # 色の差をΔEを用いて計算する関数
 def calculate_color_difference_delta_e_cie2000(color1, color2):
     """ 
