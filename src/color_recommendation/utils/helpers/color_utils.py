@@ -1,6 +1,10 @@
 from colormath.color_objects import sRGBColor, LabColor
 from colormath.color_conversions import convert_color
 from colormath.color_diff import delta_e_cie2000
+from PIL import Image
+import numpy as np
+
+
 def update_color_counts(color_counts, color):
     """
     色の出現回数を更新する関数
@@ -18,6 +22,19 @@ def update_color_counts(color_counts, color):
     else:
         color_counts[color] = 1  # 新規色を1で初期化
 
+
+def extract_used_color_count(image_path, quantize_threshold):
+    """引数で受け取ったパスの画像の色とその出現回数を抽出する関数"""
+    # 画像を読み込み
+    image = Image.open(image_path)
+    image = image.convert('RGB')  # RGBに変換
+    pixels = list(image.getdata())  # 画像のピクセルデータを取得
+
+    color_counts = {}
+    for color_rgb in pixels:
+        update_color_counts(color_counts, quantize_color_rgb(color_rgb, quantize_threshold))
+
+    return color_counts
 
 
 def quantize_color_rgb(rgb, threshold):
