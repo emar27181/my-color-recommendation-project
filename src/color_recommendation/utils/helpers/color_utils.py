@@ -5,6 +5,16 @@ from PIL import Image
 import numpy as np
 
 
+def calculate_dict_value_sum(dict):
+    """引数で受け取った辞書型の配列のvalueの合計値を計算する関数"""
+    sum = 0
+    for key in dict:
+        sum += dict[key]
+        print(dict[key])
+    return sum
+
+
+
 def update_color_counts(color_counts, color):
     """
     色の出現回数を更新する関数
