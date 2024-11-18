@@ -36,7 +36,6 @@ def calculate_dict_value_sum(dict):
     sum = 0
     for key in dict:
         sum += dict[key]
-        print(dict[key])
     return sum
 
 
