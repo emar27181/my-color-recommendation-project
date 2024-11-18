@@ -5,3 +5,4 @@ src/color_recommendation/data
 tmp/
 *dev.py
 *sandbox.py
+*memo.md
