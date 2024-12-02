@@ -1,5 +1,31 @@
 import json
 import matplotlib.pyplot as plt
+from matplotlib import colormaps
+from mpl_toolkits.mplot3d import Axes3D
+
+
+def plot_graph_3d(data, clusters, output_file_path):
+    """三次元のクラスターマップを作成する関数"""
+    # カラーマップ設定
+    num_clusters = len(set(clusters)) - (1 if -1 in clusters else 0)
+    cmap = colormaps.get_cmap('hsv').resampled(num_clusters + 1)
+
+    fig = plt.figure(figsize=(10, 7))
+    ax = fig.add_subplot(111, projection='3d')
+
+    for cluster_label in set(clusters):
+        clustered_data = data[clusters == cluster_label]
+        color = 'k' if cluster_label == -1 else cmap(cluster_label / num_clusters)
+        ax.scatter(
+            clustered_data[:, 0], clustered_data[:, 1], clustered_data[:, 2],
+            color=color, label=f'Cluster {cluster_label}' if cluster_label != -1 else 'Noise'
+        )
+
+    ax.set_xlabel('X-axis')
+    ax.set_ylabel('Y-axis')
+    ax.set_zlabel('Z-axis')
+    plt.legend()
+    plt.savefig(output_file_path)
 
 
 def plot_graph(plot_data, graph_name, output_file_path):
