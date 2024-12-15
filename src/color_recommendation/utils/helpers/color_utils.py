@@ -5,6 +5,31 @@ from PIL import Image
 import numpy as np
 
 
+def calc_weighted_average_rgb(rgb_a, rgb_b, weight_a, weight_b):
+    """
+    2つのrbg値の加重平均を計算する関数
+
+    引数:
+        rgb_a (tuple): 最初のrgb値を表す整数のタプル (R, G, B)。
+        rgb_b (tuple): 2番目のrgb値を表す整数のタプル (R, G, B)。
+        weight_a (float): 最初のrgb値に対する重み (0から1の範囲)。
+        weight_b (float): 2番目のrgb値に対する重み (0から1の範囲)。
+
+    戻り値:
+        tuple: 加重平均されたRGB値を表す整数のタプル (R, G, B)。
+    """
+
+    total_weight = weight_a + weight_b
+    weight_a_normalized = weight_a / total_weight
+    weight_b_normalized = weight_b / total_weight
+
+    r = int(rgb_a[0] * weight_a_normalized + rgb_b[0] * weight_b_normalized)
+    g = int(rgb_a[1] * weight_a_normalized + rgb_b[1] * weight_b_normalized)
+    b = int(rgb_a[2] * weight_a_normalized + rgb_b[2] * weight_b_normalized)
+
+    return (r, g, b)
+
+
 def merge_similar_color_counts(color_counts, same_color_threshold):
     """引数で受け取った配色のうちΔE値が閾値以下の色を結合する関数"""
     merged_color_counts = []  # 結合する色を保存する配列を初期化
