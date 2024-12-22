@@ -27,6 +27,12 @@ def calc_weighted_average_rgb(rgb_a, rgb_b, weight_a, weight_b):
     g = int(rgb_a[1] * weight_a_normalized + rgb_b[1] * weight_b_normalized)
     b = int(rgb_a[2] * weight_a_normalized + rgb_b[2] * weight_b_normalized)
 
+    print_colored_text('■', rgb_a)
+    print(f" × {round(weight_a_normalized*100000)/100000} + ", end="")
+    print_colored_text('■', rgb_b)
+    print(f" × {round(weight_b_normalized*100000)/100000} = ", end="")
+    print_colored_text('■\n', (r, g, b))
+
     return (r, g, b)
 
 
