@@ -120,7 +120,7 @@ def quantize_color_rgb(rgb, threshold):
 
 # 色の差をΔEを用いて計算する関数
 def calculate_color_difference_delta_e_cie2000(color1, color2):
-    """ 
+    """
     # メモ
     - この関数を実行するには/(venvディレクトリ)/lib64/python3.10/site-packages/colormath/color_diff.py内の関数delta_e_cie2000()
     の"return numpy.asscalar(delta_e)" を "return delta_e.item()" に変更する必要あり
@@ -161,3 +161,36 @@ def print_color_schemes(color_schemes):
     for color_scheme_method in color_schemes:
         for color_scheme in color_scheme_method:
             print_color_scheme(color_scheme)
+
+
+def test_delta_e_cie2000(color1, color2):
+    """ΔEを用いて色の差を計算する関数のテスト"""
+    # 色の差を計算
+    color_diff = calculate_color_difference_delta_e_cie2000(color1, color2)
+    print_colored_text('■', color1)
+    print(" と ", end="")
+    print_colored_text('■', color2)
+    print(f" の色差 = {color_diff}")
+
+
+def test_color_diff(file_path):
+    colors = []
+    with open(file_path, 'r') as file:
+        for line in file:
+            colors.append(tuple(map(int, line.strip().split(','))))
+
+    for i in range(len(colors)):
+        print(colors[i])
+        for j in range(i + 1, len(colors)):
+            test_delta_e_cie2000(colors[i], colors[j])
+
+
+if __name__ == "__main__":
+    print("=== color_utils.py =====================")
+
+    # print(calculate_color_difference_delta_e_cie2000((170, 135, 130), (160, 140, 135)))
+    test_delta_e_cie2000((170, 135, 130), (160, 140, 135))
+    test_delta_e_cie2000((250, 195, 160), (235, 95, 35))
+    test_delta_e_cie2000((225, 110, 55), (235, 95, 35))
+
+    test_color_diff("tmp/hoge.txt")
