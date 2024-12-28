@@ -1,7 +1,7 @@
 from sklearn.cluster import DBSCAN
 from sklearn.preprocessing import StandardScaler
 import numpy as np
-from utils.helpers.color_utils import calc_weighted_average_rgb, print_colored_text
+from utils.helpers.color_utils import calc_weighted_average_rgb, print_colored_text, calculate_color_difference_delta_e_cie2000
 
 
 def calc_clusterd_color_counts(color_counts_tuple, colors_array, clusters):
@@ -67,10 +67,24 @@ def clustering_color_counts(color_counts_tuple, EPS, MIN_SAMPLES):
         colors_list.append(color)
 
     colors_array = np.array(colors_list)  # color_array: 量子化された後の色のnumpy配列
-    normalized_colors_array = colors_array / 255.0
 
-    clusters = clustring_dbscan_3d(normalized_colors_array, EPS, MIN_SAMPLES)
+    # clusters = clustring_dbscan_3d(colors_array / 255.0, EPS, MIN_SAMPLES)  # 三次元(RGB)空間上の距離でクラスタリング
+    clusters = clustring_dbscan_3d_by_delta_e(colors_array, EPS, MIN_SAMPLES)  # ΔEでクラスタリング
+
     return colors_array, clusters
+
+
+def clustring_dbscan_3d_by_delta_e(data_3d, EPS, MIN_SAMPLES):
+    """受け取ったデータをΔE値を基にDBSCANクラスタリングでクラスタリングする関数
+    data: クラスタリング対象の3次元データ
+    EPS: 近傍の半径（ある点の近くをどこまで「近い」とみなすか）の閾値
+    MIN_SAMPLES: クラスタとして認識するために必要な最小の点数の閾値
+    """
+
+    dbscan = DBSCAN(eps=EPS, min_samples=MIN_SAMPLES, metric=calculate_color_difference_delta_e_cie2000)
+    clusters = dbscan.fit_predict(data_3d)
+
+    return clusters
 
 
 def clustring_dbscan_3d(data_3d, EPS, MIN_SAMPLES):
