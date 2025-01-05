@@ -5,6 +5,37 @@ from PIL import Image
 import numpy as np
 
 
+def calc_weighted_average_rgb(rgb_a, rgb_b, weight_a, weight_b):
+    """
+    2つのrbg値の加重平均を計算する関数
+
+    引数:
+        rgb_a (tuple): 最初のrgb値を表す整数のタプル (R, G, B)。
+        rgb_b (tuple): 2番目のrgb値を表す整数のタプル (R, G, B)。
+        weight_a (float): 最初のrgb値に対する重み (0から1の範囲)。
+        weight_b (float): 2番目のrgb値に対する重み (0から1の範囲)。
+
+    戻り値:
+        tuple: 加重平均されたRGB値を表す整数のタプル (R, G, B)。
+    """
+
+    total_weight = weight_a + weight_b
+    weight_a_normalized = weight_a / total_weight
+    weight_b_normalized = weight_b / total_weight
+
+    r = int(rgb_a[0] * weight_a_normalized + rgb_b[0] * weight_b_normalized)
+    g = int(rgb_a[1] * weight_a_normalized + rgb_b[1] * weight_b_normalized)
+    b = int(rgb_a[2] * weight_a_normalized + rgb_b[2] * weight_b_normalized)
+
+    print_colored_text('■', rgb_a)
+    print(f" × {round(weight_a_normalized*100000)/100000} + ", end="")
+    print_colored_text('■', rgb_b)
+    print(f" × {round(weight_b_normalized*100000)/100000} = ", end="")
+    print_colored_text('■\n', (r, g, b))
+
+    return (r, g, b)
+
+
 def merge_similar_color_counts(color_counts, same_color_threshold):
     """引数で受け取った配色のうちΔE値が閾値以下の色を結合する関数"""
     merged_color_counts = []  # 結合する色を保存する配列を初期化
@@ -89,7 +120,7 @@ def quantize_color_rgb(rgb, threshold):
 
 # 色の差をΔEを用いて計算する関数
 def calculate_color_difference_delta_e_cie2000(color1, color2):
-    """ 
+    """
     # メモ
     - この関数を実行するには/(venvディレクトリ)/lib64/python3.10/site-packages/colormath/color_diff.py内の関数delta_e_cie2000()
     の"return numpy.asscalar(delta_e)" を "return delta_e.item()" に変更する必要あり
@@ -130,3 +161,36 @@ def print_color_schemes(color_schemes):
     for color_scheme_method in color_schemes:
         for color_scheme in color_scheme_method:
             print_color_scheme(color_scheme)
+
+
+def test_delta_e_cie2000(color1, color2):
+    """ΔEを用いて色の差を計算する関数のテスト"""
+    # 色の差を計算
+    color_diff = calculate_color_difference_delta_e_cie2000(color1, color2)
+    print_colored_text('■', color1)
+    print(" と ", end="")
+    print_colored_text('■', color2)
+    print(f" の色差 = {color_diff}")
+
+
+def test_color_diff(file_path):
+    colors = []
+    with open(file_path, 'r') as file:
+        for line in file:
+            colors.append(tuple(map(int, line.strip().split(','))))
+
+    for i in range(len(colors)):
+        print(colors[i])
+        for j in range(i + 1, len(colors)):
+            test_delta_e_cie2000(colors[i], colors[j])
+
+
+if __name__ == "__main__":
+    print("=== color_utils.py =====================")
+
+    # print(calculate_color_difference_delta_e_cie2000((170, 135, 130), (160, 140, 135)))
+    test_delta_e_cie2000((170, 135, 130), (160, 140, 135))
+    test_delta_e_cie2000((250, 195, 160), (235, 95, 35))
+    test_delta_e_cie2000((225, 110, 55), (235, 95, 35))
+
+    test_color_diff("tmp/hoge.txt")
