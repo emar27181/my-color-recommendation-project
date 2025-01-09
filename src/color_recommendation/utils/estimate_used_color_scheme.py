@@ -79,23 +79,20 @@ def estimate_used_colors_by_colorthief(image_path, color_count):
     return palette
 
 
-# 引数で受け取ったファイルの使用色を抽出する関数(再)
-def estimate_used_colors_re(image_path):
-    palette = estimate_used_colors_by_colorthief(image_path, 30)
 
-    color_scheme = []
-    for color in palette:
-        color_scheme.append([color, -1])
 
-    merged_color_scheme = merge_similar_color(color_scheme, 15)
+def estimate_used_colors_by_colorthief(image_path, color_count):
+    color_thief = ColorThief(image_path)
+    palette = color_thief.get_palette(color_count, quality=1)
 
-    for color, rate in merged_color_scheme:
-        if (IS_PRINT_COLOR_SCHEME):
-            print_colored_text("■■■■■■■■■■■■", color)
-            # print(f'Rate: {round(100*count/pixel_count)}%, Count: {count}, ColorCode: {rgb_to_hex(color)}, RGB: {color}, HSL: {rgb_to_hsl(color)}')
-            print(f'Rate: {round(10*rate)/10}%, ColorCode: {rgb_to_hex(color)}, RGB: {color}, HSL: {rgb_to_hsl(color)}')
+    if (False):
+        print("palette = ")
+        for color in palette:
+            print_colored_text("■■■  ", color)
+        print("")
 
-    return merged_color_scheme
+    return palette
+
 
 
 # 彩度が閾値以下である色を削除する関数
