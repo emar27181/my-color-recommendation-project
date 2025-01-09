@@ -3,6 +3,7 @@ from colormath.color_conversions import convert_color
 from colormath.color_diff import delta_e_cie2000
 from PIL import Image
 import numpy as np
+import math
 
 
 def calc_weighted_average_rgb(rgb_a, rgb_b, weight_a, weight_b):
@@ -68,6 +69,22 @@ def calculate_dict_value_sum(dict):
     for key in dict:
         sum += dict[key]
     return sum
+
+
+def calculate_rgb_distance_by_euclidean(rgb1, rgb2):
+    """
+    RGB形式の2つの色データ間の距離を計算し、最大値1で正規化した値を返す関数
+    引数:
+        rgb1: タプル (r, g, b)
+        param rgb2: タプル (r, g, b)
+    戻り値:
+        distance / max_distance: 正規化されたユークリッド距離
+    """
+    r1, g1, b1 = rgb1
+    r2, g2, b2 = rgb2
+    max_distance = math.sqrt((255 ** 2) * 3)
+    distance = math.sqrt((r1 - r2) ** 2 + (g1 - g2) ** 2 + (b1 - b2) ** 2)
+    return distance / max_distance
 
 
 def transform_tuple_to_list(color_counts_tuple):
