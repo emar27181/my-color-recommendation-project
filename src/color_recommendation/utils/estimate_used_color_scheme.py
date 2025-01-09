@@ -79,6 +79,52 @@ def estimate_used_colors_by_colorthief(image_path, color_count):
     return palette
 
 
+def merge_same_color_palette(palette):
+    """
+    カラーパレットの色のうち同じ色を結合する関数
+    """
+
+    IS_PRINT = False
+    merged_palette = []
+
+    while len(palette) > 0:
+        base_color = palette[0]
+        to_merge_colors = [base_color]
+        palette = palette[1:]
+
+        for i in range(len(palette) - 1, -1, -1):
+            if calculate_color_difference_delta_e_cie2000(base_color, palette[i]) < 10:
+                to_merge_colors.append(palette[i])
+                palette.pop(i)
+
+        if (IS_PRINT):
+            print("to_merge_colors = ", end="")
+            for color in to_merge_colors:
+                print_colored_text("■■■  ", color)
+            print("")
+
+        merged_color = [0, 0, 0]
+
+        for color in to_merge_colors:
+            merged_color[0] += color[0]
+            merged_color[1] += color[1]
+            merged_color[2] += color[2]
+        merged_color = [color / len(to_merge_colors) for color in merged_color]
+        merged_color = [int(color) for color in merged_color]
+
+        if (IS_PRINT):
+            print(f"merged_color_rgb = ", end="")
+            print_colored_text("■■■  \n\n", merged_color)
+
+        merged_palette.append(merged_color)
+
+    if (False):
+        print("merged_palette = ")
+        for color in merged_palette:
+            print_colored_text("■■■  ", color)
+        print("")
+
+    return merged_palette
 
 
 def estimate_used_colors_by_colorthief(image_path, color_count):
