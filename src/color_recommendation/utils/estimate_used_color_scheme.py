@@ -6,7 +6,7 @@ import os
 from PIL import Image
 from collections import Counter
 from .helpers.transform_color import rgb_to_hsl, rgb_to_hex
-from utils.helpers.color_utils import print_colored_text, calculate_color_difference_delta_e_cie2000
+from utils.helpers.color_utils import print_colored_text, calculate_color_difference_delta_e_cie2000, calculate_rgb_distance_by_euclidean
 from .config.constants_dev import SATURATION_LOWER_LIMIT, LIGHTNESS_LOWER_LIMIT, LIGHTNESS_UPPER_LIMIT, IS_PRINT_COLOR_SCHEME, IS_PRINT_COLOR_SCHEME_BEFORE_MERGED
 from colorthief import ColorThief
 # from src.color_recommendation.config.constants import SATURATION_LOWER_LIMIT, LIGHTNESS_UPPER_LIMIT, LIGHTNESS_LOWER_LIMIT
@@ -64,6 +64,18 @@ def estimate_used_color_scheme(image_path):
             print(f'Rate: {round(10*rate)/10}%, ColorCode: {rgb_to_hex(color)}, RGB: {color}, HSL: {rgb_to_hsl(color)}')
 
     return merged_used_color_schemes
+
+
+def estimate_used_color_scheme_re(image_path):
+    color_palette = estimate_used_colors_by_colorthief(image_path, 30)
+    color_palette = merge_same_color_palette(color_palette)
+    color_palette, color_palette_rate = color_count_by_color_palette(color_palette, image_path)
+
+    used_color_schemes = []
+    for i in range(len(color_palette)):
+        used_color_schemes.append([color_palette[i], color_palette_rate[i]])
+
+    return used_color_schemes
 
 
 # colorthiefを使って使用色を抽出する関数
@@ -244,14 +256,16 @@ def merge_similar_color(color_scheme, threshold):
 
 # 読込んだイラストの使用配色をjson形式で保存する関数
 def generate_json_used_color_scheme(image_path):
-    used_color_schemes = estimate_used_color_scheme(image_path)
+    # used_color_schemes = estimate_used_color_scheme(image_path)
+    used_color_schemes = estimate_used_color_scheme_re(image_path)
     # used_color_schemes = estimate_used_colors_re(image_path)
     # print(f"used_color_schemes = { used_color_schemes}")
 
     # JSON用のリストを作成
     json_data = []
     for color_scheme in used_color_schemes:
-        hex = rgb_to_hex(color_scheme[0].tolist())
+        # hex = rgb_to_hex(color_scheme[0].tolist())
+        hex = rgb_to_hex(color_scheme[0])
         color_dict = {
             "color": hex,  # NumPy配列をリストに変換
             "rate": round(10 * color_scheme[1]) / 1000,
