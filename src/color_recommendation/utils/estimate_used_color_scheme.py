@@ -140,6 +140,45 @@ def estimate_used_colors_by_colorthief(image_path, color_count):
     return palette
 
 
+def color_count_by_color_palette(color_palette, image_path):
+    """
+    引数で受け取ったカラーパレットの色が画像内にどれぐらいの割合で出現しているかを計測する関数
+    """
+    # PILで画像を開き、全ピクセルのRGBを取得
+    image = Image.open(image_path)
+    # image.thumbnail((64, 64))  # 縦横最大100ピクセルに縮小
+    color_pixels = list(image.getdata())
+    # color_pixels = color_pixels[:5]
+
+    color_palette_count = [0] * len(color_palette)
+    classified_color_count = 0
+
+    # 画像内の各ピクセルの色と引数で受け取った色の差分を計算
+    for color_pixel in color_pixels:
+        for i in range(len(color_palette)):
+
+            # print(f"color_palette[i] = {color_palette[i]}, color_pixel = {color_pixel}")
+            # if (calculate_color_difference_delta_e_cie2000(color_palette[i], color_pixel) < 15):
+            if (calculate_rgb_distance_by_euclidean(color_palette[i], color_pixel[:3]) < 0.1):
+                color_palette_count[i] += 1
+                classified_color_count += 1
+
+    # 比率に基づいて降順ソート
+    sorted_data = sorted(zip(color_palette, color_palette_count), key=lambda x: x[1], reverse=True)
+
+    # 結果を分解
+    color_palette, color_palette_count = zip(*sorted_data)
+
+    color_palette_rate = [-1] * len(color_palette)
+
+    print("color_palette = ")
+    for i in range(len(color_palette_count)):
+        print_colored_text("■■■  ", color_palette[i])
+        print(f" {color_palette_count[i] / classified_color_count}")
+        color_palette_rate[i] = color_palette_count[i] / classified_color_count
+
+    return color_palette, color_palette_rate
+
 
 # 彩度が閾値以下である色を削除する関数
 def delete_achromatic(color_scheme):
