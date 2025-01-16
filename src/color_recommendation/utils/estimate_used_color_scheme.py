@@ -289,6 +289,22 @@ def generate_json_used_color_scheme(image_path):
     return json_data
 
 
+def save_estimated_used_colors_for_illustrates(illustrater_list, illust_count_limit):
+    """
+    引数で受け取るリスト内のイラストレーターのイラストの使用色をすべて抽出する関数
+
+    引数: 
+        illutrater_list: 使用色を抽出させたいイラストレーターのリスト(文字列)
+        illustrater_count_limit: イラストレーターごとに読み込むイラストの枚数の限界値
+    戻り値: 
+        None
+
+    """
+    for illustrater in illustrater_list:
+        print(f"=== {illustrater} =====================")
+        save_estimated_used_colors(illustrater, illust_count_limit)
+
+
 # 推定された使用色を保存する関数
 def save_estimated_used_colors(illustrater_name, illust_count_limit):
     json_data = []
