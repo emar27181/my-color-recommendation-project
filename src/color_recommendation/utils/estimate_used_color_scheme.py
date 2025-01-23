@@ -9,6 +9,7 @@ from .helpers.transform_color import rgb_to_hsl, rgb_to_hex
 from utils.helpers.color_utils import print_colored_text, calculate_color_difference_delta_e_cie2000, calculate_rgb_distance_by_euclidean
 from .config.constants_dev import SATURATION_LOWER_LIMIT, LIGHTNESS_LOWER_LIMIT, LIGHTNESS_UPPER_LIMIT, IS_PRINT_COLOR_SCHEME, IS_PRINT_COLOR_SCHEME_BEFORE_MERGED
 from colorthief import ColorThief
+from utils.helpers.json_utils import get_json_length
 # from src.color_recommendation.config.constants import SATURATION_LOWER_LIMIT, LIGHTNESS_UPPER_LIMIT, LIGHTNESS_LOWER_LIMIT
 
 
@@ -293,10 +294,10 @@ def save_estimated_used_colors_for_illustrates(illustrater_list, illust_count_li
     """
     引数で受け取るリスト内のイラストレーターのイラストの使用色をすべて抽出する関数
 
-    引数: 
+    引数:
         illutrater_list: 使用色を抽出させたいイラストレーターのリスト(文字列)
         illustrater_count_limit: イラストレーターごとに読み込むイラストの枚数の限界値
-    戻り値: 
+    戻り値:
         None
 
     """
@@ -306,6 +307,7 @@ def save_estimated_used_colors_for_illustrates(illustrater_list, illust_count_li
 
         if os.path.exists(output_file_path):
             print(f"既に '{output_file_path}' が存在するため処理をスキップします．")
+            print(f"使用色が抽出されたイラストの枚数: {get_json_length(output_file_path)} [枚]")
         else:
             save_estimated_used_colors(illustrater, illust_count_limit, output_file_path)
 
