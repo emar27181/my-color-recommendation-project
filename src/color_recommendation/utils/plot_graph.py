@@ -70,6 +70,25 @@ def calculate_recall(file_path):
     return recalls
 
 
+def save_plot_recall_at_k_for_illustrators(illustrator_list):
+    """
+    引数で受け取るリスト内のイラストレーターのrecall@kグラフを保存する関数
+
+    引数:
+        illutrator_list: 使用色を抽出させたいイラストレーターのリスト(文字列)
+    戻り値:
+        None
+
+    """
+
+    for illustrator_name in illustrator_list:
+        print(f"=== {illustrator_name} ==========================")
+        IS_CONTAINED_NEXT_COLOR_FILE_PATH = f"src/color_recommendation/data/output/is_contained_next_color_{illustrator_name}.json"
+        GRAPH_PATH = f'src/color_recommendation/data/output/recall_at_k_{illustrator_name}.png'
+        plot_recall_at_k(IS_CONTAINED_NEXT_COLOR_FILE_PATH, GRAPH_PATH)
+        print(f"{GRAPH_PATH} が保存されました．(グラフの作成)")
+
+
 def plot_recall_at_k(input_file_path, output_file_path):
 
     recalls = calculate_recall(input_file_path)
