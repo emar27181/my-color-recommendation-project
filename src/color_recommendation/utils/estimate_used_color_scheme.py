@@ -302,11 +302,16 @@ def save_estimated_used_colors_for_illustrates(illustrater_list, illust_count_li
     """
     for illustrater in illustrater_list:
         print(f"=== {illustrater} =====================")
-        save_estimated_used_colors(illustrater, illust_count_limit)
+        output_file_path = f'src/color_recommendation/data/input/used_colors_{illustrater}.json'
+
+        if os.path.exists(output_file_path):
+            print(f"既に '{output_file_path}' が存在するため処理をスキップします．")
+        else:
+            save_estimated_used_colors(illustrater, illust_count_limit, output_file_path)
 
 
 # 推定された使用色を保存する関数
-def save_estimated_used_colors(illustrater_name, illust_count_limit):
+def save_estimated_used_colors(illustrater_name, illust_count_limit, output_file_path):
     json_data = []
 
     load_directory_path = f'src/color_recommendation/data/input/illustration/{illustrater_name}'
@@ -329,11 +334,10 @@ def save_estimated_used_colors(illustrater_name, illust_count_limit):
 
     # print(json_data)
 
-    file_path = f'src/color_recommendation/data/input/used_colors_{illustrater_name}.json'
-    with open(file_path, 'w') as json_file:
+    with open(output_file_path, 'w') as json_file:
         json.dump(json_data, json_file, indent=4)
 
-    print(f"JSONデータが '{file_path}' に保存されました。")
+    print(f"JSONデータが '{output_file_path}' に保存されました。")
     return json_data
 
 
