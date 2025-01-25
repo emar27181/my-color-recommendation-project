@@ -1,5 +1,6 @@
 from utils.helpers.color_utils import calculate_color_difference_delta_e_cie2000, print_colored_text
 from utils.helpers.transform_color import hex_to_rgb
+import json
 
 IS_PRINT_CONTAINED_NEXT_COLOR_INFO = False
 
@@ -28,6 +29,34 @@ def is_contained_color(next_color, color_schemes):
                 return True, i
 
     return False, -1
+
+
+def save_data_is_contained_next_color_for_illustrators(illutrator_list):
+    """
+    引数で受け取るリスト内のイラストレーターの推薦配色群に次に塗ったとされる色があるかを保存する関数
+
+    引数:
+        illutrater_list: 評価したいイラストレーターのリスト(文字列)
+    戻り値:
+        None
+    """
+
+    for illutrator_name in illutrator_list:
+        print(f"=== {illutrator_name} ========================")
+
+        input_file_path = f"src/color_recommendation/data/output/recommend_colors_{illutrator_name}.json"
+
+        with open(input_file_path, 'r', encoding='utf-8') as file:
+            recommended_colors_data = json.load(file)
+
+        is_contained_next_color_data = check_data_is_contained_next_color(recommended_colors_data)
+
+        # print(f"{is_contained_next_color_data}")
+
+        output_file_path = f"src/color_recommendation/data/output/is_contained_next_color_{illutrator_name}.json"
+        with open(output_file_path, 'w', encoding='utf-8') as file:
+            json.dump(is_contained_next_color_data, file, ensure_ascii=False, indent=4)
+            print(f"{output_file_path} が保存されました．(次の色が含まれているかどうかを保存するデータの作成)")
 
 
 def check_data_is_contained_next_color(data):

@@ -70,6 +70,41 @@ def calculate_recall(file_path):
     return recalls
 
 
+def save_plot_recall_at_k_for_illustrators(illustrator_list):
+    """
+    引数で受け取るリスト内のイラストレーターのrecall@kグラフを保存する関数
+
+    引数:
+        illutrator_list: 使用色を抽出させたいイラストレーターのリスト(文字列)
+    戻り値:
+        None
+
+    """
+
+    for illustrator_name in illustrator_list:
+        IS_CONTAINED_NEXT_COLOR_FILE_PATH = f"src/color_recommendation/data/output/is_contained_next_color_{illustrator_name}.json"
+        # GRAPH_PATH = f'src/color_recommendation/data/output/recall_at_k_{illustrator_name}.png'
+
+        recalls = calculate_recall(IS_CONTAINED_NEXT_COLOR_FILE_PATH)
+        # plot_graph(recalls, 'recall', output_file_path)
+
+        # プロット
+        plt.plot(recalls, label=f'{illustrator_name}', marker='o', markersize=0)
+
+    plt.title("recall@k")
+    plt.ylim(0, 1)
+    plt.xlim(0, 60)
+    plt.xlabel('color_scheme')
+    plt.ylabel(f'recall')
+    plt.grid(True)
+    plt.legend(title="Illustrators", fontsize=10)
+
+    # ファイルに保存
+    GRAPH_PATH = f'src/color_recommendation/data/output/recall_at_k.png'
+    plt.savefig(GRAPH_PATH)
+    print(f"{GRAPH_PATH} が保存されました．(グラフの作成)")
+
+
 def plot_recall_at_k(input_file_path, output_file_path):
 
     recalls = calculate_recall(input_file_path)

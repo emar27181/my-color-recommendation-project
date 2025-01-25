@@ -22,3 +22,10 @@ def convert_color_schemes_to_color_data(color_schemes):
     # print(output_color_data)
 
     return (output_color_data)
+
+
+def get_json_length(file_path):
+    with open(file_path, 'r') as json_file:
+        json_data = json.load(json_file)
+
+    return (len(json_data))

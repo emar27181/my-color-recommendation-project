@@ -53,6 +53,29 @@ def generate_recommend_colors(data):
     return output_data
 
 
+def save_recommend_colors_for_illustraters(illutrater_list):
+    """
+    引数で受け取るリスト内のイラストレーターのイラストの推薦配色を保存する関数
+
+    引数:
+        illutrater_list: 推薦配色を生成させたいイラストレーターのリスト(文字列)
+    戻り値:
+        None
+    """
+
+    for illustrater_name in illutrater_list:
+        print(f"=== {illustrater_name} ====================")
+
+        input_file_path = f"src/color_recommendation/data/input/used_colors_{illustrater_name}.json"
+        used_colors_data = read_file(input_file_path)
+
+        recommend_colors_data = generate_recommend_colors(used_colors_data)
+        output_file_path = f"src/color_recommendation/data/output/recommend_colors_{illustrater_name}.json"
+        with open(output_file_path, 'w', encoding='utf-8') as file:
+            json.dump(recommend_colors_data, file, ensure_ascii=False, indent=4)
+            print(f"{output_file_path} が保存されました．(推薦配色群の生成)")
+
+
 def run_all(file_name, illust_count_limit):
     print(f"=== {file_name} ====================")
 

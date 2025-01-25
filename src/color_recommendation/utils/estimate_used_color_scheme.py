@@ -6,9 +6,10 @@ import os
 from PIL import Image
 from collections import Counter
 from .helpers.transform_color import rgb_to_hsl, rgb_to_hex
-from utils.helpers.color_utils import print_colored_text, calculate_color_difference_delta_e_cie2000
+from utils.helpers.color_utils import print_colored_text, calculate_color_difference_delta_e_cie2000, calculate_rgb_distance_by_euclidean
 from .config.constants_dev import SATURATION_LOWER_LIMIT, LIGHTNESS_LOWER_LIMIT, LIGHTNESS_UPPER_LIMIT, IS_PRINT_COLOR_SCHEME, IS_PRINT_COLOR_SCHEME_BEFORE_MERGED
 from colorthief import ColorThief
+from utils.helpers.json_utils import get_json_length
 # from src.color_recommendation.config.constants import SATURATION_LOWER_LIMIT, LIGHTNESS_UPPER_LIMIT, LIGHTNESS_LOWER_LIMIT
 
 
@@ -66,6 +67,18 @@ def estimate_used_color_scheme(image_path):
     return merged_used_color_schemes
 
 
+def estimate_used_color_scheme_re(image_path):
+    color_palette = estimate_used_colors_by_colorthief(image_path, 30)
+    color_palette = merge_same_color_palette(color_palette)
+    color_palette, color_palette_rate = color_count_by_color_palette(color_palette, image_path)
+
+    used_color_schemes = []
+    for i in range(len(color_palette)):
+        used_color_schemes.append([color_palette[i], color_palette_rate[i]])
+
+    return used_color_schemes
+
+
 # colorthiefを使って使用色を抽出する関数
 def estimate_used_colors_by_colorthief(image_path, color_count):
     color_thief = ColorThief(image_path)
@@ -79,23 +92,105 @@ def estimate_used_colors_by_colorthief(image_path, color_count):
     return palette
 
 
-# 引数で受け取ったファイルの使用色を抽出する関数(再)
-def estimate_used_colors_re(image_path):
-    palette = estimate_used_colors_by_colorthief(image_path, 30)
+def merge_same_color_palette(palette):
+    """
+    カラーパレットの色のうち同じ色を結合する関数
+    """
 
-    color_scheme = []
-    for color in palette:
-        color_scheme.append([color, -1])
+    IS_PRINT = False
+    merged_palette = []
 
-    merged_color_scheme = merge_similar_color(color_scheme, 15)
+    while len(palette) > 0:
+        base_color = palette[0]
+        to_merge_colors = [base_color]
+        palette = palette[1:]
 
-    for color, rate in merged_color_scheme:
-        if (IS_PRINT_COLOR_SCHEME):
-            print_colored_text("■■■■■■■■■■■■", color)
-            # print(f'Rate: {round(100*count/pixel_count)}%, Count: {count}, ColorCode: {rgb_to_hex(color)}, RGB: {color}, HSL: {rgb_to_hsl(color)}')
-            print(f'Rate: {round(10*rate)/10}%, ColorCode: {rgb_to_hex(color)}, RGB: {color}, HSL: {rgb_to_hsl(color)}')
+        for i in range(len(palette) - 1, -1, -1):
+            if calculate_color_difference_delta_e_cie2000(base_color, palette[i]) < 10:
+                to_merge_colors.append(palette[i])
+                palette.pop(i)
 
-    return merged_color_scheme
+        if (IS_PRINT):
+            print("to_merge_colors = ", end="")
+            for color in to_merge_colors:
+                print_colored_text("■■■  ", color)
+            print("")
+
+        merged_color = [0, 0, 0]
+
+        for color in to_merge_colors:
+            merged_color[0] += color[0]
+            merged_color[1] += color[1]
+            merged_color[2] += color[2]
+        merged_color = [color / len(to_merge_colors) for color in merged_color]
+        merged_color = [int(color) for color in merged_color]
+
+        if (IS_PRINT):
+            print(f"merged_color_rgb = ", end="")
+            print_colored_text("■■■  \n\n", merged_color)
+
+        merged_palette.append(merged_color)
+
+    if (False):
+        print("merged_palette = ")
+        for color in merged_palette:
+            print_colored_text("■■■  ", color)
+        print("")
+
+    return merged_palette
+
+
+def estimate_used_colors_by_colorthief(image_path, color_count):
+    color_thief = ColorThief(image_path)
+    palette = color_thief.get_palette(color_count, quality=1)
+
+    if (False):
+        print("palette = ")
+        for color in palette:
+            print_colored_text("■■■  ", color)
+        print("")
+
+    return palette
+
+
+def color_count_by_color_palette(color_palette, image_path):
+    """
+    引数で受け取ったカラーパレットの色が画像内にどれぐらいの割合で出現しているかを計測する関数
+    """
+    # PILで画像を開き、全ピクセルのRGBを取得
+    image = Image.open(image_path)
+    # image.thumbnail((64, 64))  # 縦横最大100ピクセルに縮小
+    color_pixels = list(image.getdata())
+    # color_pixels = color_pixels[:5]
+
+    color_palette_count = [0] * len(color_palette)
+    classified_color_count = 0
+
+    # 画像内の各ピクセルの色と引数で受け取った色の差分を計算
+    for color_pixel in color_pixels:
+        for i in range(len(color_palette)):
+
+            # print(f"color_palette[i] = {color_palette[i]}, color_pixel = {color_pixel}")
+            # if (calculate_color_difference_delta_e_cie2000(color_palette[i], color_pixel) < 15):
+            if (calculate_rgb_distance_by_euclidean(color_palette[i], color_pixel[:3]) < 0.1):
+                color_palette_count[i] += 1
+                classified_color_count += 1
+
+    # 比率に基づいて降順ソート
+    sorted_data = sorted(zip(color_palette, color_palette_count), key=lambda x: x[1], reverse=True)
+
+    # 結果を分解
+    color_palette, color_palette_count = zip(*sorted_data)
+
+    color_palette_rate = [-1] * len(color_palette)
+
+    print("color_palette = ")
+    for i in range(len(color_palette_count)):
+        print_colored_text("■■■  ", color_palette[i])
+        print(f" {color_palette_count[i] / classified_color_count}")
+        color_palette_rate[i] = color_palette_count[i] / classified_color_count
+
+    return color_palette, color_palette_rate
 
 
 # 彩度が閾値以下である色を削除する関数
@@ -162,14 +257,16 @@ def merge_similar_color(color_scheme, threshold):
 
 # 読込んだイラストの使用配色をjson形式で保存する関数
 def generate_json_used_color_scheme(image_path):
-    used_color_schemes = estimate_used_color_scheme(image_path)
+    # used_color_schemes = estimate_used_color_scheme(image_path)
+    used_color_schemes = estimate_used_color_scheme_re(image_path)
     # used_color_schemes = estimate_used_colors_re(image_path)
     # print(f"used_color_schemes = { used_color_schemes}")
 
     # JSON用のリストを作成
     json_data = []
     for color_scheme in used_color_schemes:
-        hex = rgb_to_hex(color_scheme[0].tolist())
+        # hex = rgb_to_hex(color_scheme[0].tolist())
+        hex = rgb_to_hex(color_scheme[0])
         color_dict = {
             "color": hex,  # NumPy配列をリストに変換
             "rate": round(10 * color_scheme[1]) / 1000,
@@ -193,8 +290,30 @@ def generate_json_used_color_scheme(image_path):
     return json_data
 
 
+def save_estimated_used_colors_for_illustrates(illustrater_list, illust_count_limit):
+    """
+    引数で受け取るリスト内のイラストレーターのイラストの使用色をすべて抽出する関数
+
+    引数:
+        illutrater_list: 使用色を抽出させたいイラストレーターのリスト(文字列)
+        illustrater_count_limit: イラストレーターごとに読み込むイラストの枚数の限界値
+    戻り値:
+        None
+
+    """
+    for illustrater in illustrater_list:
+        print(f"=== {illustrater} =====================")
+        output_file_path = f'src/color_recommendation/data/input/used_colors_{illustrater}.json'
+
+        if os.path.exists(output_file_path):
+            print(f"既に '{output_file_path}' が存在するため処理をスキップします．")
+            print(f"使用色が抽出されたイラストの枚数: {get_json_length(output_file_path)} [枚]")
+        else:
+            save_estimated_used_colors(illustrater, illust_count_limit, output_file_path)
+
+
 # 推定された使用色を保存する関数
-def save_estimated_used_colors(illustrater_name, illust_count_limit):
+def save_estimated_used_colors(illustrater_name, illust_count_limit, output_file_path):
     json_data = []
 
     load_directory_path = f'src/color_recommendation/data/input/illustration/{illustrater_name}'
@@ -217,11 +336,10 @@ def save_estimated_used_colors(illustrater_name, illust_count_limit):
 
     # print(json_data)
 
-    file_path = f'src/color_recommendation/data/input/used_colors_{illustrater_name}.json'
-    with open(file_path, 'w') as json_file:
+    with open(output_file_path, 'w') as json_file:
         json.dump(json_data, json_file, indent=4)
 
-    print(f"JSONデータが '{file_path}' に保存されました。")
+    print(f"JSONデータが '{output_file_path}' に保存されました。")
     return json_data
 
 

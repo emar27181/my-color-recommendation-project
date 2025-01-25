@@ -4,6 +4,6 @@ src/color_recommendation/data
 *.pyc
 tmp/
 *dev.py
-*sandbox.py
+*sandbox*
 *memo.md
 .env
