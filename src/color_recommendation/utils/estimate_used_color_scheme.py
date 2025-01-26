@@ -317,6 +317,12 @@ def save_estimated_used_colors(illustrater_name, illust_count_limit, output_file
     json_data = []
 
     load_directory_path = f'src/color_recommendation/data/input/illustration/{illustrater_name}'
+
+    # print("here1")
+    if not os.path.exists(load_directory_path):
+        # print("here2")
+        print(f" '{load_directory_path}' が存在しません．処理をスキップします．")
+        return  # 処理を終了
     # directory_path = 'tmp/estimate_used_color_scheme/data/input/gaako/'
     # jpg_files = [file for file in os.listdir(directory_path) if file.endswith('.jpg')]  # .jpgファイルの名前をすべて配列に保存
     # .jpgファイルと.pngファイルの名前を同じ配列に保存
