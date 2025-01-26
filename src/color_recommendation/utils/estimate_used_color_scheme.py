@@ -187,8 +187,8 @@ def color_count_by_color_palette(color_palette, image_path):
     print("color_palette = ")
     for i in range(len(color_palette_count)):
         print_colored_text("■■■  ", color_palette[i])
-        print(f" {color_palette_count[i] / classified_color_count}")
         color_palette_rate[i] = color_palette_count[i] / classified_color_count
+        print(f" {color_palette_rate[i]}")
 
     return color_palette, color_palette_rate
 
@@ -269,7 +269,8 @@ def generate_json_used_color_scheme(image_path):
         hex = rgb_to_hex(color_scheme[0])
         color_dict = {
             "color": hex,  # NumPy配列をリストに変換
-            "rate": round(10 * color_scheme[1]) / 1000,
+            # "rate": round(10 * color_scheme[1]) / 1000,
+            "rate": color_scheme[1],
             "amount": -1
         }
         json_data.append(color_dict)
