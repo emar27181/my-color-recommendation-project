@@ -2,6 +2,7 @@ import json
 import matplotlib.pyplot as plt
 from matplotlib import colormaps
 from mpl_toolkits.mplot3d import Axes3D
+import os
 
 
 def plot_graph_3d(data, clusters, output_file_path):
@@ -111,6 +112,87 @@ def plot_recall_at_k(input_file_path, output_file_path):
     plot_graph(recalls, 'recall', output_file_path)
     # print(timing_count)
     # print(recalls)
+
+
+def plot_scatter(illustrator_name):
+    """
+    引数で受け取るイラストレーターの使用色の散布図をプロットする関数
+
+    引数:
+        illustrator_name: イラストレーター名
+
+    戻り値:
+        None
+    """
+    print(f"=== {illustrator_name} ====================")
+
+    input_file_path = f"src/color_recommendation/data/input/used_colors_{illustrator_name}.json"
+
+    # ファイルの読み込み
+    try:
+        if not os.path.exists(input_file_path):
+            raise FileNotFoundError(f"File not found: {input_file_path}")
+            return
+
+        with open(input_file_path, 'r') as f:
+            data = json.load(f)
+            print(f"{input_file_path} が読み込まれました．")
+
+    except FileNotFoundError as e:
+        print(f"エラー: {e}")
+        return
+    except json.JSONDecodeError as e:
+        print(f"JSONデコードエラー: {e}. ファイルの内容を確認してください。")
+        return
+    except Exception as e:
+        print(f"予期しないエラーが発生しました: {e}")
+        return
+
+    # 明度と彩度を計算
+    lightness_list = []
+    saturation_list = []
+    color_labels = []
+
+    for illustration in data:
+        for color_info in illustration:
+            hex_color = color_info["color"]
+            # HexカラーをRGBに変換
+            r = int(hex_color[1:3], 16) / 255.0
+            g = int(hex_color[3:5], 16) / 255.0
+            b = int(hex_color[5:7], 16) / 255.0
+
+            # 明度（Lightness）計算
+            lightness = (max(r, g, b) + min(r, g, b)) / 2
+            lightness_list.append(lightness)
+
+            # 彩度（Saturation）計算
+            if max(r, g, b) == min(r, g, b):  # グレースケール
+                saturation = 0
+            else:
+                saturation = (max(r, g, b) - min(r, g, b)) / (1 - abs(2 * lightness - 1))
+            saturation_list.append(saturation)
+
+            # 色ラベルを保存（散布図の色用）
+            color_labels.append(hex_color)
+
+    # 散布図を作成
+    plt.figure(figsize=(8, 6))
+    plt.scatter(saturation_list, lightness_list, c=color_labels, edgecolor='k')
+
+    # グラフの設定
+    plt.title(f'{illustrator_name}', fontsize=14)
+    plt.xlabel('Saturation', fontsize=12)
+    plt.ylabel('Lightness', fontsize=12)
+    plt.grid(True)
+    # plt.show()
+
+    output_file_path = f'src/color_recommendation/data/output/scatter_plot_{illustrator_name}.png'
+
+    plt.savefig(output_file_path)
+    print(f"{output_file_path} が保存されました．")
+    print(f"イラスト:  src/color_recommendation/data/input/illustration/{illustrator_name}")
+
+    plt.close()
 
 
 def main():
