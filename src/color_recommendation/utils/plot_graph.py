@@ -152,6 +152,7 @@ def plot_scatter(illustrator_name):
     lightness_list = []
     saturation_list = []
     color_labels = []
+    sizes = []
 
     for illustration in data:
         for color_info in illustration:
@@ -174,10 +175,11 @@ def plot_scatter(illustrator_name):
 
             # 色ラベルを保存（散布図の色用）
             color_labels.append(hex_color)
+            sizes.append(color_info["rate"] * 400)
 
     # 散布図を作成
     plt.figure(figsize=(8, 6))
-    plt.scatter(saturation_list, lightness_list, c=color_labels, edgecolor='k')
+    plt.scatter(saturation_list, lightness_list, s=sizes, c=color_labels, edgecolor=None)
 
     # グラフの設定
     plt.title(f'{illustrator_name}', fontsize=14)
