@@ -175,9 +175,8 @@ def print_color_scheme(color_scheme):
 
 # 引数で受け取った配色群を表示させる関数
 def print_color_schemes(color_schemes):
-    for color_scheme_method in color_schemes:
-        for color_scheme in color_scheme_method:
-            print_color_scheme(color_scheme)
+    for color_scheme in color_schemes:
+        print_color_scheme(color_scheme)
 
 
 def test_delta_e_cie2000(color1, color2):

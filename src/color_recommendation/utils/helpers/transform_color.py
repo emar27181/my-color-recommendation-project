@@ -76,12 +76,11 @@ def transform_color_scheme_rgb_to_hex(color_scheme_rgb):
     return color_scheme_hex
 
 
-def transform_color_schemes_rgb_to_hex(color_schemes_method_rgb):
+def transform_color_schemes_rgb_to_hex(color_schemes_rgb):
     color_schemes_hex = []
-    for color_scheme_method_rgb in color_schemes_method_rgb:
-        for color_scheme_rgb in color_scheme_method_rgb:
-            # print("color_scheme_rgb: ", color_scheme_rgb)
-            color_schemes_hex.append(transform_color_scheme_rgb_to_hex(color_scheme_rgb))
+    for color_scheme_rgb in color_schemes_rgb:
+        # print("color_scheme_rgb: ", color_scheme_rgb)
+        color_schemes_hex.append(transform_color_scheme_rgb_to_hex(color_scheme_rgb))
     return color_schemes_hex
 
 
