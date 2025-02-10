@@ -76,43 +76,6 @@ def save_recommend_colors_for_illustraters(illutrater_list):
             print(f"{output_file_path} が保存されました．(推薦配色群の生成)")
 
 
-def run_all(file_name, illust_count_limit):
-    print(f"=== {file_name} ====================")
-
-    # download_instagram_images(file_name, illust_count_limit)
-    # print(f"@{file_name} の投稿がダウンロードされました．")
-
-    # 使用色の抽出と保存
-    save_estimated_used_colors(file_name, illust_count_limit)
-    print("使用色が抽出されました．")
-
-    # イラストデータの読み込み
-    USED_COLORS_FILE_PATH = f"src/color_recommendation/data/input/used_colors_{file_name}.json"
-    used_colors_data = read_file(USED_COLORS_FILE_PATH)
-
-    # 推薦配色群の生成
-    recommend_colors_data = generate_recommend_colors(used_colors_data)
-    RECOMMEND_COLORS_FILE_PATH = f"src/color_recommendation/data/output/recommend_colors_{file_name}.json"
-    with open(RECOMMEND_COLORS_FILE_PATH, 'w', encoding='utf-8') as file:
-        json.dump(recommend_colors_data, file, ensure_ascii=False, indent=4)
-        print(f"{RECOMMEND_COLORS_FILE_PATH} が保存されました．(推薦配色群の生成)")
-
-    # 次の色が含まれているかどうかの判定とデータの作成
-    is_contained_next_color_data = check_data_is_contained_next_color(recommend_colors_data)
-    IS_CONTAINED_NEXT_COLOR_FILE_PATH = f"src/color_recommendation/data/output/is_contained_next_color_{file_name}.json"
-    with open(IS_CONTAINED_NEXT_COLOR_FILE_PATH, 'w', encoding='utf-8') as file:
-        json.dump(is_contained_next_color_data, file, ensure_ascii=False, indent=4)
-        print(f"{IS_CONTAINED_NEXT_COLOR_FILE_PATH} が保存されました．(次の色が含まれているかどうかを保存するデータの作成)")
-
-    # グラフの生成
-    GRAPH_PATH = f'src/color_recommendation/data/output/recall_at_k_{file_name}.png'
-    print(f"{IS_CONTAINED_NEXT_COLOR_FILE_PATH} が読み込まれました．")
-    plot_recall_at_k(IS_CONTAINED_NEXT_COLOR_FILE_PATH, GRAPH_PATH)
-    print(f"{GRAPH_PATH} が保存されました．(グラフの作成)")
-
-    print("")
-
-
 def main():
     run_all("gaako_instagram", 100)
     run_all("gaako_portfolio", 100)
