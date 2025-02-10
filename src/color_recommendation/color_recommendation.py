@@ -36,6 +36,12 @@ def generate_recommend_colors(data):
         print(f"=== {illust_data[0]['illustName']} =================== ")
         print_color_schemes(recommend_color_schemes)
 
+        # 使用配色のRGB形式のリストを取得
+        used_color_scheme_rgb = []
+        for color_scheme_data in illust_data:
+            used_color_scheme_rgb.append(hex_to_rgb(color_scheme_data['color']))
+
+
         new_illust_data = {
             "illust_name": illust_data[0]['illustName'],
             "color_scheme": illust_data,
