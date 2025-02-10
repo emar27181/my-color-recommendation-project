@@ -1,13 +1,14 @@
 import json
 from utils.generate_color_scheme_method import generate_all_color_schemes
 from utils.add_variations_color_scheme import add_all_variations_color_schemes
-from utils.helpers.color_utils import print_colored_text, print_color_schemes
+from utils.helpers.color_utils import print_colored_text, print_color_schemes, print_color_scheme
 from utils.helpers.transform_color import hex_to_rgb, transform_color_schemes_rgb_to_hex
 from utils.helpers.json_utils import convert_color_schemes_to_color_data
 from utils.check_data_is_contained_next_color import check_data_is_contained_next_color
 from utils.plot_graph import plot_recall_at_k
 from utils.estimate_used_color_scheme import generate_json_used_color_scheme, save_estimated_used_colors
 from utils.download_instagram_images import download_instagram_images
+from utils.sort_color_scheme import sort_color_scheme_by_color_difference
 
 
 def read_file(file_path):
@@ -31,19 +32,23 @@ def generate_recommend_colors(data):
         # あるイラストに対して推薦配色群を生成
         base_color_rgb = hex_to_rgb(illust_data[0]['color'])  # 推薦配色の基となる色を取得
         recommend_color_schemes_rgb = generate_all_color_schemes(base_color_rgb)  # 17(?)パターンの配色群を生成
-        # recommend_color_schemes_rgb = add_all_variations_color_schemes(recommend_color_schemes_rgb)  # 明度の異なる2パターンの配色群を追加
+        recommend_color_schemes_rgb = add_all_variations_color_schemes(recommend_color_schemes_rgb)  # 明度の異なる2パターンの配色群を追加
 
         print(f"=== {illust_data[0]['illustName']} =================== ")
 
         # print(recommend_color_schemes_rgb)
-        print_color_schemes(recommend_color_schemes_rgb)
+        # print_color_schemes(recommend_color_schemes_rgb)
+
+        for i in range(len(recommend_color_schemes_rgb)):
+            print(f"[{i}]: ", end="")
+            print_color_scheme(recommend_color_schemes_rgb[i])
 
         # 使用配色のRGB形式のリストを取得
         used_color_scheme_rgb = []
         for color_scheme_data in illust_data:
             used_color_scheme_rgb.append(hex_to_rgb(color_scheme_data['color']))
 
-        # recommend_color_schemes_rgb = sort_color_scheme_by_color_difference(used_color_scheme_rgb, recommend_color_schemes_rgb)
+        recommend_color_schemes_rgb = sort_color_scheme_by_color_difference(used_color_scheme_rgb, recommend_color_schemes_rgb)
         # print(recommend_color_schemes_rgb)
 
         new_illust_data = {

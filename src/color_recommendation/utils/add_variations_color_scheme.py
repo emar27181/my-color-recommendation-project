@@ -21,19 +21,25 @@ def add_all_variations_color_schemes(color_schemes):
     # print(new_color_schemes)
 
     new_color_schemes = []
-    for color_scheme_method in color_schemes:
-        for color_scheme in color_scheme_method:
 
-            # 確認用出力
-            if False:
-                print_color_scheme(color_scheme)
-                print_color_scheme(add_lightness_variations_color_scheme(color_scheme, +20))
-                print_color_scheme(add_lightness_variations_color_scheme(color_scheme, -20))
+    before_color_schemes_len = len(color_schemes)
 
-            new_color_schemes.append(add_lightness_variations_color_scheme(color_scheme, +20))
-            new_color_schemes.append(add_lightness_variations_color_scheme(color_scheme, -20))
+    # for color_scheme in color_schemes:
+    for i in range(before_color_schemes_len):
+        color_scheme = color_schemes[i]
 
-    color_schemes.append(new_color_schemes)
+        # 確認用出力
+        if False:
+            print_color_scheme(color_scheme)
+            print_color_scheme(add_lightness_variations_color_scheme(color_scheme, +20))
+            print_color_scheme(add_lightness_variations_color_scheme(color_scheme, -20))
+
+        color_schemes.append(add_lightness_variations_color_scheme(color_scheme, +20))
+        color_schemes.append(add_lightness_variations_color_scheme(color_scheme, -20))
+        new_color_schemes.append(add_lightness_variations_color_scheme(color_scheme, +20))
+        new_color_schemes.append(add_lightness_variations_color_scheme(color_scheme, -20))
+
+    # color_schemes.append(new_color_schemes)
 
     return (color_schemes)
 
