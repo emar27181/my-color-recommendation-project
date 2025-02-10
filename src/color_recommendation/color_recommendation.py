@@ -29,19 +29,16 @@ def generate_recommend_colors(data):
             continue
 
         # あるイラストに対して推薦配色群を生成
-        # print(illust_data[0]["illustName"])
-        base_color_rgb = hex_to_rgb(illust_data[0]['color'])
-        recommend_color_schemes = generate_all_color_schemes(base_color_rgb)
-        recommend_color_schemes = add_all_variations_color_schemes(recommend_color_schemes)
-        # print_color_schemes(recommend_color_schemes)
+        base_color_rgb = hex_to_rgb(illust_data[0]['color'])  # 推薦配色の基となる色を取得
+        recommend_color_schemes = generate_all_color_schemes(base_color_rgb)  # 17(?)パターンの配色群を生成
+        recommend_color_schemes = add_all_variations_color_schemes(recommend_color_schemes)  # 明度の異なる2パターンの配色群を追加
 
-        # recommend_color_schemes_hex = transform_color_schemes_rgb_to_hex(recommend_color_schemes)
-        # print(recommend_color_schemes_hex)recommend_color_schemes_hex, recommendations
+        print(f"=== {illust_data[0]['illustName']} =================== ")
+        print_color_schemes(recommend_color_schemes)
 
         new_illust_data = {
             "illust_name": illust_data[0]['illustName'],
             "color_scheme": illust_data,
-            # "recommend_color_schemes_rgb": recommend_color_schemes,
             "recommend_color_schemes": convert_color_schemes_to_color_data(transform_color_schemes_rgb_to_hex(recommend_color_schemes)),
         }
 
