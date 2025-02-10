@@ -29,34 +29,30 @@ def generate_recommend_colors(data):
         if not illust_data:
             continue
 
-        # あるイラストに対して推薦配色群を生成
-        base_color_rgb = hex_to_rgb(illust_data[0]['color'])  # 推薦配色の基となる色を取得
-        recommend_color_schemes_rgb = generate_all_color_schemes(base_color_rgb)  # 17(?)パターンの配色群を生成
-        recommend_color_schemes_rgb = add_all_variations_color_schemes(recommend_color_schemes_rgb)  # 明度の異なる2パターンの配色群を追加
-
         print(f"=== {illust_data[0]['illustName']} =================== ")
-
-        # print(recommend_color_schemes_rgb)
-        # print_color_schemes(recommend_color_schemes_rgb)
-
-        for i in range(len(recommend_color_schemes_rgb)):
-            print(f"[{i}]: ", end="")
-            print_color_scheme(recommend_color_schemes_rgb[i])
 
         # 使用配色のRGB形式のリストを取得
         used_color_scheme_rgb = []
         for color_scheme_data in illust_data:
             used_color_scheme_rgb.append(hex_to_rgb(color_scheme_data['color']))
 
-        recommend_color_schemes_rgb = sort_color_scheme_by_color_difference(used_color_scheme_rgb, recommend_color_schemes_rgb)
-        # print(recommend_color_schemes_rgb)
+        # あるイラストに対して推薦配色群を生成
+        base_color_rgb = hex_to_rgb(illust_data[0]['color'])  # 推薦配色の基となる色を取得
+        recommend_color_schemes_rgb = generate_all_color_schemes(base_color_rgb)  # 17(?)パターンの配色群を生成
+        recommend_color_schemes_rgb = add_all_variations_color_schemes(recommend_color_schemes_rgb)  # 明度の異なる2パターンの配色群を追加
+        recommend_color_schemes_rgb = sort_color_scheme_by_color_difference(used_color_scheme_rgb, recommend_color_schemes_rgb)  # 使用配色との類似度順にソート
 
         new_illust_data = {
             "illust_name": illust_data[0]['illustName'],
             "color_scheme": illust_data,
             # "recommend_color_schemes": convert_color_schemes_to_color_data(transform_color_schemes_rgb_to_hex(recommend_color_schemes_rgb)),
-            "recommend_color_schemes": transform_color_schemes_rgb_to_hex(recommend_color_schemes_rgb),
+            "recommend_color_schemes": convert_color_schemes_to_color_data(transform_color_schemes_rgb_to_hex(recommend_color_schemes_rgb)),
         }
+
+        # 確認用出力
+        for i in range(len(recommend_color_schemes_rgb)):
+            print(f"[{i}]: ", end="")
+            print_color_scheme(recommend_color_schemes_rgb[i])
 
         # print(new_illust_data)
         output_data.append(new_illust_data)
