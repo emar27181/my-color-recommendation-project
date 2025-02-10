@@ -5,6 +5,8 @@ from PIL import Image
 import numpy as np
 import math
 
+DEBUG = False
+
 
 def calc_weighted_average_rgb(rgb_a, rgb_b, weight_a, weight_b):
     """
@@ -135,9 +137,14 @@ def quantize_color_rgb(rgb, threshold):
     return tuple((value // threshold) * threshold if value % threshold < 3 else (value // threshold) * threshold + threshold for value in rgb)
 
 
-# 色の差をΔEを用いて計算する関数
 def calculate_color_difference_delta_e_cie2000(color1, color2):
-    """
+    """二色間の色の差をΔEを用いて計算する関数
+    引数:
+        color1: 色1 (R, G, B)
+        color2: 色2 (R, G, B)
+    戻り値:
+        delta_e: 色の差 (0-1)
+
     # メモ
     - この関数を実行するには/(venvディレクトリ)/lib64/python3.10/site-packages/colormath/color_diff.py内の関数delta_e_cie2000()
     の"return numpy.asscalar(delta_e)" を "return delta_e.item()" に変更する必要あり
@@ -154,6 +161,52 @@ def calculate_color_difference_delta_e_cie2000(color1, color2):
     # ΔE（CIE 2000）を計算
     delta_e = delta_e_cie2000(color1_lab, color2_lab)
     return float(delta_e)
+
+
+def calc_color_scheme_difference_delta_e_cie2000(color_scheme1, color_scheme2):
+    """配色間の色の差をΔEを用いて計算する関数
+
+    引数:
+        color_scheme1: 配色1 (リスト)
+        color_scheme2: 配色2 (リスト)
+    戻り値:
+        delta_e: 色の差 (0-100)
+    """
+
+    min_delta_e_list = [101] * len(color_scheme1)
+    compared_index = []
+
+    for i in range(len(color_scheme1)):
+        min_delta_e_index = 0
+        for j in range(len(color_scheme2)):
+            if j in compared_index:
+                continue
+
+            # ΔEを計算
+            delta_e = calculate_color_difference_delta_e_cie2000(color_scheme1[i], color_scheme2[j])
+            if delta_e < min_delta_e_list[i]:
+                min_delta_e_list[i] = delta_e
+                min_delta_e_index = j
+
+            if (DEBUG):
+                print(f"[{i}, {j}]: ", end="")
+                print("ΔE( ", end="")
+                print_colored_text("■", color_scheme1[i])
+                print(" , ", end="")
+                print_colored_text("■", color_scheme2[j])
+                print(f" ) = {delta_e}")
+
+        # print(f"min_delta_e_index = {min_delta_e_index}")
+        compared_index.append(min_delta_e_index)
+
+    min_delta_e_list = [x for x in min_delta_e_list if x != 101]
+
+    # print(f"min_delta_e = {min_delta_e_list}")
+
+    ave_delta_e = sum([x for x in min_delta_e_list]) / len(min_delta_e_list)
+    # print(f"ave_delta_e = {ave_delta_e}")
+
+    return ave_delta_e
 
 
 # 引数で受け取ったRGB値の文字を表示させる関数
