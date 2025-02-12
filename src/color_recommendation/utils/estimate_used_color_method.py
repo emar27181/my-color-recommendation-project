@@ -1,6 +1,6 @@
 import json
 from utils.helpers.color_utils import print_colored_text
-from utils.helpers.transform_color import hex_to_rgb, rgb_to_hsl
+from utils.helpers.transform_color import hex_to_rgb, rgb_to_hsl, hsl_to_rgb
 
 
 def merge_hue_data(data, threshold=5):
@@ -30,6 +30,13 @@ def merge_hue_data(data, threshold=5):
         merged.append((round(avg_hue), total_weight))
 
     return merged
+
+
+def delete_hue_data_low_rate(data, threshold):
+    """
+    出現率が一定以下の色相データを削除する関数
+    """
+    return [(h, w) for h, w in data if w >= threshold]
 
 
 def print_hues_data(hues):
@@ -66,12 +73,15 @@ def estimate_used_color_method_by_illustrator(illustrator):
                 hues.append([color_hsl[0], used_rate])
 
         print_hues_data(hues)
-
         print("=== ↓ ===")
 
         # 色相が近いデータ同士で加重平均を取って結合
         hues = merge_hue_data(hues, 30)
+        print_hues_data(hues)
+        print("=== ↓ ===")
 
+        # 出現率が一定以下の色相データを削除
+        hues = delete_hue_data_low_rate(hues, 0.1)
         print_hues_data(hues)
 
 
