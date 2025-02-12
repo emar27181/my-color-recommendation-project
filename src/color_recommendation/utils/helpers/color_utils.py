@@ -4,7 +4,7 @@ from colormath.color_diff import delta_e_cie2000
 from PIL import Image
 import numpy as np
 import math
-from utils.helpers.transform_color import rgb_to_hsl
+from utils.helpers.transform_color import rgb_to_hsl, rgb_to_lab
 
 DEBUG = True
 
@@ -271,6 +271,24 @@ def is_chromatic_color_by_hsl(color_rgb):
         return False
     elif (lightness <= 5 or 90 <= lightness):
         return False
+    else:
+        return True
+
+
+def is_chromatic_color_by_lab(color_rgb):
+    """受け取った色が有彩色かどうかをHSL空間を使って判定する関数
+    """
+
+    color_hsl = rgb_to_hsl(color_rgb)
+    color_lab = rgb_to_lab(color_rgb)
+
+    if (DEBUG):
+        print_colored_text("■ ", color_rgb)
+        # print(f" lab = {color_lab}, hsl = {color_hsl}, rgb = {color_rgb}")
+
+    if (color_lab[0] <= 10 or 90 <= color_lab[0]):
+        return False
+
     else:
         return True
 
