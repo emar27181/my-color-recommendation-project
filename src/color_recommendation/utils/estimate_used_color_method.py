@@ -3,6 +3,11 @@ from utils.helpers.color_utils import print_colored_text
 from utils.helpers.transform_color import hex_to_rgb, rgb_to_hsl
 
 
+def print_hues_data(hues):
+    for hue_data in hues:
+        print(f"{hue_data[0]}: {round(hue_data[1]*100)/100}")
+
+
 def estimate_used_color_method_by_illustrator(illustrator):
     """あるイラストレーターが使っている配色技法を推定する関数
     """
