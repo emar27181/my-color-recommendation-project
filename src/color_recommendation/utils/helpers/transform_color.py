@@ -1,4 +1,5 @@
 import numpy as np
+from skimage.color import rgb2lab
 
 
 def hex_to_rgb(hex_color):
@@ -65,6 +66,19 @@ def hsl_to_rgb(h, s, l):
     b = (b + m) * 255
 
     return [int(r), int(g), int(b)]
+
+
+def rgb_to_lab(rgb):
+    r, g, b = rgb[0], rgb[1], rgb[2]
+
+    # RGB値を0〜1の範囲に正規化
+    rgb = np.array([[[r / 255, g / 255, b / 255]]])
+
+    # RGBからLabに変換
+    lab = rgb2lab(rgb)
+
+    # L, a, b を通常の float に変換して返す
+    return float(lab[0, 0, 0]), float(lab[0, 0, 1]), float(lab[0, 0, 2])
 
 
 def transform_color_scheme_rgb_to_hex(color_scheme_rgb):
