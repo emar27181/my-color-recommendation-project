@@ -1,11 +1,19 @@
 import json
 from utils.helpers.color_utils import print_colored_text, is_chromatic_color_by_hsl
 from utils.helpers.transform_color import hex_to_rgb, rgb_to_hsl, hsl_to_rgb
+import numpy as np
 
 
-def merge_hue_data(data, threshold=5):
+def merge_hue_data(data, threshold):
     """
-    近い色相同士の加重平均を取って結合する関数
+    近い色相同士の加重平均を取って結合する関数（ベクトル加重平均版）
+
+    引数:
+    data: List[Tuple[int, float]] - (色相H, 重みW) のリスト
+    threshold: int - 近いとみなす色相の閾値
+
+    戻り値: 
+    List[Tuple[int, float]] - (統合後の色相H, 重みW) のリスト
     """
     merged = []
     used = set()
@@ -24,9 +32,18 @@ def merge_hue_data(data, threshold=5):
                 group.append((h2, w2))
                 used.add(j)
 
-        # 加重平均で代表Hueを決定
+        # ベクトル加重平均で代表Hueを決定
         total_weight = sum(w for _, w in group)
-        avg_hue = sum(h * w for h, w in group) / total_weight
+        x_sum = sum(np.cos(np.deg2rad(h)) * w for h, w in group)
+        y_sum = sum(np.sin(np.deg2rad(h)) * w for h, w in group)
+
+        if total_weight == 0:
+            avg_hue = 0  # すべての重みが0ならデフォルト値
+        else:
+            avg_hue = np.rad2deg(np.arctan2(y_sum, x_sum))
+            if avg_hue < 0:
+                avg_hue += 360  # 負の値を補正
+
         merged.append((round(avg_hue), total_weight))
 
     return merged
