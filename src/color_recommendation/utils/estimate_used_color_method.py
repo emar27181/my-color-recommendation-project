@@ -107,6 +107,20 @@ def estimate_used_color_method_by_illustrator(illustrator):
         print_hues_data(hues)
 
 
+def save_estimate_used_color_method_for_illustrators(illutrater_list):
+    """
+    引数で受け取るリスト内のイラストレーターのイラストの配色技法を保存する関数
+
+    引数:
+        illutrater_list: 推薦配色を生成させたいイラストレーターのリスト(文字列)
+    戻り値:
+        None
+    """
+
+    for illustrater_name in illutrater_list:
+        estimate_used_color_method_by_illustrator(illustrater_name)
+
+
 if __name__ == '__main__':
     pass
     # estimate_used_color_scheme('test')
