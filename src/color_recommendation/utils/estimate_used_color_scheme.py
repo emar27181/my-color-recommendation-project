@@ -305,7 +305,7 @@ def save_estimated_used_colors_for_illustrates(illustrater_list, illust_count_li
     """
     for illustrater in illustrater_list:
         print(f"=== {illustrater} =====================")
-        output_file_path = f'src/color_recommendation/data/input/used_colors_{illustrater}.json'
+        output_file_path = f'src/color_recommendation/data/input/used_colors/used_colors_{illustrater}.json'
 
         if os.path.exists(output_file_path):
             print(f"既に '{output_file_path}' が存在するため処理をスキップします．")

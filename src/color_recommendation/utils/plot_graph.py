@@ -83,7 +83,7 @@ def save_plot_recall_at_k_for_illustrators(illustrator_list):
     """
 
     for illustrator_name in illustrator_list:
-        IS_CONTAINED_NEXT_COLOR_FILE_PATH = f"src/color_recommendation/data/output/is_contained_next_color_{illustrator_name}.json"
+        IS_CONTAINED_NEXT_COLOR_FILE_PATH = f"src/color_recommendation/data/output/is_contained_next_color/is_contained_next_color_{illustrator_name}.json"
         # GRAPH_PATH = f'src/color_recommendation/data/output/recall_at_k_{illustrator_name}.png'
 
         recalls = calculate_recall(IS_CONTAINED_NEXT_COLOR_FILE_PATH)
@@ -98,7 +98,7 @@ def save_plot_recall_at_k_for_illustrators(illustrator_list):
     plt.xlabel('color_scheme')
     plt.ylabel(f'recall')
     plt.grid(True)
-    plt.legend(title="Illustrators", fontsize=10)
+    plt.legend(title="Illustrators", fontsize=5)
 
     # ファイルに保存
     GRAPH_PATH = f'src/color_recommendation/data/output/recall_at_k.png'
