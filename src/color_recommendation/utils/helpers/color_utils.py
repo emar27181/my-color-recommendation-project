@@ -4,8 +4,9 @@ from colormath.color_diff import delta_e_cie2000
 from PIL import Image
 import numpy as np
 import math
+from utils.helpers.transform_color import rgb_to_hsl
 
-DEBUG = False
+DEBUG = True
 
 
 def calc_weighted_average_rgb(rgb_a, rgb_b, weight_a, weight_b):
@@ -254,12 +255,25 @@ def test_color_diff(file_path):
             test_delta_e_cie2000(colors[i], colors[j])
 
 
+def is_chromatic_color_by_hsl(color_rgb):
+    """受け取った色が有彩色かどうかをHSL空間を使って判定する関数
+    """
+
+    color_hsl = rgb_to_hsl(color_rgb)
+    saturation = color_hsl[1]
+    lightness = color_hsl[2]
+
+    if (DEBUG):
+        print_colored_text("\n■", color_rgb)
+        print(f" hsl = {color_hsl}, rgb = {color_rgb}")
+
+    if (saturation <= 5):
+        return False
+    elif (lightness <= 5 or 90 <= lightness):
+        return False
+    else:
+        return True
+
+
 if __name__ == "__main__":
     print("=== color_utils.py =====================")
-
-    # print(calculate_color_difference_delta_e_cie2000((170, 135, 130), (160, 140, 135)))
-    test_delta_e_cie2000((170, 135, 130), (160, 140, 135))
-    test_delta_e_cie2000((250, 195, 160), (235, 95, 35))
-    test_delta_e_cie2000((225, 110, 55), (235, 95, 35))
-
-    test_color_diff("tmp/hoge.txt")
