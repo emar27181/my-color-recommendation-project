@@ -3,6 +3,8 @@ from utils.helpers.color_utils import print_colored_text, is_chromatic_color_by_
 from utils.helpers.transform_color import hex_to_rgb, rgb_to_hsl, hsl_to_rgb
 import numpy as np
 
+DEBUG = False
+
 
 def merge_hue_data(data, threshold):
     """
@@ -65,14 +67,14 @@ def print_hues_data(hues):
 def estimate_used_color_method_by_illustrator(illustrator):
     """あるイラストレーターが使っている配色技法を推定する関数
     """
-    print(f"=== {illustrator} =================================")
+    print(f"=== {illustrator} =======================")
 
     with open(f"src/color_recommendation/data/input/used_colors/used_colors_{illustrator}.json", "r") as f:
         data = json.load(f)
 
     for illust_data in data:
         illust_name = illust_data[0]['illustName']
-        print(f"=== {illust_name} ================")
+        print(f"=== {illust_name} ===")
 
         # 色相とその出現割合の計測
         hues = []  # 色相とその出現割合を保存する変数
@@ -90,13 +92,15 @@ def estimate_used_color_method_by_illustrator(illustrator):
             if (is_chromatic_color_by_hsl(color_rgb, 5, 5, 95)):
                 hues.append([color_hsl[0], used_rate])
 
-        print_hues_data(hues)
-        print("=== ↓ ===")
+        if (DEBUG):
+            print_hues_data(hues)
+            print("=== ↓ ===")
 
         # 色相が近いデータ同士で加重平均を取って結合
         hues = merge_hue_data(hues, 15)
-        print_hues_data(hues)
-        print("=== ↓ ===")
+        if (DEBUG):
+            print_hues_data(hues)
+            print("=== ↓ ===")
 
         # 出現率が一定以下の色相データを削除
         hues = delete_hue_data_low_rate(hues, 0.01)
