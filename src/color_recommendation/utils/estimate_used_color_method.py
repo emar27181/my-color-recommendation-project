@@ -14,14 +14,20 @@ def estimate_used_color_method_by_illustrator(illustrator):
     for illust_data in data:
         illust_name = illust_data[0]['illustName']
         print(f"=== {illust_name} ================")
+
+        # 色相とその出現割合の計測
+        hues = []  # 色相とその出現割合を保存する変数
         for color_data in illust_data:
             color_hex = color_data['color']
             color_rgb = hex_to_rgb(color_hex)
             color_hsl = rgb_to_hsl(color_rgb)
             used_rate = color_data['rate']
 
-            print_colored_text("■", color_rgb)
-            print(f": {used_rate}  {color_hsl}")
+            # print(f"{color_hsl[0]}: {used_rate} ")
+            # print_colored_text("■", color_rgb)
+            # print(f"({color_hsl[0]}): {used_rate}  {color_hsl}")
+            hues.append([color_hsl[0], used_rate])
+        print(hues)
 
 
 if __name__ == '__main__':
