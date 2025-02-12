@@ -3,6 +3,35 @@ from utils.helpers.color_utils import print_colored_text
 from utils.helpers.transform_color import hex_to_rgb, rgb_to_hsl
 
 
+def merge_hue_data(data, threshold=5):
+    """
+    近い色相同士の加重平均を取って結合する関数
+    """
+    merged = []
+    used = set()
+
+    for i, (h1, w1) in enumerate(data):
+        if i in used:
+            continue
+        group = [(h1, w1)]
+        used.add(i)
+
+        for j, (h2, w2) in enumerate(data):
+            if j in used:
+                continue
+            # 360度環境を考慮して距離を計算
+            if min(abs(h1 - h2), 360 - abs(h1 - h2)) <= threshold:
+                group.append((h2, w2))
+                used.add(j)
+
+        # 加重平均で代表Hueを決定
+        total_weight = sum(w for _, w in group)
+        avg_hue = sum(h * w for h, w in group) / total_weight
+        merged.append((round(avg_hue), total_weight))
+
+    return merged
+
+
 def print_hues_data(hues):
     for hue_data in hues:
         print(f"{hue_data[0]}: {round(hue_data[1]*100)/100}")
@@ -32,7 +61,15 @@ def estimate_used_color_method_by_illustrator(illustrator):
             # print_colored_text("■", color_rgb)
             # print(f"({color_hsl[0]}): {used_rate}  {color_hsl}")
             hues.append([color_hsl[0], used_rate])
-        print(hues)
+
+        print_hues_data(hues)
+
+        print("=== ↓ ===")
+
+        # 色相が近いデータ同士で加重平均を取って結合
+        hues = merge_hue_data(hues, 30)
+
+        print_hues_data(hues)
 
 
 if __name__ == '__main__':
