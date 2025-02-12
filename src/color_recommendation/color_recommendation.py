@@ -8,7 +8,8 @@ from utils.check_data_is_contained_next_color import check_data_is_contained_nex
 from utils.plot_graph import plot_recall_at_k
 from utils.estimate_used_color_scheme import generate_json_used_color_scheme, save_estimated_used_colors
 from utils.download_instagram_images import download_instagram_images
-from utils.sort_color_scheme import sort_color_scheme_by_color_difference
+from utils.sort_color_scheme import sort_color_scheme_by_color_difference, shuffle_color_schemes
+import os
 
 
 def read_file(file_path):
@@ -18,7 +19,7 @@ def read_file(file_path):
         return data
 
 
-def generate_recommend_colors(data):
+def generate_recommend_colors(data, sort_type):
 
     output_data = []
 
@@ -40,7 +41,13 @@ def generate_recommend_colors(data):
         base_color_rgb = hex_to_rgb(illust_data[0]['color'])  # 推薦配色の基となる色を取得
         recommend_color_schemes_rgb = generate_all_color_schemes(base_color_rgb)  # 17(?)パターンの配色群を生成
         recommend_color_schemes_rgb = add_all_variations_color_schemes(recommend_color_schemes_rgb)  # 明度の異なる2パターンの配色群を追加
-        recommend_color_schemes_rgb = sort_color_scheme_by_color_difference(used_color_scheme_rgb, recommend_color_schemes_rgb)  # 使用配色との類似度順にソート
+
+        if (sort_type == "color_diff"):
+            recommend_color_schemes_rgb = sort_color_scheme_by_color_difference(used_color_scheme_rgb, recommend_color_schemes_rgb)  # 使用配色との類似度順にソート
+        elif (sort_type == "random"):
+            recommend_color_schemes_rgb = shuffle_color_schemes(recommend_color_schemes_rgb)  # 推薦配色をランダムにシャッフル
+        else:
+            print("ソートの種類が間違っているため，推薦配色は並び替えられずに挿入されます．(ソートの種類:  'random', 'color_diff')")
 
         new_illust_data = {
             "illust_name": illust_data[0]['illustName'],
@@ -62,12 +69,13 @@ def generate_recommend_colors(data):
     return output_data
 
 
-def save_recommend_colors_for_illustraters(illutrater_list):
+def save_recommend_colors_for_illustraters(illutrater_list, sort_type):
     """
     引数で受け取るリスト内のイラストレーターのイラストの推薦配色を保存する関数
 
     引数:
         illutrater_list: 推薦配色を生成させたいイラストレーターのリスト(文字列)
+        sort_type: ソートの種類(random/color_diff)
     戻り値:
         None
     """
@@ -78,8 +86,9 @@ def save_recommend_colors_for_illustraters(illutrater_list):
         input_file_path = f"src/color_recommendation/data/input/used_colors/used_colors_{illustrater_name}.json"
         used_colors_data = read_file(input_file_path)
 
-        recommend_colors_data = generate_recommend_colors(used_colors_data)
-        output_file_path = f"src/color_recommendation/data/output/recommend_colors/recommend_colors_{illustrater_name}.json"
+        recommend_colors_data = generate_recommend_colors(used_colors_data, sort_type)
+        output_file_path = f"src/color_recommendation/data/output/recommend_colors/{sort_type}/recommend_colors_{illustrater_name}.json"
+
         with open(output_file_path, 'w', encoding='utf-8') as file:
             json.dump(recommend_colors_data, file, ensure_ascii=False, indent=4)
             print(f"{output_file_path} が保存されました．(推薦配色群の生成)")
