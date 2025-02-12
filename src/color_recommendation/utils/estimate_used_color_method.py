@@ -1,5 +1,5 @@
 import json
-from utils.helpers.color_utils import print_colored_text
+from utils.helpers.color_utils import print_colored_text, is_chromatic_color_by_hsl
 from utils.helpers.transform_color import hex_to_rgb, rgb_to_hsl, hsl_to_rgb
 
 
@@ -69,15 +69,15 @@ def estimate_used_color_method_by_illustrator(illustrator):
             # print_colored_text("■", color_rgb)
             # print(f"({color_hsl[0]}): {used_rate}  {color_hsl}")
 
-            # 彩度が10以上のみを追加(彩度が小さい場合，無彩色であり色相環に影響を与えないため)
-            if (color_hsl[1] >= 10):
+            # 有彩色を追加(彩度が小さい場合，無彩色であり色相環に影響を与えないため)
+            if (is_chromatic_color_by_hsl(color_rgb, 5, 5, 95)):
                 hues.append([color_hsl[0], used_rate])
 
         print_hues_data(hues)
         print("=== ↓ ===")
 
         # 色相が近いデータ同士で加重平均を取って結合
-        hues = merge_hue_data(hues, 30)
+        hues = merge_hue_data(hues, 5)
         print_hues_data(hues)
         print("=== ↓ ===")
 

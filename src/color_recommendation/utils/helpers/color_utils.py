@@ -6,7 +6,7 @@ import numpy as np
 import math
 from utils.helpers.transform_color import rgb_to_hsl, rgb_to_lab
 
-DEBUG = True
+DEBUG = False
 
 
 def calc_weighted_average_rgb(rgb_a, rgb_b, weight_a, weight_b):
@@ -255,7 +255,7 @@ def test_color_diff(file_path):
             test_delta_e_cie2000(colors[i], colors[j])
 
 
-def is_chromatic_color_by_hsl(color_rgb):
+def is_chromatic_color_by_hsl(color_rgb, SATURATION_THRESHOLD, LIGHTNESS_LOWER_THRESHOLD, LIGHTNESS_UPPER_THRESHOLD):
     """受け取った色が有彩色かどうかをHSL空間を使って判定する関数
     """
 
@@ -267,9 +267,9 @@ def is_chromatic_color_by_hsl(color_rgb):
         print_colored_text("\n■", color_rgb)
         print(f" hsl = {color_hsl}, rgb = {color_rgb}")
 
-    if (saturation <= 5):
+    if (saturation <= SATURATION_THRESHOLD):
         return False
-    elif (lightness <= 5 or 90 <= lightness):
+    elif (lightness <= LIGHTNESS_LOWER_THRESHOLD or LIGHTNESS_UPPER_THRESHOLD <= lightness):
         return False
     else:
         return True
