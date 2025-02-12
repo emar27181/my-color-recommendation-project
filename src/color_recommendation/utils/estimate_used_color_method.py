@@ -60,7 +60,7 @@ def delete_hue_data_low_rate(data, threshold):
 
 def print_hues_data(hues):
     for hue_data in hues:
-        print_colored_text("■", hsl_to_rgb(hue_data[0], 100, 50))
+        print_colored_text("■", hsl_to_rgb((hue_data[0]) % 360, 100, 50))
         print(f" {hue_data[0]}: {round(hue_data[1]*100)/100}")
 
 
