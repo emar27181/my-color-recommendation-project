@@ -77,12 +77,12 @@ def estimate_used_color_method_by_illustrator(illustrator):
         print("=== ↓ ===")
 
         # 色相が近いデータ同士で加重平均を取って結合
-        hues = merge_hue_data(hues, 5)
+        hues = merge_hue_data(hues, 15)
         print_hues_data(hues)
         print("=== ↓ ===")
 
         # 出現率が一定以下の色相データを削除
-        hues = delete_hue_data_low_rate(hues, 0.1)
+        hues = delete_hue_data_low_rate(hues, 0.01)
         print_hues_data(hues)
 
 
