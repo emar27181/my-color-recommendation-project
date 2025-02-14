@@ -91,6 +91,9 @@ def estimate_used_color_method_by_illustrator(illustrator):
             # 有彩色を追加(彩度が小さい場合，無彩色であり色相環に影響を与えないため)
             if (is_chromatic_color_by_hsl(color_rgb, 5, 5, 95)):
                 hues.append([color_hsl[0], used_rate])
+            else:
+                print_colored_text("■", color_rgb)
+                print(f": {used_rate}")
 
         if (DEBUG):
             print_hues_data(hues)
