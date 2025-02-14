@@ -58,19 +58,38 @@ def delete_hue_data_low_rate(data, threshold):
     return [(h, w) for h, w in data if w >= threshold]
 
 
-def print_chromatic_colors_rate(hues):
-    for hue_data in hues:
-        print_colored_text("■", hsl_to_rgb((hue_data[0]) % 360, 100, 50))
-        print(f" {hue_data[0]}: {round(hue_data[1]*100)/100}")
+def print_chromatic_colors_rate(data, threshold):
+    """
+    有彩色の使用割合を表示させる関数
+
+    引数: 
+        data:
+        threshold: float - 表示させる使用比率の閾値
+    戻り値:
+        none
+    """
+    for hue_data in data:
+        if (threshold < hue_data[1]):
+            print_colored_text("■", hsl_to_rgb((hue_data[0]) % 360, 100, 50))
+            print(f" {hue_data[0]}: {round(hue_data[1]*1000)/10}%")
 
 
-def print_achromatic_colors_rate(data):
-    if (0.01 < data[0][1]):
+def print_achromatic_colors_rate(data, threshold):
+    """
+    無彩色の使用割合を表示させる関数
+
+    引数: 
+        data:
+        threshold: float - 表示させる使用比率の閾値
+    戻り値:
+        none
+    """
+    if (threshold < data[0][1]):
         print_colored_text("■", (10, 10, 10))
-        print(f" -: {round(data[0][1]*100)/100}")
-    if (0.01 < data[1][1]):
+        print(f" -: {round(data[0][1]*1000)/10}%")
+    if (threshold < data[1][1]):
         print_colored_text("■", (255, 255, 255))
-        print(f" -: {round(data[1][1]*100)/100}")
+        print(f" -: {round(data[1][1]*1000)/10}%")
 
 
 def estimate_used_color_method_by_illustrator(illustrator):
@@ -121,11 +140,11 @@ def estimate_used_color_method_by_illustrator(illustrator):
             print("=== ↓ ===")
 
         # 出現率が一定以下の色相データを削除
-        chromatic_colors_rate = delete_hue_data_low_rate(chromatic_colors_rate, 0.01)
+        # chromatic_colors_rate = delete_hue_data_low_rate(chromatic_colors_rate, 0.01)
 
         # 確認用出力
-        print_chromatic_colors_rate(chromatic_colors_rate)
-        print_achromatic_colors_rate(achromatic_colors_rate)
+        print_chromatic_colors_rate(chromatic_colors_rate, 0.01)
+        print_achromatic_colors_rate(achromatic_colors_rate, 0.01)
 
 
 def save_estimate_used_color_method_for_illustrators(illutrater_list):
