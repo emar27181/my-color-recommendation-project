@@ -58,7 +58,7 @@ def delete_hue_data_low_rate(data, threshold):
     return [(h, w) for h, w in data if w >= threshold]
 
 
-def print_hues_data(hues):
+def print_chromatic_colors_rate(hues):
     for hue_data in hues:
         print_colored_text("■", hsl_to_rgb((hue_data[0]) % 360, 100, 50))
         print(f" {hue_data[0]}: {round(hue_data[1]*100)/100}")
@@ -77,37 +77,45 @@ def estimate_used_color_method_by_illustrator(illustrator):
         print(f"=== {illust_name} ===")
 
         # 色相とその出現割合の計測
-        hues = []  # 色相とその出現割合を保存する変数
+        chromatic_colors_rate = []  # 有彩色の色相とその出現割合を保存する変数
+        achromatic_colors_rate = [[-10, 0], [-11, 0]]  # 無彩色とその出現割合を保存する変数
+
         for color_data in illust_data:
             color_hex = color_data['color']
             color_rgb = hex_to_rgb(color_hex)
             color_hsl = rgb_to_hsl(color_rgb)
             used_rate = color_data['rate']
 
-            # print(f"{color_hsl[0]}: {used_rate} ")
-            # print_colored_text("■", color_rgb)
-            # print(f"({color_hsl[0]}): {used_rate}  {color_hsl}")
-
-            # 有彩色を追加(彩度が小さい場合，無彩色であり色相環に影響を与えないため)
+            # 使用比率の追加(有彩色と無彩色を分けて保存)
             if (is_chromatic_color_by_hsl(color_rgb, 5, 5, 95)):
-                hues.append([color_hsl[0], used_rate])
+                chromatic_colors_rate.append([color_hsl[0], used_rate])
             else:
-                print_colored_text("■", color_rgb)
-                print(f": {used_rate}")
+                # 黒色の使用比率の追加
+                if (color_hsl[2] <= 50):
+                    # print_colored_text("■", color_rgb)
+                    # print(f": {used_rate}")
+                    achromatic_colors_rate[0][1] += used_rate
+                # 白色の使用比率の追加
+                else:
+                    # print_colored_text("■", color_rgb)
+                    # print(f": {used_rate}")
+                    achromatic_colors_rate[1][1] += used_rate
 
         if (DEBUG):
-            print_hues_data(hues)
+            print_chromatic_colors_rate(chromatic_colors_rate)
             print("=== ↓ ===")
 
         # 色相が近いデータ同士で加重平均を取って結合
-        hues = merge_hue_data(hues, 15)
+        chromatic_colors_rate = merge_hue_data(chromatic_colors_rate, 15)
         if (DEBUG):
-            print_hues_data(hues)
+            print_chromatic_colors_rate(chromatic_colors_rate)
             print("=== ↓ ===")
 
         # 出現率が一定以下の色相データを削除
-        hues = delete_hue_data_low_rate(hues, 0.01)
-        print_hues_data(hues)
+        chromatic_colors_rate = delete_hue_data_low_rate(chromatic_colors_rate, 0.01)
+
+        # 確認用出力
+        print_chromatic_colors_rate(chromatic_colors_rate)
 
 
 def save_estimate_used_color_method_for_illustrators(illutrater_list):
