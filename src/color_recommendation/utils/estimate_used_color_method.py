@@ -64,6 +64,15 @@ def print_chromatic_colors_rate(hues):
         print(f" {hue_data[0]}: {round(hue_data[1]*100)/100}")
 
 
+def print_achromatic_colors_rate(data):
+    if (0.01 < data[0][1]):
+        print_colored_text("■", (10, 10, 10))
+        print(f" -: {round(data[0][1]*100)/100}")
+    if (0.01 < data[1][1]):
+        print_colored_text("■", (255, 255, 255))
+        print(f" -: {round(data[1][1]*100)/100}")
+
+
 def estimate_used_color_method_by_illustrator(illustrator):
     """あるイラストレーターが使っている配色技法を推定する関数
     """
@@ -116,6 +125,7 @@ def estimate_used_color_method_by_illustrator(illustrator):
 
         # 確認用出力
         print_chromatic_colors_rate(chromatic_colors_rate)
+        print_achromatic_colors_rate(achromatic_colors_rate)
 
 
 def save_estimate_used_color_method_for_illustrators(illutrater_list):
