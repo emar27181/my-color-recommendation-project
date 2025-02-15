@@ -92,6 +92,25 @@ def print_achromatic_colors_rate(data, threshold):
         print(f" -: {round(data[1][1]*1000)/10}%")
 
 
+def count_chromatic_colors(hues_data, threshold):
+    """引数で受け取る使用配色のうち，有彩色の数をカウントする関数"""
+    chromatic_count = 0
+    for hue_data in hues_data:
+        if (hue_data[0] > 0 and threshold < hue_data[1]):
+            chromatic_count += 1
+    return chromatic_count
+
+
+def count_achromatic_colors(hues_data, threshold):
+    """引数で受け取る使用配色のうち，無彩色の彩色の数をカウントする関数"""
+    achromatic_count = 0
+    for hue_data in hues_data:
+        if (hue_data[0] == -10 and threshold < hue_data[1]):
+            achromatic_count += 1
+        elif (hue_data[0] == -11 and threshold < hue_data[1]):
+            achromatic_count += 1
+    return achromatic_count
+
 def estimate_used_color_method_by_illustrator(illustrator):
     """あるイラストレーターが使っている配色技法を推定する関数
     """
