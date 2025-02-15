@@ -146,6 +146,13 @@ def estimate_used_color_method_by_illustrator(illustrator):
         print_chromatic_colors_rate(chromatic_colors_rate, 0.01)
         print_achromatic_colors_rate(achromatic_colors_rate, 0.01)
 
+        used_hues_rate = []
+        for chromatic_color_rate in chromatic_colors_rate:
+            used_hues_rate.append(chromatic_color_rate)
+        for achromatic_color_rate in achromatic_colors_rate:
+            used_hues_rate.append((achromatic_color_rate[0], achromatic_color_rate[1]))
+        print(f"used_hues_rate = {used_hues_rate}")
+
 
 def save_estimate_used_color_method_for_illustrators(illutrater_list):
     """
