@@ -111,6 +111,62 @@ def count_achromatic_colors(hues_data, threshold):
             achromatic_count += 1
     return achromatic_count
 
+
+def estimate_used_color_method(used_hues_data):
+    """引数で受け取る使用配色のデータを基に配色技法を推定する関数"""
+    chromatic_colors_count = count_chromatic_colors(used_hues_data, 0.01)
+    achromatic_colors_count = count_achromatic_colors(used_hues_data, 0.01)
+
+    print(f"count_chromatic_colors = {chromatic_colors_count}")
+    print(f"achromatic_colors = {achromatic_colors_count}")
+
+    """
+    # 色の数が1色だった場合
+    if (len(used_colors) == 1):
+        used_color_scheme_method = ColorScheme.IDENTITY_COLOR
+
+    # 色の数が2色だった場合
+    elif (len(used_colors) == 2):
+        if (hue_diffs[1] >= 165):
+            used_color_scheme_method = ColorScheme.DYAD_COLOR
+        elif (is_angle_between_angles(hue_diffs[1], 75, 105)):
+            # elif ((75 <= hue_diffs[1]) & (hue_diffs[1] <= 105)):
+            used_color_scheme_method = ColorScheme.INTERMEDIATE_COLOR
+        elif (is_angle_between_angles(hue_diffs[1], 105, 165)):
+            used_color_scheme_method = ColorScheme.OPONENT_COLOR
+        elif (is_angle_between_angles(hue_diffs[1], 15, 45)):
+            used_color_scheme_method = ColorScheme.ANALOGY_COLOR
+
+    # 色の数が3色だった場合
+    elif (len(used_colors) == 3):
+        if ((hue_diffs[1] <= 30) & (hue_diffs[2] <= 60)):
+            used_color_scheme_method = ColorScheme.DOMINANT_COLOR
+        elif (((120 <= hue_diffs[1]) & (hue_diffs[1] <= 150)) & ((120 <= hue_diffs[2]) & (hue_diffs[2] <= 150))):
+            used_color_scheme_method = ColorScheme.TRIAD_COLOR_SCHEME
+        elif ((hue_diffs[1] >= 150) & (hue_diffs[2] >= 150)):
+            used_color_scheme_method = ColorScheme.SPLIT_COMPLEMENTARY_COLOR
+        elif (is_angle_between_angles(hue_diffs[1], 15, 60) & is_angle_between_angles(hue_diffs[2], 135, 165)):
+            # elif ((hue_diffs[1] <= 45) & (hue_diffs[2] >= 150)):
+            used_color_scheme_method = ColorScheme.SPLIT_COMPLEMENTARY_COLOR
+        elif (is_angle_between_angles(hue_diffs[2], 15, 60) & is_angle_between_angles(hue_diffs[1], 135, 165)):
+            # elif ((hue_diffs[1] >= 150) & (hue_diffs[2] <= 45)):
+            used_color_scheme_method = ColorScheme.SPLIT_COMPLEMENTARY_COLOR
+
+    # 色の数が3色だった場合
+    elif (len(used_colors) == 4):
+        if (is_angle_between_angles(hue_diffs[1], 75, 105) & is_angle_between_angles(hue_diffs[2], 75, 105) & (hue_diffs[3] >= 165)):
+            used_color_scheme_method = ColorScheme.TETRADE_COLOR
+    elif (len(used_colors) == 5):
+        used_color_scheme_method = ColorScheme.PENTAD_COLOR
+    elif (len(used_colors) == 6):
+        used_color_scheme_method = ColorScheme.HEXAD_COLOR
+    else:
+        used_color_scheme_method = ColorScheme.ERROR
+
+    print(f"推定された配色技法は {used_color_scheme_method} です．")
+    """
+
+
 def estimate_used_color_method_by_illustrator(illustrator):
     """あるイラストレーターが使っている配色技法を推定する関数
     """
@@ -170,7 +226,10 @@ def estimate_used_color_method_by_illustrator(illustrator):
             used_hues_rate.append(chromatic_color_rate)
         for achromatic_color_rate in achromatic_colors_rate:
             used_hues_rate.append((achromatic_color_rate[0], achromatic_color_rate[1]))
-        print(f"used_hues_rate = {used_hues_rate}")
+        # print(f"used_hues_rate = {used_hues_rate}")
+
+        # 使用配色技法の推定
+        estimate_used_color_method(used_hues_rate)
 
 
 def save_estimate_used_color_method_for_illustrators(illutrater_list):
