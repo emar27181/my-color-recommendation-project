@@ -5,7 +5,7 @@ import numpy as np
 import os
 from PIL import Image
 from collections import Counter
-from .helpers.transform_color import rgb_to_hsl, rgb_to_hex
+from .helpers.transform_color import rgb_to_hsl, rgb_to_hex, hex_to_rgb
 from utils.helpers.color_utils import print_colored_text, calculate_color_difference_delta_e_cie2000, calculate_rgb_distance_by_euclidean
 from .config.constants_dev import SATURATION_LOWER_LIMIT, LIGHTNESS_LOWER_LIMIT, LIGHTNESS_UPPER_LIMIT, IS_PRINT_COLOR_SCHEME, IS_PRINT_COLOR_SCHEME_BEFORE_MERGED
 from colorthief import ColorThief
@@ -402,6 +402,32 @@ def save_estimated_used_colors(illustrater_name, illust_count_limit, output_file
 
     print(f"JSONデータが '{output_file_path}' に保存されました。")
     return json_data
+
+
+def print_estimated_used_colors_for_illustrators(illustrator_list, count_limit):
+    """抽出された使用色を表示する関数
+    """
+
+    for illustrator in illustrator_list:
+        print(f"=== {illustrator} ==============")
+        count = 0
+        with open(f"src/color_recommendation/data/input/used_colors/used_colors_{illustrator}.json", "r") as f:
+            data = json.load(f)
+
+            for illust_data in data:
+                if (count >= count_limit):
+                    continue
+                illust_name = illust_data[0]["illustName"]
+                print(f"=== {illust_name} =============")
+                for used_color_data in illust_data:
+                    color_hex = used_color_data['color']
+                    color_rgb = hex_to_rgb(color_hex)
+                    rate = used_color_data['rate']
+
+                    print_colored_text("■", color_rgb)
+                    print(f": {round(rate*10000)/100}%")
+
+                count += 1
 
 
 def main():
