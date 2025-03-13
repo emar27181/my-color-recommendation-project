@@ -3,7 +3,7 @@ from utils.helpers.color_utils import print_colored_text, is_chromatic_color_by_
 from utils.helpers.transform_color import hex_to_rgb, rgb_to_hsl, hsl_to_rgb
 import numpy as np
 
-DEBUG = True
+DEBUG = False
 
 
 def merge_hue_data(data, threshold):
@@ -117,8 +117,9 @@ def estimate_used_color_method(used_hues_data):
     chromatic_colors_count = count_chromatic_colors(used_hues_data, 0.01)
     achromatic_colors_count = count_achromatic_colors(used_hues_data, 0.01)
 
-    print(f"count_chromatic_colors = {chromatic_colors_count}")
-    print(f"achromatic_colors = {achromatic_colors_count}")
+    if (DEBUG):
+        print(f"count_chromatic_colors = {chromatic_colors_count}")
+        print(f"achromatic_colors = {achromatic_colors_count}")
 
     """
     # 色の数が1色だった場合
@@ -183,7 +184,7 @@ def estimate_used_color_method_by_illustrator(illustrator):
             # print(illust_data)
             print_used_color_and_rate(illust_data, 0.01)
 
-            print("=== ↓ === (↑ 基となる使用色とその比率, ↓ 抽出された色相(有彩色のみ)とその比率)")
+            print("\n=== ↓ === (↑ 基となる使用色とその比率, ↓ 抽出された色相(有彩色のみ)とその比率)")
 
         # 色相とその出現割合の計測
         chromatic_colors_rate = []  # 有彩色の色相とその出現割合を保存する変数
@@ -196,8 +197,10 @@ def estimate_used_color_method_by_illustrator(illustrator):
             used_rate = color_data['rate']
 
             # 使用比率の追加(有彩色と無彩色を分けて保存)
-            # 有彩色の場合
-            if (is_chromatic_color_by_hsl(color_rgb, 5, 5, 95)):
+            # 有彩色の場合(有彩色判定の閾値を緩く設定しすぎると白や肌色が有彩色として判定されてしまう)
+            # if (is_chromatic_color_by_hsl(color_rgb, 5, 5, 95)):
+            # if (is_chromatic_color_by_hsl(color_rgb, 15, 15, 85)):
+            if (is_chromatic_color_by_hsl(color_rgb, 20, 20, 80)):
                 chromatic_colors_rate.append([color_hsl[0], used_rate])
             # 無彩色の場合
             else:
@@ -215,7 +218,7 @@ def estimate_used_color_method_by_illustrator(illustrator):
         if (DEBUG):
 
             print_chromatic_colors_rate(chromatic_colors_rate, 0.01)
-            print("=== ↓ === (色相が近いデータ同士で加重平均を取って結合)")
+            print("\n=== ↓ === ( ↓ 色相が近いデータ同士で加重平均を取って結合)")
 
         # 色相が近いデータ同士で加重平均を取って結合
         chromatic_colors_rate = merge_hue_data(chromatic_colors_rate, 15)
