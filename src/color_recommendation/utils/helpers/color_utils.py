@@ -4,7 +4,7 @@ from colormath.color_diff import delta_e_cie2000
 from PIL import Image
 import numpy as np
 import math
-from utils.helpers.transform_color import rgb_to_hsl, rgb_to_lab
+from utils.helpers.transform_color import rgb_to_hsl, rgb_to_lab, hex_to_rgb
 
 DEBUG = False
 
@@ -219,7 +219,22 @@ def print_colored_text(text, rgb):
     print(f"\033[38;2;{rgb[0]};{rgb[1]};{rgb[2]}m{text}\033[0m", end="")
 
 
+def print_used_color_and_rate(colors_data, print_threshold):
+    """使用色とその比率を表示する関数
+
+    引数:
+        colors_data: 色とその出現率を保存するデータ
+        print_threshold: 表示する出現率の閾値(0-1)
+    """
+    for color_data in colors_data:
+        # print(color_data)
+        print_colored_text("■", hex_to_rgb(color_data['color']))
+        print(f": {round(color_data['rate'] * 10000)/ 100} % ")
+
+
 # 引数で受け取った配色を表示させる関数
+
+
 def print_color_scheme(color_scheme):
     for color in color_scheme:
         print_colored_text("■", color)

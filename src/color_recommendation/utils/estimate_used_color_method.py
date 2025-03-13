@@ -1,9 +1,9 @@
 import json
-from utils.helpers.color_utils import print_colored_text, is_chromatic_color_by_hsl
+from utils.helpers.color_utils import print_colored_text, is_chromatic_color_by_hsl, print_used_color_and_rate
 from utils.helpers.transform_color import hex_to_rgb, rgb_to_hsl, hsl_to_rgb
 import numpy as np
 
-DEBUG = False
+DEBUG = True
 
 
 def merge_hue_data(data, threshold):
@@ -179,6 +179,12 @@ def estimate_used_color_method_by_illustrator(illustrator):
         illust_name = illust_data[0]['illustName']
         print(f"=== {illust_name} ===")
 
+        if (DEBUG):
+            # print(illust_data)
+            print_used_color_and_rate(illust_data, 0.01)
+
+            print("=== ↓ === (↑ 基となる使用色とその比率, ↓ 抽出された色相(有彩色のみ)とその比率)")
+
         # 色相とその出現割合の計測
         chromatic_colors_rate = []  # 有彩色の色相とその出現割合を保存する変数
         achromatic_colors_rate = [[-10, 0], [-11, 0]]  # 無彩色とその出現割合を保存する変数
@@ -190,8 +196,10 @@ def estimate_used_color_method_by_illustrator(illustrator):
             used_rate = color_data['rate']
 
             # 使用比率の追加(有彩色と無彩色を分けて保存)
+            # 有彩色の場合
             if (is_chromatic_color_by_hsl(color_rgb, 5, 5, 95)):
                 chromatic_colors_rate.append([color_hsl[0], used_rate])
+            # 無彩色の場合
             else:
                 # 黒色の使用比率の追加
                 if (color_hsl[2] <= 50):
@@ -203,21 +211,26 @@ def estimate_used_color_method_by_illustrator(illustrator):
                     # print_colored_text("■", color_rgb)
                     # print(f": {used_rate}")
                     achromatic_colors_rate[1][1] += used_rate
-
+        # 確認用出力1
         if (DEBUG):
-            print_chromatic_colors_rate(chromatic_colors_rate)
-            print("=== ↓ ===")
+
+            print_chromatic_colors_rate(chromatic_colors_rate, 0.01)
+            print("=== ↓ === (色相が近いデータ同士で加重平均を取って結合)")
 
         # 色相が近いデータ同士で加重平均を取って結合
         chromatic_colors_rate = merge_hue_data(chromatic_colors_rate, 15)
+
+        """
+        # データの時点では出現率を削除せずに表示させるときに変更する方針に変更(2025/03/13)に
         if (DEBUG):
-            print_chromatic_colors_rate(chromatic_colors_rate)
-            print("=== ↓ ===")
+            print_chromatic_colors_rate(chromatic_colors_rate, 0.01)
+            print("=== ↓ === ")
 
         # 出現率が一定以下の色相データを削除
-        # chromatic_colors_rate = delete_hue_data_low_rate(chromatic_colors_rate, 0.01)
+        chromatic_colors_rate = delete_hue_data_low_rate(chromatic_colors_rate, 0.01)
+        """
 
-        # 確認用出力
+        # 確認用出力2
         print_chromatic_colors_rate(chromatic_colors_rate, 0.01)
         print_achromatic_colors_rate(achromatic_colors_rate, 0.01)
 
