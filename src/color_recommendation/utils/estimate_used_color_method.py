@@ -258,6 +258,7 @@ def save_estimate_used_color_method_for_illustrators(illutrater_list):
         None
     """
 
+    print("*** 使用色相の抽出 ************")
     for illustrater_name in illutrater_list:
         estimate_used_color_method_by_illustrator(illustrater_name)
 
