@@ -4,6 +4,9 @@ from utils.helpers.transform_color import hex_to_rgb, rgb_to_hsl, hsl_to_rgb
 import numpy as np
 
 DEBUG = False
+# (有彩色判定の閾値を緩く設定しすぎると白や肌色が有彩色として判定されてしまう)
+SATURATION_THRESHOLD, LIGHTNESS_LOWER_THRESHOLD, LIGHTNESS_UPPER_THRESHOLD = 20, 20, 80  # これが暫定値(2025/03/19)
+PRINT_THRESHOLD = 0
 
 
 def merge_hue_data(data, threshold):
@@ -71,7 +74,7 @@ def print_chromatic_colors_rate(data, threshold):
     for hue_data in data:
         if (threshold < hue_data[1]):
             print_colored_text("■", hsl_to_rgb((hue_data[0]) % 360, 100, 50))
-            print(f" {hue_data[0]}: {round(hue_data[1]*1000)/10}%")
+            print(f" {hue_data[0]}: {round(hue_data[1]*10000)/100}%")
 
 
 def print_achromatic_colors_rate(data, threshold):
@@ -86,10 +89,10 @@ def print_achromatic_colors_rate(data, threshold):
     """
     if (threshold < data[0][1]):
         print_colored_text("■", (10, 10, 10))
-        print(f" -: {round(data[0][1]*1000)/10}%")
+        print(f" -: {round(data[0][1]*10000)/100}%")
     if (threshold < data[1][1]):
         print_colored_text("■", (255, 255, 255))
-        print(f" -: {round(data[1][1]*1000)/10}%")
+        print(f" -: {round(data[1][1]*10000)/100}%")
 
 
 def count_chromatic_colors(hues_data, threshold):
@@ -182,7 +185,7 @@ def estimate_used_color_method_by_illustrator(illustrator):
 
         if (DEBUG):
             # print(illust_data)
-            print_used_color_and_rate(illust_data, 0.01)
+            print_used_color_and_rate(illust_data, PRINT_THRESHOLD)
 
             print("\n=== ↓ === (↑ 基となる使用色とその比率, ↓ 抽出された色相(有彩色のみ)とその比率)")
 
@@ -197,10 +200,8 @@ def estimate_used_color_method_by_illustrator(illustrator):
             used_rate = color_data['rate']
 
             # 使用比率の追加(有彩色と無彩色を分けて保存)
-            # 有彩色の場合(有彩色判定の閾値を緩く設定しすぎると白や肌色が有彩色として判定されてしまう)
-            # if (is_chromatic_color_by_hsl(color_rgb, 5, 5, 95)):
-            # if (is_chromatic_color_by_hsl(color_rgb, 15, 15, 85)):
-            if (is_chromatic_color_by_hsl(color_rgb, 20, 20, 80)):
+            # 有彩色の場合
+            if (is_chromatic_color_by_hsl(color_rgb, SATURATION_THRESHOLD, LIGHTNESS_LOWER_THRESHOLD, LIGHTNESS_UPPER_THRESHOLD)):
                 chromatic_colors_rate.append([color_hsl[0], used_rate])
             # 無彩色の場合
             else:
@@ -217,7 +218,7 @@ def estimate_used_color_method_by_illustrator(illustrator):
         # 確認用出力1
         if (DEBUG):
 
-            print_chromatic_colors_rate(chromatic_colors_rate, 0.01)
+            print_chromatic_colors_rate(chromatic_colors_rate, PRINT_THRESHOLD)
             print("\n=== ↓ === ( ↓ 色相が近いデータ同士で加重平均を取って結合)")
 
         # 色相が近いデータ同士で加重平均を取って結合
@@ -234,8 +235,8 @@ def estimate_used_color_method_by_illustrator(illustrator):
         """
 
         # 確認用出力2
-        print_chromatic_colors_rate(chromatic_colors_rate, 0.01)
-        print_achromatic_colors_rate(achromatic_colors_rate, 0.01)
+        print_chromatic_colors_rate(chromatic_colors_rate, PRINT_THRESHOLD)
+        print_achromatic_colors_rate(achromatic_colors_rate, PRINT_THRESHOLD)
 
         used_hues_rate = []
         for chromatic_color_rate in chromatic_colors_rate:
