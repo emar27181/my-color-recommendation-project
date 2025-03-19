@@ -228,9 +228,11 @@ def print_used_color_and_rate(colors_data, print_threshold):
     """
     for color_data in colors_data:
         # print(color_data)
-        print_colored_text("■", hex_to_rgb(color_data['color']))
-        print(f": {round(color_data['rate'] * 10000)/ 100} % ")
-
+        color_rgb = hex_to_rgb(color_data['color'])
+        color_hsl = rgb_to_hsl(color_rgb)
+        print_colored_text("■", color_rgb)
+        print(f": {round(color_data['rate'] * 10000)/ 100} % ", end="")
+        print(f" hsl = {color_hsl}")
 
 # 引数で受け取った配色を表示させる関数
 
