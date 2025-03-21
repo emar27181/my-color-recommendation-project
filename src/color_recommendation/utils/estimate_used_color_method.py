@@ -115,6 +115,26 @@ def count_achromatic_colors(hues_data, threshold):
     return achromatic_count
 
 
+def extract_used_chromatic_hues(used_hues_data, used_rate_threshold):
+    """ 使用された色相のデータのうち有彩色のみを抽出し，その角度を保存するリストを返す関数
+
+    引数:
+        used_hues_data:  使用された色相と使用比率のリスト(白黒を含む)
+        used_rate_threshold: 使用されたと判定する閾値(0-1)
+
+    戻り値:
+        used_chromatic_hues:  使用された有彩色の色相のリスト
+    """
+
+    used_chromatic_hues = []
+    for hue_data in used_hues_data:
+        if (hue_data[0] >= 0 and hue_data[1] > used_rate_threshold):
+            used_chromatic_hues.append(hue_data[0])
+            # print(hue_data[0])
+
+    return used_chromatic_hues
+
+
 def estimate_used_color_method(used_hues_data):
     """引数で受け取る使用配色のデータを基に配色技法を推定する関数"""
     chromatic_colors_count = count_chromatic_colors(used_hues_data, 0.01)
@@ -123,6 +143,21 @@ def estimate_used_color_method(used_hues_data):
     if (DEBUG):
         print(f"count_chromatic_colors = {chromatic_colors_count}")
         print(f"achromatic_colors = {achromatic_colors_count}")
+
+    # print(f"used_hues_data = {used_hues_data}")
+    used_chromatic_hues = extract_used_chromatic_hues(used_hues_data, 0.01)
+    print(f"used_chromatic_hues = {used_chromatic_hues}")
+
+    print("推定結果 => ", end="")
+    # 有彩色の数が0だった場合
+    if (chromatic_colors_count == 0):
+        print("モノクロ配色")
+
+    elif (chromatic_colors_count == 1):
+        print("アイデンティティ配色")
+
+    else:
+        print("default")
 
     """
     # 色の数が1色だった場合
