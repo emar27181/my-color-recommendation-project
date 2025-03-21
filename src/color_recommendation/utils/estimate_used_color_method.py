@@ -216,7 +216,8 @@ def estimate_used_color_method_by_illustrator(illustrator):
 
     for illust_data in data:
         illust_name = illust_data[0]['illustName']
-        print(f"=== {illust_name} ===")
+        print(f"\n=== {illust_name} ===")
+        print("*** 使用色相の抽出 ************")
 
         if (DEBUG):
             # print(illust_data)
@@ -281,6 +282,7 @@ def estimate_used_color_method_by_illustrator(illustrator):
         # print(f"used_hues_rate = {used_hues_rate}")
 
         # 使用配色技法の推定
+        print("*** 使用配色技法の推定 ************")
         estimate_used_color_method(used_hues_rate)
 
 
@@ -294,7 +296,6 @@ def save_estimate_used_color_method_for_illustrators(illutrater_list):
         None
     """
 
-    print("*** 使用色相の抽出 ************")
     for illustrater_name in illutrater_list:
         estimate_used_color_method_by_illustrator(illustrater_name)
 
