@@ -190,6 +190,8 @@ def estimate_used_color_method(used_hues_data):
         elif (is_angle_between_angles(hue_diffs[1], 15, 45)):
             # used_color_scheme_method ColorScheme.ANALOGY_COLOR
             print("アナロジー配色(2色相)")
+        else:
+            print("エラー(2色相)")
 
     # 色の数が3色だった場合
     elif (chromatic_colors_count == 3):
@@ -210,12 +212,16 @@ def estimate_used_color_method(used_hues_data):
             # elif ((hue_diffs[1] >= 150) & (hue_diffs[2] <= 45)):
             # used_color_scheme_method ColorScheme.SPLIT_COMPLEMENTARY_COLOR
             print("スプリットコンプリメンタリー配色(3色相)")
+        else:
+            print("エラー(3色相)")
 
     # 色の数が4色だった場合
     elif (chromatic_colors_count == 4):
         if (is_angle_between_angles(hue_diffs[1], 75, 105) & is_angle_between_angles(hue_diffs[2], 75, 105) & (hue_diffs[3] >= 165)):
             # used_color_scheme_method ColorScheme.TETRADE_COLOR
             print("テトラード配色(4色相)")
+        else:
+            print("エラー(4色相)")
     elif (chromatic_colors_count == 5):
         # used_color_scheme_method ColorScheme.PENTAD_COLOR
         print("ペンタード配色(5色相)")
@@ -224,7 +230,7 @@ def estimate_used_color_method(used_hues_data):
         print("ヘキサード配色(6色相)")
     else:
         # used_color_scheme_method ColorScheme.ERROR
-        print("エラー")
+        print("エラー(7色相以上)")
 
     # print(f"推定された配色技法は {used_color_scheme_method} です．")
 
