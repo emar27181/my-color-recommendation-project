@@ -115,6 +115,12 @@ def count_achromatic_colors(hues_data, threshold):
     return achromatic_count
 
 
+def is_angle_between_angles(angle, angle_start, angle_end):
+    """ ある角度同士の間にあるかどうかを判定する関数
+    """
+    return ((angle_start <= angle) & (angle <= angle_end))
+
+
 def extract_used_chromatic_hues(used_hues_data, used_rate_threshold):
     """ 使用された色相のデータのうち有彩色のみを抽出し，その角度を保存するリストを返す関数
 
@@ -149,61 +155,66 @@ def estimate_used_color_method(used_hues_data):
     print(f"used_chromatic_hues = {used_chromatic_hues}")
 
     print("推定結果 => ", end="")
-    # 有彩色の数が0だった場合
     if (chromatic_colors_count == 0):
         print("モノクロ配色")
 
+    # 色の数が1色だった場合
     elif (chromatic_colors_count == 1):
         print("アイデンティティ配色")
+        # used_color_scheme_method ColorScheme.IDENTITY_COLOR
 
-    else:
-        print("default")
-
-    """
-    # 色の数が1色だった場合
-    if (len(used_colors) == 1):
-        used_color_scheme_method = ColorScheme.IDENTITY_COLOR
-
-    # 色の数が2色だった場合
-    elif (len(used_colors) == 2):
-        if (hue_diffs[1] >= 165):
-            used_color_scheme_method = ColorScheme.DYAD_COLOR
-        elif (is_angle_between_angles(hue_diffs[1], 75, 105)):
-            # elif ((75 <= hue_diffs[1]) & (hue_diffs[1] <= 105)):
-            used_color_scheme_method = ColorScheme.INTERMEDIATE_COLOR
-        elif (is_angle_between_angles(hue_diffs[1], 105, 165)):
-            used_color_scheme_method = ColorScheme.OPONENT_COLOR
-        elif (is_angle_between_angles(hue_diffs[1], 15, 45)):
-            used_color_scheme_method = ColorScheme.ANALOGY_COLOR
+        # 色の数が2色だった場合
+    elif (chromatic_colors_count == 2):
+        if (used_chromatic_hues[1] >= 165):
+            # used_color_scheme_method ColorScheme.DYAD_COLOR
+            print("ダイアード配色")
+        elif (is_angle_between_angles(used_chromatic_hues[1], 75, 105)):
+            # elif ((75 <= used_chromatic_hues[1]) & (used_chromatic_hues[1] <= 105)):
+            # used_color_scheme_method ColorScheme.INTERMEDIATE_COLOR
+            print("インターミディエート配色")
+        elif (is_angle_between_angles(used_chromatic_hues[1], 105, 165)):
+            # used_color_scheme_method ColorScheme.OPONENT_COLOR
+            print("オポーネント配色")
+        elif (is_angle_between_angles(used_chromatic_hues[1], 15, 45)):
+            # used_color_scheme_method ColorScheme.ANALOGY_COLOR
+            print("アナロジー配色")
 
     # 色の数が3色だった場合
-    elif (len(used_colors) == 3):
-        if ((hue_diffs[1] <= 30) & (hue_diffs[2] <= 60)):
-            used_color_scheme_method = ColorScheme.DOMINANT_COLOR
-        elif (((120 <= hue_diffs[1]) & (hue_diffs[1] <= 150)) & ((120 <= hue_diffs[2]) & (hue_diffs[2] <= 150))):
-            used_color_scheme_method = ColorScheme.TRIAD_COLOR_SCHEME
-        elif ((hue_diffs[1] >= 150) & (hue_diffs[2] >= 150)):
-            used_color_scheme_method = ColorScheme.SPLIT_COMPLEMENTARY_COLOR
-        elif (is_angle_between_angles(hue_diffs[1], 15, 60) & is_angle_between_angles(hue_diffs[2], 135, 165)):
-            # elif ((hue_diffs[1] <= 45) & (hue_diffs[2] >= 150)):
-            used_color_scheme_method = ColorScheme.SPLIT_COMPLEMENTARY_COLOR
-        elif (is_angle_between_angles(hue_diffs[2], 15, 60) & is_angle_between_angles(hue_diffs[1], 135, 165)):
-            # elif ((hue_diffs[1] >= 150) & (hue_diffs[2] <= 45)):
-            used_color_scheme_method = ColorScheme.SPLIT_COMPLEMENTARY_COLOR
+    elif (chromatic_colors_count == 3):
+        if ((used_chromatic_hues[1] <= 30) & (used_chromatic_hues[2] <= 60)):
+            # used_color_scheme_method ColorScheme.DOMINANT_COLOR
+            print("ドミナント配色")
+        elif (((120 <= used_chromatic_hues[1]) & (used_chromatic_hues[1] <= 150)) & ((120 <= used_chromatic_hues[2]) & (used_chromatic_hues[2] <= 150))):
+            # used_color_scheme_method ColorScheme.TRIAD_COLOR_SCHEME
+            pritn("トライアド配色")
+        elif ((used_chromatic_hues[1] >= 150) & (used_chromatic_hues[2] >= 150)):
+            # used_color_scheme_method ColorScheme.SPLIT_COMPLEMENTARY_COLOR
+            print("スプリットコンプリメンタリー配色")
+        elif (is_angle_between_angles(used_chromatic_hues[1], 15, 60) & is_angle_between_angles(used_chromatic_hues[2], 135, 165)):
+            # elif ((used_chromatic_hues[1] <= 45) & (used_chromatic_hues[2] >= 150)):
+            # used_color_scheme_method ColorScheme.SPLIT_COMPLEMENTARY_COLOR
+            print("スプリットコンプリメンタリー配色")
+        elif (is_angle_between_angles(used_chromatic_hues[2], 15, 60) & is_angle_between_angles(used_chromatic_hues[1], 135, 165)):
+            # elif ((used_chromatic_hues[1] >= 150) & (used_chromatic_hues[2] <= 45)):
+            # used_color_scheme_method ColorScheme.SPLIT_COMPLEMENTARY_COLOR
+            print("スプリットコンプリメンタリー配色")
 
-    # 色の数が3色だった場合
-    elif (len(used_colors) == 4):
-        if (is_angle_between_angles(hue_diffs[1], 75, 105) & is_angle_between_angles(hue_diffs[2], 75, 105) & (hue_diffs[3] >= 165)):
-            used_color_scheme_method = ColorScheme.TETRADE_COLOR
-    elif (len(used_colors) == 5):
-        used_color_scheme_method = ColorScheme.PENTAD_COLOR
-    elif (len(used_colors) == 6):
-        used_color_scheme_method = ColorScheme.HEXAD_COLOR
+    # 色の数が4色だった場合
+    elif (chromatic_colors_count == 4):
+        if (is_angle_between_angles(used_chromatic_hues[1], 75, 105) & is_angle_between_angles(used_chromatic_hues[2], 75, 105) & (used_chromatic_hues[3] >= 165)):
+            # used_color_scheme_method ColorScheme.TETRADE_COLOR
+            print("テトラード配色")
+    elif (chromatic_colors_count == 5):
+        # used_color_scheme_method ColorScheme.PENTAD_COLOR
+        print("ペンタード配色")
+    elif (chromatic_colors_count == 6):
+        # used_color_scheme_method ColorScheme.HEXAD_COLOR
+        print("ヘキサード配色")
     else:
-        used_color_scheme_method = ColorScheme.ERROR
+        # used_color_scheme_method ColorScheme.ERROR
+        print("エラー")
 
-    print(f"推定された配色技法は {used_color_scheme_method} です．")
-    """
+    # print(f"推定された配色技法は {used_color_scheme_method} です．")
 
 
 def estimate_used_color_method_by_illustrator(illustrator):
