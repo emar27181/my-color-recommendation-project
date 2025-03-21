@@ -310,5 +310,12 @@ def is_chromatic_color_by_lab(color_rgb):
         return True
 
 
+def calc_angle_diff(angle1, angle2):
+    """角度の差(0°~180°)を計算する関数
+    """
+    diff = abs(angle1 - angle2)
+    return diff if diff <= 180 else 360 - diff
+
+
 if __name__ == "__main__":
     print("=== color_utils.py =====================")
