@@ -3,25 +3,31 @@ from .helpers.color_utils import print_colored_text, print_color_schemes
 
 
 def generate_all_color_schemes(base_color_rgb):
+    color_schemes_by_color_scheme_methods = []
+
+    color_schemes_by_color_scheme_methods.append(generate_identity_color_scheme(base_color_rgb))
+
+    color_schemes_by_color_scheme_methods.append(generate_intermediate_color_scheme(base_color_rgb))
+
+    color_schemes_by_color_scheme_methods.append(generate_dyad_color_scheme(base_color_rgb))
+    color_schemes_by_color_scheme_methods.append(generate_analogy_color_scheme(base_color_rgb))
+    color_schemes_by_color_scheme_methods.append(generate_oponent_color_scheme(base_color_rgb))
+
+    color_schemes_by_color_scheme_methods.append(generate_dominant_color_scheme(base_color_rgb))
+    color_schemes_by_color_scheme_methods.append(generate_split_complementary_color_scheme(base_color_rgb))
+    color_schemes_by_color_scheme_methods.append(generate_triad_color_scheme(base_color_rgb))
+
+    color_schemes_by_color_scheme_methods.append(generate_tetrad_color_scheme(base_color_rgb))
+
+    color_schemes_by_color_scheme_methods.append(generate_pentad_color_scheme(base_color_rgb))
+
+    color_schemes_by_color_scheme_methods.append(generate_hexad_color_scheme(base_color_rgb))
+
     color_schemes = []
-
-    color_schemes.append(generate_identity_color_scheme(base_color_rgb))
-
-    color_schemes.append(generate_intermediate_color_scheme(base_color_rgb))
-
-    color_schemes.append(generate_dyad_color_scheme(base_color_rgb))
-    color_schemes.append(generate_analogy_color_scheme(base_color_rgb))
-    color_schemes.append(generate_oponent_color_scheme(base_color_rgb))
-
-    color_schemes.append(generate_dominant_color_scheme(base_color_rgb))
-    color_schemes.append(generate_split_complementary_color_scheme(base_color_rgb))
-    color_schemes.append(generate_triad_color_scheme(base_color_rgb))
-
-    color_schemes.append(generate_tetrad_color_scheme(base_color_rgb))
-
-    color_schemes.append(generate_pentad_color_scheme(base_color_rgb))
-
-    color_schemes.append(generate_hexad_color_scheme(base_color_rgb))
+    # 配色技法ごとの配色群を取り出してcolor_schemesに追加(ドミナントカラー配色などは一つの配色技法に対して複数の配色を生成するため)
+    for color_schemes_per_color_scheme_method in color_schemes_by_color_scheme_methods:
+        for color_scheme in color_schemes_per_color_scheme_method:
+            color_schemes.append(color_scheme)
 
     return color_schemes
 

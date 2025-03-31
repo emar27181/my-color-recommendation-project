@@ -1,4 +1,5 @@
 import numpy as np
+from skimage.color import rgb2lab
 
 
 def hex_to_rgb(hex_color):
@@ -67,6 +68,19 @@ def hsl_to_rgb(h, s, l):
     return [int(r), int(g), int(b)]
 
 
+def rgb_to_lab(rgb):
+    r, g, b = rgb[0], rgb[1], rgb[2]
+
+    # RGB値を0〜1の範囲に正規化
+    rgb = np.array([[[r / 255, g / 255, b / 255]]])
+
+    # RGBからLabに変換
+    lab = rgb2lab(rgb)
+
+    # L, a, b を通常の float に変換して返す
+    return float(lab[0, 0, 0]), float(lab[0, 0, 1]), float(lab[0, 0, 2])
+
+
 def transform_color_scheme_rgb_to_hex(color_scheme_rgb):
     color_scheme_hex = []
     # print(color_scheme_rgb)
@@ -76,12 +90,11 @@ def transform_color_scheme_rgb_to_hex(color_scheme_rgb):
     return color_scheme_hex
 
 
-def transform_color_schemes_rgb_to_hex(color_schemes_method_rgb):
+def transform_color_schemes_rgb_to_hex(color_schemes_rgb):
     color_schemes_hex = []
-    for color_scheme_method_rgb in color_schemes_method_rgb:
-        for color_scheme_rgb in color_scheme_method_rgb:
-            # print("color_scheme_rgb: ", color_scheme_rgb)
-            color_schemes_hex.append(transform_color_scheme_rgb_to_hex(color_scheme_rgb))
+    for color_scheme_rgb in color_schemes_rgb:
+        # print("color_scheme_rgb: ", color_scheme_rgb)
+        color_schemes_hex.append(transform_color_scheme_rgb_to_hex(color_scheme_rgb))
     return color_schemes_hex
 
 

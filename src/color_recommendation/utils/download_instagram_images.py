@@ -1,4 +1,5 @@
 import instaloader
+import time
 
 
 def download_instagram_images_for_illustrators(illustrator_list, illust_count_limit):
@@ -32,3 +33,5 @@ def download_instagram_images(profile_name, illust_count_limit):
             return
         L.download_post(post, target=profile_name)
         count += 1
+
+        time.sleep(0.5)  # 連続でリクエストを送るとエラーが発生するため，0.5秒待機

@@ -1,13 +1,15 @@
 import json
 from utils.generate_color_scheme_method import generate_all_color_schemes
 from utils.add_variations_color_scheme import add_all_variations_color_schemes
-from utils.helpers.color_utils import print_colored_text, print_color_schemes
+from utils.helpers.color_utils import print_colored_text, print_color_schemes, print_color_scheme
 from utils.helpers.transform_color import hex_to_rgb, transform_color_schemes_rgb_to_hex
 from utils.helpers.json_utils import convert_color_schemes_to_color_data
 from utils.check_data_is_contained_next_color import check_data_is_contained_next_color
 from utils.plot_graph import plot_recall_at_k
 from utils.estimate_used_color_scheme import generate_json_used_color_scheme, save_estimated_used_colors
 from utils.download_instagram_images import download_instagram_images
+from utils.sort_color_scheme import sort_color_scheme_by_color_difference, shuffle_color_schemes
+import os
 
 
 def read_file(file_path):
@@ -17,7 +19,7 @@ def read_file(file_path):
         return data
 
 
-def generate_recommend_colors(data):
+def generate_recommend_colors(data, sort_type):
 
     output_data = []
 
@@ -28,22 +30,36 @@ def generate_recommend_colors(data):
         if not illust_data:
             continue
 
-        # あるイラストに対して推薦配色群を生成
-        # print(illust_data[0]["illustName"])
-        base_color_rgb = hex_to_rgb(illust_data[0]['color'])
-        recommend_color_schemes = generate_all_color_schemes(base_color_rgb)
-        recommend_color_schemes = add_all_variations_color_schemes(recommend_color_schemes)
-        # print_color_schemes(recommend_color_schemes)
+        print(f"=== {illust_data[0]['illustName']} =================== ")
 
-        # recommend_color_schemes_hex = transform_color_schemes_rgb_to_hex(recommend_color_schemes)
-        # print(recommend_color_schemes_hex)recommend_color_schemes_hex, recommendations
+        # 使用配色のRGB形式のリストを取得
+        used_color_scheme_rgb = []
+        for color_scheme_data in illust_data:
+            used_color_scheme_rgb.append(hex_to_rgb(color_scheme_data['color']))
+
+        # あるイラストに対して推薦配色群を生成
+        base_color_rgb = hex_to_rgb(illust_data[0]['color'])  # 推薦配色の基となる色を取得
+        recommend_color_schemes_rgb = generate_all_color_schemes(base_color_rgb)  # 17(?)パターンの配色群を生成
+        recommend_color_schemes_rgb = add_all_variations_color_schemes(recommend_color_schemes_rgb)  # 明度の異なる2パターンの配色群を追加
+
+        if (sort_type == "color_diff"):
+            recommend_color_schemes_rgb = sort_color_scheme_by_color_difference(used_color_scheme_rgb, recommend_color_schemes_rgb)  # 使用配色との類似度順にソート
+        elif (sort_type == "random"):
+            recommend_color_schemes_rgb = shuffle_color_schemes(recommend_color_schemes_rgb)  # 推薦配色をランダムにシャッフル
+        else:
+            print("ソートの種類が間違っているため，推薦配色は並び替えられずに挿入されます．(ソートの種類:  'random', 'color_diff')")
 
         new_illust_data = {
             "illust_name": illust_data[0]['illustName'],
             "color_scheme": illust_data,
-            # "recommend_color_schemes_rgb": recommend_color_schemes,
-            "recommend_color_schemes": convert_color_schemes_to_color_data(transform_color_schemes_rgb_to_hex(recommend_color_schemes)),
+            # "recommend_color_schemes": convert_color_schemes_to_color_data(transform_color_schemes_rgb_to_hex(recommend_color_schemes_rgb)),
+            "recommend_color_schemes": convert_color_schemes_to_color_data(transform_color_schemes_rgb_to_hex(recommend_color_schemes_rgb)),
         }
+
+        # 確認用出力
+        for i in range(len(recommend_color_schemes_rgb)):
+            print(f"[{i}]: ", end="")
+            print_color_scheme(recommend_color_schemes_rgb[i])
 
         # print(new_illust_data)
         output_data.append(new_illust_data)
@@ -53,12 +69,13 @@ def generate_recommend_colors(data):
     return output_data
 
 
-def save_recommend_colors_for_illustraters(illutrater_list):
+def save_recommend_colors_for_illustraters(illutrater_list, sort_type):
     """
     引数で受け取るリスト内のイラストレーターのイラストの推薦配色を保存する関数
 
     引数:
         illutrater_list: 推薦配色を生成させたいイラストレーターのリスト(文字列)
+        sort_type: ソートの種類(random/color_diff)
     戻り値:
         None
     """
@@ -66,51 +83,15 @@ def save_recommend_colors_for_illustraters(illutrater_list):
     for illustrater_name in illutrater_list:
         print(f"=== {illustrater_name} ====================")
 
-        input_file_path = f"src/color_recommendation/data/input/used_colors_{illustrater_name}.json"
+        input_file_path = f"src/color_recommendation/data/input/used_colors/used_colors_{illustrater_name}.json"
         used_colors_data = read_file(input_file_path)
 
-        recommend_colors_data = generate_recommend_colors(used_colors_data)
-        output_file_path = f"src/color_recommendation/data/output/recommend_colors_{illustrater_name}.json"
+        recommend_colors_data = generate_recommend_colors(used_colors_data, sort_type)
+        output_file_path = f"src/color_recommendation/data/output/recommend_colors/{sort_type}/recommend_colors_{illustrater_name}.json"
+
         with open(output_file_path, 'w', encoding='utf-8') as file:
             json.dump(recommend_colors_data, file, ensure_ascii=False, indent=4)
             print(f"{output_file_path} が保存されました．(推薦配色群の生成)")
-
-
-def run_all(file_name, illust_count_limit):
-    print(f"=== {file_name} ====================")
-
-    # download_instagram_images(file_name, illust_count_limit)
-    # print(f"@{file_name} の投稿がダウンロードされました．")
-
-    # 使用色の抽出と保存
-    save_estimated_used_colors(file_name, illust_count_limit)
-    print("使用色が抽出されました．")
-
-    # イラストデータの読み込み
-    USED_COLORS_FILE_PATH = f"src/color_recommendation/data/input/used_colors_{file_name}.json"
-    used_colors_data = read_file(USED_COLORS_FILE_PATH)
-
-    # 推薦配色群の生成
-    recommend_colors_data = generate_recommend_colors(used_colors_data)
-    RECOMMEND_COLORS_FILE_PATH = f"src/color_recommendation/data/output/recommend_colors_{file_name}.json"
-    with open(RECOMMEND_COLORS_FILE_PATH, 'w', encoding='utf-8') as file:
-        json.dump(recommend_colors_data, file, ensure_ascii=False, indent=4)
-        print(f"{RECOMMEND_COLORS_FILE_PATH} が保存されました．(推薦配色群の生成)")
-
-    # 次の色が含まれているかどうかの判定とデータの作成
-    is_contained_next_color_data = check_data_is_contained_next_color(recommend_colors_data)
-    IS_CONTAINED_NEXT_COLOR_FILE_PATH = f"src/color_recommendation/data/output/is_contained_next_color_{file_name}.json"
-    with open(IS_CONTAINED_NEXT_COLOR_FILE_PATH, 'w', encoding='utf-8') as file:
-        json.dump(is_contained_next_color_data, file, ensure_ascii=False, indent=4)
-        print(f"{IS_CONTAINED_NEXT_COLOR_FILE_PATH} が保存されました．(次の色が含まれているかどうかを保存するデータの作成)")
-
-    # グラフの生成
-    GRAPH_PATH = f'src/color_recommendation/data/output/recall_at_k_{file_name}.png'
-    print(f"{IS_CONTAINED_NEXT_COLOR_FILE_PATH} が読み込まれました．")
-    plot_recall_at_k(IS_CONTAINED_NEXT_COLOR_FILE_PATH, GRAPH_PATH)
-    print(f"{GRAPH_PATH} が保存されました．(グラフの作成)")
-
-    print("")
 
 
 def main():

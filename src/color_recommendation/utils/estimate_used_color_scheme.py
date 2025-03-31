@@ -5,12 +5,13 @@ import numpy as np
 import os
 from PIL import Image
 from collections import Counter
-from .helpers.transform_color import rgb_to_hsl, rgb_to_hex
+from .helpers.transform_color import rgb_to_hsl, rgb_to_hex, hex_to_rgb
 from utils.helpers.color_utils import print_colored_text, calculate_color_difference_delta_e_cie2000, calculate_rgb_distance_by_euclidean
 from .config.constants_dev import SATURATION_LOWER_LIMIT, LIGHTNESS_LOWER_LIMIT, LIGHTNESS_UPPER_LIMIT, IS_PRINT_COLOR_SCHEME, IS_PRINT_COLOR_SCHEME_BEFORE_MERGED
 from colorthief import ColorThief
 from utils.helpers.json_utils import get_json_length
 # from src.color_recommendation.config.constants import SATURATION_LOWER_LIMIT, LIGHTNESS_UPPER_LIMIT, LIGHTNESS_LOWER_LIMIT
+from concurrent.futures import ThreadPoolExecutor
 
 
 # 読み込まれた画像の使用配色を推定する関数
@@ -187,8 +188,8 @@ def color_count_by_color_palette(color_palette, image_path):
     print("color_palette = ")
     for i in range(len(color_palette_count)):
         print_colored_text("■■■  ", color_palette[i])
-        print(f" {color_palette_count[i] / classified_color_count}")
         color_palette_rate[i] = color_palette_count[i] / classified_color_count
+        print(f" {color_palette_rate[i]}")
 
     return color_palette, color_palette_rate
 
@@ -269,7 +270,8 @@ def generate_json_used_color_scheme(image_path):
         hex = rgb_to_hex(color_scheme[0])
         color_dict = {
             "color": hex,  # NumPy配列をリストに変換
-            "rate": round(10 * color_scheme[1]) / 1000,
+            # "rate": round(10 * color_scheme[1]) / 1000,
+            "rate": color_scheme[1],
             "amount": -1
         }
         json_data.append(color_dict)
@@ -303,13 +305,66 @@ def save_estimated_used_colors_for_illustrates(illustrater_list, illust_count_li
     """
     for illustrater in illustrater_list:
         print(f"=== {illustrater} =====================")
-        output_file_path = f'src/color_recommendation/data/input/used_colors_{illustrater}.json'
+        output_file_path = f'src/color_recommendation/data/input/used_colors/used_colors_{illustrater}.json'
 
         if os.path.exists(output_file_path):
             print(f"既に '{output_file_path}' が存在するため処理をスキップします．")
             print(f"使用色が抽出されたイラストの枚数: {get_json_length(output_file_path)} [枚]")
         else:
-            save_estimated_used_colors(illustrater, illust_count_limit, output_file_path)
+            save_estimated_used_colors(illustrater, illust_count_limit, output_file_path)  # 逐次処理で使用色を抽出
+            # save_estimated_used_colors_parallel(illustrater, illust_count_limit, output_file_path) # 並列処理で使用色を抽出
+
+
+def save_estimated_used_colors_parallel(illustrater_name, illust_count_limit, output_file_path):
+    """
+    使用色を並列処理によって推定し保存する関数
+    """
+    def process_image(file_name):
+        # 各画像を処理して JSON データを生成
+        print(f" {load_directory_path}/{file_name} の処理を開始します。")
+        json_used_color_scheme = generate_json_used_color_scheme(f"{load_directory_path}/{file_name}")
+
+        print(f" {load_directory_path}/{file_name} の処理が完了しました。")
+        for used_color_data in json_used_color_scheme:
+            # print(used_color_data["color"])
+            print_colored_text("■■■", hex_to_rgb(used_color_data["color"]))
+            print(f": {used_color_data['rate']}")
+        print("")
+
+        return json_used_color_scheme
+
+    json_data = []
+    load_directory_path = f'src/color_recommendation/data/input/illustration/{illustrater_name}'
+
+    if not os.path.exists(load_directory_path):
+        print(f"'{load_directory_path}' が存在しません．処理をスキップします．")
+        return
+
+    # 画像ファイルのリストを取得
+    image_files = [file for file in os.listdir(load_directory_path) if file.endswith(('.jpg', '.png'))]
+
+    # 処理する画像ファイルを制限
+    image_files = image_files[:illust_count_limit]
+
+    print(f"合計 {len(image_files)} 枚の画像を処理します。")
+
+    # 並列処理を開始
+    with ThreadPoolExecutor() as executor:
+        future_to_file = {executor.submit(process_image, file_name): file_name for file_name in image_files}
+        for future in as_completed(future_to_file):
+            file_name = future_to_file[future]
+            try:
+                json_data.append(future.result())
+                print(f" {load_directory_path}/{file_name} の処理が完了しました。")
+            except Exception as e:
+                print(f" {load_directory_path}/{file_name}  の処理中にエラーが発生しました: {e}")
+
+    # JSON データをファイルに保存
+    with open(output_file_path, 'w') as json_file:
+        json.dump(json_data, json_file, indent=4)
+
+    print(f"JSONデータが '{output_file_path}' に保存されました。")
+    return json_data
 
 
 # 推定された使用色を保存する関数
@@ -317,6 +372,12 @@ def save_estimated_used_colors(illustrater_name, illust_count_limit, output_file
     json_data = []
 
     load_directory_path = f'src/color_recommendation/data/input/illustration/{illustrater_name}'
+
+    # print("here1")
+    if not os.path.exists(load_directory_path):
+        # print("here2")
+        print(f" '{load_directory_path}' が存在しません．処理をスキップします．")
+        return  # 処理を終了
     # directory_path = 'tmp/estimate_used_color_scheme/data/input/gaako/'
     # jpg_files = [file for file in os.listdir(directory_path) if file.endswith('.jpg')]  # .jpgファイルの名前をすべて配列に保存
     # .jpgファイルと.pngファイルの名前を同じ配列に保存
@@ -341,6 +402,32 @@ def save_estimated_used_colors(illustrater_name, illust_count_limit, output_file
 
     print(f"JSONデータが '{output_file_path}' に保存されました。")
     return json_data
+
+
+def print_estimated_used_colors_for_illustrators(illustrator_list, count_limit):
+    """抽出された使用色を表示する関数
+    """
+
+    for illustrator in illustrator_list:
+        print(f"=== {illustrator} ==============")
+        count = 0
+        with open(f"src/color_recommendation/data/input/used_colors/used_colors_{illustrator}.json", "r") as f:
+            data = json.load(f)
+
+            for illust_data in data:
+                if (count >= count_limit):
+                    continue
+                illust_name = illust_data[0]["illustName"]
+                print(f"=== {illust_name} =============")
+                for used_color_data in illust_data:
+                    color_hex = used_color_data['color']
+                    color_rgb = hex_to_rgb(color_hex)
+                    rate = used_color_data['rate']
+
+                    print_colored_text("■", color_rgb)
+                    print(f": {round(rate*10000)/100}%")
+
+                count += 1
 
 
 def main():

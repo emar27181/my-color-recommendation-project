@@ -4,6 +4,9 @@ from colormath.color_diff import delta_e_cie2000
 from PIL import Image
 import numpy as np
 import math
+from utils.helpers.transform_color import rgb_to_hsl, rgb_to_lab, hex_to_rgb
+
+DEBUG = False
 
 
 def calc_weighted_average_rgb(rgb_a, rgb_b, weight_a, weight_b):
@@ -135,9 +138,14 @@ def quantize_color_rgb(rgb, threshold):
     return tuple((value // threshold) * threshold if value % threshold < 3 else (value // threshold) * threshold + threshold for value in rgb)
 
 
-# 色の差をΔEを用いて計算する関数
 def calculate_color_difference_delta_e_cie2000(color1, color2):
-    """
+    """二色間の色の差をΔEを用いて計算する関数
+    引数:
+        color1: 色1 (R, G, B)
+        color2: 色2 (R, G, B)
+    戻り値:
+        delta_e: 色の差 (0-1)
+
     # メモ
     - この関数を実行するには/(venvディレクトリ)/lib64/python3.10/site-packages/colormath/color_diff.py内の関数delta_e_cie2000()
     の"return numpy.asscalar(delta_e)" を "return delta_e.item()" に変更する必要あり
@@ -156,6 +164,52 @@ def calculate_color_difference_delta_e_cie2000(color1, color2):
     return float(delta_e)
 
 
+def calc_color_scheme_difference_delta_e_cie2000(color_scheme1, color_scheme2):
+    """配色間の色の差をΔEを用いて計算する関数
+
+    引数:
+        color_scheme1: 配色1 (リスト)
+        color_scheme2: 配色2 (リスト)
+    戻り値:
+        delta_e: 色の差 (0-100)
+    """
+
+    min_delta_e_list = [101] * len(color_scheme1)
+    compared_index = []
+
+    for i in range(len(color_scheme1)):
+        min_delta_e_index = 0
+        for j in range(len(color_scheme2)):
+            if j in compared_index:
+                continue
+
+            # ΔEを計算
+            delta_e = calculate_color_difference_delta_e_cie2000(color_scheme1[i], color_scheme2[j])
+            if delta_e < min_delta_e_list[i]:
+                min_delta_e_list[i] = delta_e
+                min_delta_e_index = j
+
+            if (DEBUG):
+                print(f"[{i}, {j}]: ", end="")
+                print("ΔE( ", end="")
+                print_colored_text("■", color_scheme1[i])
+                print(" , ", end="")
+                print_colored_text("■", color_scheme2[j])
+                print(f" ) = {delta_e}")
+
+        # print(f"min_delta_e_index = {min_delta_e_index}")
+        compared_index.append(min_delta_e_index)
+
+    min_delta_e_list = [x for x in min_delta_e_list if x != 101]
+
+    # print(f"min_delta_e = {min_delta_e_list}")
+
+    ave_delta_e = sum([x for x in min_delta_e_list]) / len(min_delta_e_list)
+    # print(f"ave_delta_e = {ave_delta_e}")
+
+    return ave_delta_e
+
+
 # 引数で受け取ったRGB値の文字を表示させる関数
 def print_colored_text(text, rgb):
     # RGBから16進数カラーコードに変換
@@ -165,7 +219,24 @@ def print_colored_text(text, rgb):
     print(f"\033[38;2;{rgb[0]};{rgb[1]};{rgb[2]}m{text}\033[0m", end="")
 
 
+def print_used_color_and_rate(colors_data, print_threshold):
+    """使用色とその比率を表示する関数
+
+    引数:
+        colors_data: 色とその出現率を保存するデータ
+        print_threshold: 表示する出現率の閾値(0-1)
+    """
+    for color_data in colors_data:
+        # print(color_data)
+        color_rgb = hex_to_rgb(color_data['color'])
+        color_hsl = rgb_to_hsl(color_rgb)
+        print_colored_text("■", color_rgb)
+        print(f": {round(color_data['rate'] * 10000)/ 100} % ", end="")
+        print(f" hsl = {color_hsl}")
+
 # 引数で受け取った配色を表示させる関数
+
+
 def print_color_scheme(color_scheme):
     for color in color_scheme:
         print_colored_text("■", color)
@@ -175,9 +246,8 @@ def print_color_scheme(color_scheme):
 
 # 引数で受け取った配色群を表示させる関数
 def print_color_schemes(color_schemes):
-    for color_scheme_method in color_schemes:
-        for color_scheme in color_scheme_method:
-            print_color_scheme(color_scheme)
+    for color_scheme in color_schemes:
+        print_color_scheme(color_scheme)
 
 
 def test_delta_e_cie2000(color1, color2):
@@ -202,12 +272,50 @@ def test_color_diff(file_path):
             test_delta_e_cie2000(colors[i], colors[j])
 
 
+def is_chromatic_color_by_hsl(color_rgb, SATURATION_THRESHOLD, LIGHTNESS_LOWER_THRESHOLD, LIGHTNESS_UPPER_THRESHOLD):
+    """受け取った色が有彩色かどうかをHSL空間を使って判定する関数
+    """
+
+    color_hsl = rgb_to_hsl(color_rgb)
+    saturation = color_hsl[1]
+    lightness = color_hsl[2]
+
+    if (DEBUG):
+        print_colored_text("\n■", color_rgb)
+        print(f" hsl = {color_hsl}, rgb = {color_rgb}")
+
+    if (saturation <= SATURATION_THRESHOLD):
+        return False
+    elif (lightness <= LIGHTNESS_LOWER_THRESHOLD or LIGHTNESS_UPPER_THRESHOLD <= lightness):
+        return False
+    else:
+        return True
+
+
+def is_chromatic_color_by_lab(color_rgb):
+    """受け取った色が有彩色かどうかをHSL空間を使って判定する関数
+    """
+
+    color_hsl = rgb_to_hsl(color_rgb)
+    color_lab = rgb_to_lab(color_rgb)
+
+    if (DEBUG):
+        print_colored_text("■ ", color_rgb)
+        # print(f" lab = {color_lab}, hsl = {color_hsl}, rgb = {color_rgb}")
+
+    if (color_lab[0] <= 10 or 90 <= color_lab[0]):
+        return False
+
+    else:
+        return True
+
+
+def calc_angle_diff(angle1, angle2):
+    """角度の差(0°~180°)を計算する関数
+    """
+    diff = abs(angle1 - angle2)
+    return diff if diff <= 180 else 360 - diff
+
+
 if __name__ == "__main__":
     print("=== color_utils.py =====================")
-
-    # print(calculate_color_difference_delta_e_cie2000((170, 135, 130), (160, 140, 135)))
-    test_delta_e_cie2000((170, 135, 130), (160, 140, 135))
-    test_delta_e_cie2000((250, 195, 160), (235, 95, 35))
-    test_delta_e_cie2000((225, 110, 55), (235, 95, 35))
-
-    test_color_diff("tmp/hoge.txt")
