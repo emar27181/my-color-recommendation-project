@@ -362,5 +362,15 @@ def calc_closest_angle(angles, target):
     return best
 
 
+def bring_element_to_front(list, target):
+    """ ターゲットを先頭に持ってくる関数
+    """
+    # リストに対象の要素が存在するか確認
+    if target in list:
+        list.remove(target)    # まずリストから削除
+        list.insert(0, target)  # 先頭に挿入
+    return list
+
+
 if __name__ == "__main__":
     print("=== color_utils.py =====================")
