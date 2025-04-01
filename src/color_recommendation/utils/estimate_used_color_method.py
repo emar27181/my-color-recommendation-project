@@ -152,12 +152,10 @@ def estimate_used_color_method(used_hues_data):
 
     # print(f"used_hues_data = {used_hues_data}")
     used_chromatic_hues = extract_used_chromatic_hues(used_hues_data, 0.01)
+    used_chromatic_hues.sort()
     mean_hue = calc_mean_angle(used_chromatic_hues)
     opposite_mean_hue = (mean_hue + 180) % 360
-    print(f"used_chromatic_hues = {used_chromatic_hues}")
-    print(f"mean_hue = {mean_hue}")
-    print(f"opposite_mean_hue = {opposite_mean_hue}")
-    print(f"closest_hue = {calc_closest_angle(used_chromatic_hues, opposite_mean_hue)}")
+    print(f"used_chromatic_hues = {used_chromatic_hues} (使用率1％以上のみ)")
     used_chromatic_hues = bring_element_to_front(used_chromatic_hues, calc_closest_angle(used_chromatic_hues, opposite_mean_hue))
 
     hue_diffs = []
