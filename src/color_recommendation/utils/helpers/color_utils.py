@@ -339,5 +339,28 @@ def calc_mean_angle(degrees):
     return mean_degree
 
 
+def calc_closest_angle(angles, target):
+    """
+    angles: 度単位の角度のリスト
+    target: ターゲット角度。2π未満ならラジアンとみなし度に変換する。
+    ターゲットに最も近い角度（度単位）を返す。
+    """
+    # ターゲットが2π未満の場合、ラジアンとみなして度に変換
+    if target < 2 * math.pi:
+        target = math.degrees(target)
+
+    best = None
+    min_diff = 360  # 初期値は最大の360度
+    for angle in angles:
+        # 循環する角度の差を計算（0〜180の最小差）
+        diff = abs(angle - target) % 360
+        if diff > 180:
+            diff = 360 - diff
+        if diff < min_diff:
+            min_diff = diff
+            best = angle
+    return best
+
+
 if __name__ == "__main__":
     print("=== color_utils.py =====================")

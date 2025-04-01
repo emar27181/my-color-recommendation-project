@@ -1,5 +1,5 @@
 import json
-from utils.helpers.color_utils import print_colored_text, is_chromatic_color_by_hsl, print_used_color_and_rate, calc_angle_diff, calc_mean_angle
+from utils.helpers.color_utils import print_colored_text, is_chromatic_color_by_hsl, print_used_color_and_rate, calc_angle_diff, calc_mean_angle, calc_closest_angle
 from utils.helpers.transform_color import hex_to_rgb, rgb_to_hsl, hsl_to_rgb
 import numpy as np
 
@@ -158,6 +158,7 @@ def estimate_used_color_method(used_hues_data):
     print(f"used_chromatic_hues = {used_chromatic_hues}")
     print(f"mean_hue = {mean_hue}")
     print(f"opposite_mean_hue = {opposite_mean_hue}")
+    print(f"closest_hue = {calc_closest_angle(used_chromatic_hues, opposite_mean_hue)}")
 
     hue_diffs = []
 
