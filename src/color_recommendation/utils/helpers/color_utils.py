@@ -317,5 +317,27 @@ def calc_angle_diff(angle1, angle2):
     return diff if diff <= 180 else 360 - diff
 
 
+def calc_mean_angle(degrees):
+    """
+    平均角度を計算する関数
+
+    Args:
+        degrees: 角度のリスト
+
+    Returns:
+        mean_degree : 角度の平均値
+    """
+    # ラジアンに変換
+    radians = np.radians(degrees)
+    # 各角度の単位ベクトルを計算
+    sin_sum = np.sum(np.sin(radians))
+    cos_sum = np.sum(np.cos(radians))
+    # 平均ベクトルの角度を計算
+    mean_radian = np.arctan2(sin_sum, cos_sum)
+    # ラジアンを度に変換し、0-360度の範囲に調整
+    mean_degree = np.degrees(mean_radian) % 360
+    return mean_degree
+
+
 if __name__ == "__main__":
     print("=== color_utils.py =====================")
