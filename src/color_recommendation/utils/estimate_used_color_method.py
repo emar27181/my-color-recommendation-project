@@ -177,15 +177,15 @@ def estimate_used_color_method(used_hues_data):
     print(f"hue_diffs: {hue_diffs}")
 
     print("推定結果 => ", end="")
-    if (chromatic_colors_count == 0):
+    if (len(hue_diffs) == 0):
         print("0色相: モノクロ配色")
 
     # 色相の数が1色だった場合
-    elif (chromatic_colors_count == 1):
+    elif (len(hue_diffs) == 1):
         print("1色相: アイデンティティ配色")
 
     # 色相の数が2色だった場合
-    elif (chromatic_colors_count == 2):
+    elif (len(hue_diffs) == 2):
         if (hue_diffs[1] >= 165):
             # used_color_scheme_method ColorScheme.DYAD_COLOR
             print("2色相: ダイアード配色")
@@ -199,7 +199,7 @@ def estimate_used_color_method(used_hues_data):
             print("2色相: エラー")
 
     # 色相の数が3色だった場合
-    elif (chromatic_colors_count == 3):
+    elif (len(hue_diffs) == 3):
         if ((hue_diffs[1] <= 30) & (hue_diffs[2] <= 60)):
             print("3色相: ドミナント配色")
         elif (((120 <= hue_diffs[1]) & (hue_diffs[1] <= 150)) & ((120 <= hue_diffs[2]) & (hue_diffs[2] <= 150))):
@@ -214,18 +214,18 @@ def estimate_used_color_method(used_hues_data):
             print("3色相: エラー")
 
     # 色相の数が4色だった場合
-    elif (chromatic_colors_count == 4):
+    elif (len(hue_diffs) == 4):
         if (is_angle_between_angles(hue_diffs[1], 75, 105) & is_angle_between_angles(hue_diffs[2], 75, 105) & (hue_diffs[3] >= 165)):
             print("4色相: テトラード配色")
         else:
             print("4色相: エラー")
 
     # 色相の数が5色だった場合
-    elif (chromatic_colors_count == 5):
+    elif (len(hue_diffs) == 5):
         print("5色相: ペンタード配色")
 
     # 色相の数が6色だった場合
-    elif (chromatic_colors_count == 6):
+    elif (len(hue_diffs) == 6):
         print("6色相: ヘキサード配色")
 
     # 色相の数が7色だった場合
