@@ -98,6 +98,35 @@ def transform_color_schemes_rgb_to_hex(color_schemes_rgb):
     return color_schemes_hex
 
 
+def transform_hues_to_pccs(hues):
+    pccs = []
+    for hue in hues:
+        pccs.append(hue_to_pccs(hue))
+    pccs.sort()
+    return pccs
+
+
+def hue_to_pccs(hue_angle):
+    """
+    HSLの色相角度（0°〜360°）をPCCSの色相番号（1〜24）に変換する関数
+    ※PCCSの黄色は8だが，この関数では5になってしまっている(2025/04/02)
+
+    引数:
+        hue_angle (float): HSLの色相角度（0°〜360°）
+
+    戻り値:
+        pccs_number (int): PCCSの色相番号（1〜24）
+
+    """
+    # HSLの色相角度をPCCSの色相番号にマッピング
+    pccs_number = round((hue_angle / 360) * 24) + 1
+
+    if (pccs_number > 24):
+        pccs_number = 1
+
+    return pccs_number
+
+
 def main():
     """
       print(rgb_to_hex((255, 0, 0)))

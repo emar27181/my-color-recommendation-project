@@ -1,6 +1,6 @@
 import json
 from utils.helpers.color_utils import print_colored_text, is_chromatic_color_by_hsl, print_used_color_and_rate, calc_angle_diff, calc_mean_angle, calc_closest_angle, bring_element_to_front
-from utils.helpers.transform_color import hex_to_rgb, rgb_to_hsl, hsl_to_rgb
+from utils.helpers.transform_color import hex_to_rgb, rgb_to_hsl, hsl_to_rgb, transform_hues_to_pccs
 import numpy as np
 
 DEBUG = False
@@ -157,6 +157,9 @@ def estimate_used_color_method(used_hues_data):
     opposite_mean_hue = (mean_hue + 180) % 360
     print(f"used_chromatic_hues = {used_chromatic_hues} (使用率1％以上のみ)")
     used_chromatic_hues = bring_element_to_front(used_chromatic_hues, calc_closest_angle(used_chromatic_hues, opposite_mean_hue))
+    used_pccs = transform_hues_to_pccs(used_chromatic_hues)
+
+    print(f"used_pccs = {used_pccs}")
 
     hue_diffs = []
 
