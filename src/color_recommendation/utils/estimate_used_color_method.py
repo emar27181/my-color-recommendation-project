@@ -132,6 +132,8 @@ def extract_used_chromatic_hues(used_hues_data, used_rate_threshold):
             used_chromatic_hues.append(hue_data[0])
             # print(hue_data[0])
 
+    used_chromatic_hues.sort()
+
     return used_chromatic_hues
 
 
@@ -140,29 +142,30 @@ def estimate_used_color_method(used_hues_data):
 
     USED_RATE_THRESHOLD = 0.01
 
+    # 使用された色相の数のカウント
     chromatic_colors_count = count_chromatic_colors(used_hues_data, USED_RATE_THRESHOLD)
     achromatic_colors_count = count_achromatic_colors(used_hues_data, USED_RATE_THRESHOLD)
-
     if (DEBUG):
         print(f"count_chromatic_colors = {chromatic_colors_count}")
         print(f"achromatic_colors = {achromatic_colors_count}")
 
-    # print(f"used_hues_data = {used_hues_data}")
+    # 使用された色相(0~360)の抽出
     used_chromatic_hues = extract_used_chromatic_hues(used_hues_data, USED_RATE_THRESHOLD)
-    used_chromatic_hues.sort()
-    mean_hue = calc_mean_angle(used_chromatic_hues)
-    opposite_mean_hue = (mean_hue + 180) % 360
-    print(f"used_chromatic_hues = {used_chromatic_hues} (使用率1％以上のみ)")
-    used_chromatic_hues = bring_element_to_front(used_chromatic_hues, calc_closest_angle(used_chromatic_hues, opposite_mean_hue))
+    mean_hue = calc_mean_angle(used_chromatic_hues)  # 使用色相の平均
+    opposite_mean_hue = (mean_hue + 180) % 360  # 平均色相の反対側の色相
+    used_chromatic_hues = bring_element_to_front(used_chromatic_hues, calc_closest_angle(used_chromatic_hues, opposite_mean_hue))  # 平均色相の反対側の色相をリストの先頭に移動
+
+    # 使用されたPCCS色相(1~24)の抽出
     used_pccs = transform_hues_to_pccs(used_chromatic_hues)
 
-    print(f"used_pccs = {used_pccs}")
-
+    # 色相差(0~12)の抽出
     hue_diffs = chromatic_hues_to_hue_diffs(used_chromatic_hues)
 
+    # 確認用出力
+    print(f"used_chromatic_hues = {used_chromatic_hues} (使用率1％以上のみ)")
+    print(f"used_pccs = {used_pccs}")
     print(f"hue_diffs: {hue_diffs}")
-
-    hue_diffs_to_color_method(hue_diffs)
+    hue_diffs_to_color_method(hue_diffs)  # ←現在はコンソール表示のみ
 
 
 def estimate_used_color_method_by_illustrator(illustrator):
