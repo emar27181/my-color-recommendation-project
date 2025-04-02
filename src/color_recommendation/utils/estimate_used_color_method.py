@@ -1,6 +1,6 @@
 import json
 from utils.helpers.color_utils import print_colored_text, is_chromatic_color_by_hsl, print_used_color_and_rate, calc_angle_diff, calc_mean_angle, calc_closest_angle, bring_element_to_front
-from utils.helpers.transform_color import hex_to_rgb, rgb_to_hsl, hsl_to_rgb, transform_hues_to_pccs
+from utils.helpers.transform_color import hex_to_rgb, rgb_to_hsl, hsl_to_rgb, transform_hues_to_pccs, hue_diffs_to_color_method
 import numpy as np
 
 DEBUG = False
@@ -115,12 +115,6 @@ def count_achromatic_colors(hues_data, threshold):
     return achromatic_count
 
 
-def is_angle_between_angles(angle, angle_start, angle_end):
-    """ ある角度同士の間にあるかどうかを判定する関数
-    """
-    return ((angle_start <= angle) & (angle <= angle_end))
-
-
 def extract_used_chromatic_hues(used_hues_data, used_rate_threshold):
     """ 使用された色相のデータのうち有彩色のみを抽出し，その角度を保存するリストを返す関数
 
@@ -176,61 +170,7 @@ def estimate_used_color_method(used_hues_data):
     hue_diffs.sort()
     print(f"hue_diffs: {hue_diffs}")
 
-    print("推定結果 => ", end="")
-    if (len(hue_diffs) == 0):
-        print("0色相: モノクロ配色")
-
-    # 色相の数が1色だった場合
-    elif (len(hue_diffs) == 1):
-        print("1色相: アイデンティティ配色")
-
-    # 色相の数が2色だった場合
-    elif (len(hue_diffs) == 2):
-        if (hue_diffs[1] >= 165):
-            # used_color_scheme_method ColorScheme.DYAD_COLOR
-            print("2色相: ダイアード配色")
-        elif (is_angle_between_angles(hue_diffs[1], 75, 105)):
-            print("2色相: インターミディエート配色")
-        elif (is_angle_between_angles(hue_diffs[1], 105, 165)):
-            print("2色相: オポーネント配色")
-        elif (is_angle_between_angles(hue_diffs[1], 15, 45)):
-            print("2色相: アナロジー配色")
-        else:
-            print("2色相: エラー")
-
-    # 色相の数が3色だった場合
-    elif (len(hue_diffs) == 3):
-        if ((hue_diffs[1] <= 30) & (hue_diffs[2] <= 60)):
-            print("3色相: ドミナント配色")
-        elif (((120 <= hue_diffs[1]) & (hue_diffs[1] <= 150)) & ((120 <= hue_diffs[2]) & (hue_diffs[2] <= 150))):
-            print("3色相: トライアド配色")
-        elif ((hue_diffs[1] >= 150) & (hue_diffs[2] >= 150)):
-            print("3色相: スプリットコンプリメンタリー配色")
-        elif (is_angle_between_angles(hue_diffs[1], 15, 60) & is_angle_between_angles(hue_diffs[2], 135, 165)):
-            print("3色相: スプリットコンプリメンタリー配色")
-        elif (is_angle_between_angles(hue_diffs[2], 15, 60) & is_angle_between_angles(hue_diffs[1], 135, 165)):
-            print("3色相: スプリットコンプリメンタリー配色")
-        else:
-            print("3色相: エラー")
-
-    # 色相の数が4色だった場合
-    elif (len(hue_diffs) == 4):
-        if (is_angle_between_angles(hue_diffs[1], 75, 105) & is_angle_between_angles(hue_diffs[2], 75, 105) & (hue_diffs[3] >= 165)):
-            print("4色相: テトラード配色")
-        else:
-            print("4色相: エラー")
-
-    # 色相の数が5色だった場合
-    elif (len(hue_diffs) == 5):
-        print("5色相: ペンタード配色")
-
-    # 色相の数が6色だった場合
-    elif (len(hue_diffs) == 6):
-        print("6色相: ヘキサード配色")
-
-    # 色相の数が7色だった場合
-    else:
-        print("7色相以上: エラー")
+    hue_diffs_to_color_method(hue_diffs)
 
 
 def estimate_used_color_method_by_illustrator(illustrator):
