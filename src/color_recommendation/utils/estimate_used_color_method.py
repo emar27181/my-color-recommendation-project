@@ -1,6 +1,6 @@
 import json
 from utils.helpers.color_utils import print_colored_text, is_chromatic_color_by_hsl, print_used_color_and_rate, calc_angle_diff, calc_mean_angle, calc_closest_angle, bring_element_to_front
-from utils.helpers.transform_color import hex_to_rgb, rgb_to_hsl, hsl_to_rgb, transform_hues_to_pccs, hue_diffs_to_color_method
+from utils.helpers.transform_color import hex_to_rgb, rgb_to_hsl, hsl_to_rgb, transform_hues_to_pccs, hue_diffs_to_color_method, chromatic_hues_to_hue_diffs
 import numpy as np
 
 DEBUG = False
@@ -158,16 +158,8 @@ def estimate_used_color_method(used_hues_data):
 
     print(f"used_pccs = {used_pccs}")
 
-    hue_diffs = []
+    hue_diffs = chromatic_hues_to_hue_diffs(used_chromatic_hues)
 
-    # 色相差の計算
-    # print(f"used_hues: {used_hues}")
-    for i in range(0, len(used_chromatic_hues)):
-        hue_diff = calc_angle_diff(used_chromatic_hues[0], used_chromatic_hues[i])
-        hue_diffs.append(hue_diff)
-        # print(f"[0] : [{i}] = {hue_diff}")
-
-    hue_diffs.sort()
     print(f"hue_diffs: {hue_diffs}")
 
     hue_diffs_to_color_method(hue_diffs)

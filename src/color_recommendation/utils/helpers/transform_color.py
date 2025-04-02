@@ -2,6 +2,13 @@ import numpy as np
 from skimage.color import rgb2lab
 
 
+def _calc_angle_diff(angle1, angle2):
+    """角度の差(0°~180°)を計算する関数
+    """
+    diff = abs(angle1 - angle2)
+    return diff if diff <= 180 else 360 - diff
+
+
 def hex_to_rgb(hex_color):
     hex_color = hex_color.lstrip('#')
     return tuple(int(hex_color[i:i + 2], 16) for i in (0, 2, 4))
@@ -199,6 +206,23 @@ def hue_diffs_to_color_method(hue_diffs):
     # 色相の数が7色だった場合
     else:
         print("7色相以上: エラー")
+
+
+def chromatic_hues_to_hue_diffs(chromatic_hues):
+    """
+    有彩色の色相のリストから色相差のリストを生成する関数
+    """
+
+    hue_diffs = []
+
+    # 色相差の計算
+    for i in range(0, len(chromatic_hues)):
+        hue_diff = _calc_angle_diff(chromatic_hues[0], chromatic_hues[i])
+        hue_diffs.append(hue_diff)
+
+    hue_diffs.sort()
+
+    return hue_diffs
 
 
 def main():
