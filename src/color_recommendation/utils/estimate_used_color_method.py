@@ -143,15 +143,18 @@ def extract_used_chromatic_hues(used_hues_data, used_rate_threshold):
 
 def estimate_used_color_method(used_hues_data):
     """引数で受け取る使用配色のデータを基に配色技法を推定する関数"""
-    chromatic_colors_count = count_chromatic_colors(used_hues_data, 0.01)
-    achromatic_colors_count = count_achromatic_colors(used_hues_data, 0.01)
+
+    USED_RATE_THRESHOLD = 0.01
+
+    chromatic_colors_count = count_chromatic_colors(used_hues_data, USED_RATE_THRESHOLD)
+    achromatic_colors_count = count_achromatic_colors(used_hues_data, USED_RATE_THRESHOLD)
 
     if (DEBUG):
         print(f"count_chromatic_colors = {chromatic_colors_count}")
         print(f"achromatic_colors = {achromatic_colors_count}")
 
     # print(f"used_hues_data = {used_hues_data}")
-    used_chromatic_hues = extract_used_chromatic_hues(used_hues_data, 0.01)
+    used_chromatic_hues = extract_used_chromatic_hues(used_hues_data, USED_RATE_THRESHOLD)
     used_chromatic_hues.sort()
     mean_hue = calc_mean_angle(used_chromatic_hues)
     opposite_mean_hue = (mean_hue + 180) % 360
