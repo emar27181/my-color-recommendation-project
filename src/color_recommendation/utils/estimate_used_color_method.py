@@ -267,6 +267,8 @@ def estimate_used_color_method_by_illustrator(illustrator):
     with open(f"src/color_recommendation/data/input/used_colors/used_colors_{illustrator}.json", "r") as f:
         data = json.load(f)
 
+    used_hues_data_by_illustrator = []
+
     for illust_data in data:
         illust_name = illust_data[0]['illustName']
         print(f"\n=== {illust_name} ===")
@@ -275,7 +277,31 @@ def estimate_used_color_method_by_illustrator(illustrator):
 
         # 使用配色技法の推定
         print("*** 使用配色技法の推定 ************")
-        estimate_used_color_method(used_hues_rate)
+        chromatic_colors_count, achromatic_colors_count, used_chromatic_hues, used_pccs, hue_diffs = estimate_used_color_method(used_hues_rate)
+
+        if (DEBUG):
+            print("___ debug _________")
+            print(f"used_hues_rate = {used_hues_rate}")
+            print(f"chromatic_colors_count = {chromatic_colors_count}")
+            print(f"achromatic_colors_count = {achromatic_colors_count}")
+            print(f"used_chromatic_hues = {used_chromatic_hues}")
+            print(f"used_pccs = {used_pccs}")
+            print(f"hue_diffs = {hue_diffs}")
+
+        used_hue_data_by_illust = {
+            "illust_name": illust_name,
+            "comment": "used_hues_rateにおいて, -10: black, -11: white. 有彩色の使用比率の閾値は1%(0.01)に設定．",
+            "used_hues_rate": used_hues_rate,
+            "chromatic_colors_count": chromatic_colors_count,
+            "achromatic_colors_count": achromatic_colors_count,
+            "used_chromatic_hues": used_chromatic_hues,
+            "used_pccs": used_pccs,
+            "hue_diffs": hue_diffs
+        }
+
+        used_hues_data_by_illustrator.append(used_hue_data_by_illust)
+
+    return used_hues_data_by_illustrator
 
 
 def save_estimate_used_color_method_for_illustrators(illutrater_list):
@@ -289,7 +315,17 @@ def save_estimate_used_color_method_for_illustrators(illutrater_list):
     """
 
     for illustrater_name in illutrater_list:
-        estimate_used_color_method_by_illustrator(illustrater_name)
+        used_hues_data_by_illustrator = estimate_used_color_method_by_illustrator(illustrater_name)
+
+        print(f"=== {illustrater_name} の使用色相の抽出が完了しました．")
+        # print(f"used_hues_data_by_illustrator = {used_hues_data_by_illustrator}")
+
+        output_file_path = f"src/color_recommendation/data/input/used_hues/used_hues_{illustrater_name}.json"
+
+        with open(output_file_path, "w", encoding="utf-8") as f:
+            # json.dump(used_hues_data_by_illustrator, f, ensure_ascii=False, indent=4)
+            json.dump(used_hues_data_by_illustrator, f, ensure_ascii=False, indent=4,)
+            print(f"{output_file_path} が保存されました．")
 
 
 if __name__ == '__main__':
