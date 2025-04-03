@@ -138,7 +138,18 @@ def extract_used_chromatic_hues(used_hues_data, used_rate_threshold):
 
 
 def estimate_used_color_method(used_hues_data):
-    """引数で受け取る使用配色のデータを基に配色技法を推定する関数"""
+    """引数で受け取る使用配色のデータを基に配色技法を推定する関数
+
+    引数: 
+        used_hues_data: 使用された色相と使用比率のリスト(白黒を含む)
+
+    戻り値:
+        chromatic_colors_count: 使用された有彩色の数
+        achromatic_colors_count: 使用された無彩色の数
+        used_chromatic_hues: 使用された有彩色の色相(0~360)のリスト
+        used_pccs: 使用されたPCCS色相(1~24)のリスト
+        hue_diffs: 色相差(0~180)のリスト
+    """
 
     USED_RATE_THRESHOLD = 0.01
 
@@ -166,6 +177,8 @@ def estimate_used_color_method(used_hues_data):
     print(f"used_pccs = {used_pccs}")
     print(f"hue_diffs: {hue_diffs}")
     hue_diffs_to_color_method(hue_diffs)  # ←現在はコンソール表示のみ
+
+    return chromatic_colors_count, achromatic_colors_count, used_chromatic_hues, used_pccs, hue_diffs
 
 
 def estimate_used_color_method_by_illustrator(illustrator):
