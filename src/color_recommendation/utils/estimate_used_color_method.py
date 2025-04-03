@@ -181,6 +181,84 @@ def estimate_used_color_method(used_hues_data):
     return chromatic_colors_count, achromatic_colors_count, used_chromatic_hues, used_pccs, hue_diffs
 
 
+def estimate_used_hue(illust_data):
+    """
+    引数で受け取るイラストデータを基に使用色相を推定する関数
+
+    引数: 
+        illust_data: 使用色のデータ(色と使用比率のリスト)
+
+    戻り値:
+        used_hues_rate: 使用色相とその使用比率のリスト
+    """
+
+    if (DEBUG):
+        # print(illust_data)
+        print_used_color_and_rate(illust_data, PRINT_THRESHOLD)
+
+        print("\n=== ↓ === (↑ 基となる使用色とその比率, ↓ 抽出された色相(有彩色のみ)とその比率)")
+
+    # 色相とその出現割合の計測
+    chromatic_colors_rate = []  # 有彩色の色相とその出現割合を保存する変数
+    achromatic_colors_rate = [[-10, 0], [-11, 0]]  # 無彩色とその出現割合を保存する変数
+
+    for color_data in illust_data:
+        color_hex = color_data['color']
+        color_rgb = hex_to_rgb(color_hex)
+        color_hsl = rgb_to_hsl(color_rgb)
+        used_rate = color_data['rate']
+
+        # 使用比率の追加(有彩色と無彩色を分けて保存)
+        # 有彩色の場合
+        if (is_chromatic_color_by_hsl(color_rgb, SATURATION_THRESHOLD, LIGHTNESS_LOWER_THRESHOLD, LIGHTNESS_UPPER_THRESHOLD)):
+            chromatic_colors_rate.append([color_hsl[0], used_rate])
+        # 無彩色の場合
+        else:
+            # 黒色の使用比率の追加
+            if (color_hsl[2] <= 50):
+                # print_colored_text("■", color_rgb)
+                # print(f": {used_rate}")
+                achromatic_colors_rate[0][1] += used_rate
+            # 白色の使用比率の追加
+            else:
+                # print_colored_text("■", color_rgb)
+                # print(f": {used_rate}")
+                achromatic_colors_rate[1][1] += used_rate
+    # 確認用出力1
+    if (DEBUG):
+
+        print_chromatic_colors_rate(chromatic_colors_rate, PRINT_THRESHOLD)
+        print("\n=== ↓ === ( ↓ 色相が近いデータ同士で加重平均を取って結合)")
+
+    # 色相(有彩色)が近いデータ同士で加重平均を取って結合
+    chromatic_colors_rate = merge_hue_data(chromatic_colors_rate, 15)
+
+    """
+        # データの時点では出現率を削除せずに表示させるときに変更する方針に変更(2025/03/13)に
+        if (DEBUG):
+            print_chromatic_colors_rate(chromatic_colors_rate, 0.01)
+            print("=== ↓ === ")
+
+        # 出現率が一定以下の色相データを削除
+        chromatic_colors_rate = delete_hue_data_low_rate(chromatic_colors_rate, 0.01)
+    """
+
+    # 確認用出力2
+    print_chromatic_colors_rate(chromatic_colors_rate, PRINT_THRESHOLD)
+    print_achromatic_colors_rate(achromatic_colors_rate, PRINT_THRESHOLD)
+
+    # 使用色相を無彩色もまとめて保存
+    used_hues_rate = []
+    # 有彩色の保存
+    for chromatic_color_rate in chromatic_colors_rate:
+        used_hues_rate.append(chromatic_color_rate)
+    # 無彩色の保存
+    for achromatic_color_rate in achromatic_colors_rate:
+        used_hues_rate.append((achromatic_color_rate[0], achromatic_color_rate[1]))
+
+    return used_hues_rate
+
+
 def estimate_used_color_method_by_illustrator(illustrator):
     """あるイラストレーターが使っている配色技法を推定する関数
     """
@@ -193,68 +271,7 @@ def estimate_used_color_method_by_illustrator(illustrator):
         illust_name = illust_data[0]['illustName']
         print(f"\n=== {illust_name} ===")
         print("*** 使用色相の抽出 ************")
-
-        if (DEBUG):
-            # print(illust_data)
-            print_used_color_and_rate(illust_data, PRINT_THRESHOLD)
-
-            print("\n=== ↓ === (↑ 基となる使用色とその比率, ↓ 抽出された色相(有彩色のみ)とその比率)")
-
-        # 色相とその出現割合の計測
-        chromatic_colors_rate = []  # 有彩色の色相とその出現割合を保存する変数
-        achromatic_colors_rate = [[-10, 0], [-11, 0]]  # 無彩色とその出現割合を保存する変数
-
-        for color_data in illust_data:
-            color_hex = color_data['color']
-            color_rgb = hex_to_rgb(color_hex)
-            color_hsl = rgb_to_hsl(color_rgb)
-            used_rate = color_data['rate']
-
-            # 使用比率の追加(有彩色と無彩色を分けて保存)
-            # 有彩色の場合
-            if (is_chromatic_color_by_hsl(color_rgb, SATURATION_THRESHOLD, LIGHTNESS_LOWER_THRESHOLD, LIGHTNESS_UPPER_THRESHOLD)):
-                chromatic_colors_rate.append([color_hsl[0], used_rate])
-            # 無彩色の場合
-            else:
-                # 黒色の使用比率の追加
-                if (color_hsl[2] <= 50):
-                    # print_colored_text("■", color_rgb)
-                    # print(f": {used_rate}")
-                    achromatic_colors_rate[0][1] += used_rate
-                # 白色の使用比率の追加
-                else:
-                    # print_colored_text("■", color_rgb)
-                    # print(f": {used_rate}")
-                    achromatic_colors_rate[1][1] += used_rate
-        # 確認用出力1
-        if (DEBUG):
-
-            print_chromatic_colors_rate(chromatic_colors_rate, PRINT_THRESHOLD)
-            print("\n=== ↓ === ( ↓ 色相が近いデータ同士で加重平均を取って結合)")
-
-        # 色相が近いデータ同士で加重平均を取って結合
-        chromatic_colors_rate = merge_hue_data(chromatic_colors_rate, 15)
-
-        """
-        # データの時点では出現率を削除せずに表示させるときに変更する方針に変更(2025/03/13)に
-        if (DEBUG):
-            print_chromatic_colors_rate(chromatic_colors_rate, 0.01)
-            print("=== ↓ === ")
-
-        # 出現率が一定以下の色相データを削除
-        chromatic_colors_rate = delete_hue_data_low_rate(chromatic_colors_rate, 0.01)
-        """
-
-        # 確認用出力2
-        print_chromatic_colors_rate(chromatic_colors_rate, PRINT_THRESHOLD)
-        print_achromatic_colors_rate(achromatic_colors_rate, PRINT_THRESHOLD)
-
-        used_hues_rate = []
-        for chromatic_color_rate in chromatic_colors_rate:
-            used_hues_rate.append(chromatic_color_rate)
-        for achromatic_color_rate in achromatic_colors_rate:
-            used_hues_rate.append((achromatic_color_rate[0], achromatic_color_rate[1]))
-        # print(f"used_hues_rate = {used_hues_rate}")
+        used_hues_rate = estimate_used_hue(illust_data)
 
         # 使用配色技法の推定
         print("*** 使用配色技法の推定 ************")
