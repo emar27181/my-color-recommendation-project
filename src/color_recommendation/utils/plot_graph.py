@@ -151,6 +151,71 @@ def _extract_used_hues_count_from_json(illustrator_name):
     return used_hues_count
 
 
+def _extract_used_achromatic_colors_average_rate_from_json(illustrator_name):
+    """
+    引数で受け取るイラストレーターの使用無彩色の平均比率を抽出する関数
+
+    引数:
+        illustrator_name: イラストレーター名
+
+    戻り値:
+        used_achromatic_colors_average_rate: 使用無彩色の平均比率
+    """
+
+    input_file_path = f"src/color_recommendation/data/input/used_hues/used_hues_{illustrator_name}.json"
+    used_achromatic_colors_average_rate = 0.0
+
+    data = get_json_data(input_file_path)
+
+    for illust_data in data:
+        illust_name = illust_data["illust_name"]
+        used_hues_rate = illust_data["used_hues_rate"]
+
+        if (DEBUG):
+            print(f"=== {illust_name} ==========")
+            print(f"chromatic_colors_count = {chromatic_colors_count}, achromatic_colors_count = {achromatic_colors_count}")
+
+        print(f"used_hues_rate = {used_hues_rate}")
+        # used_achromatic_colors_average_rate += achromatic_colors_count / len(data)
+
+    return used_achromatic_colors_average_rate
+
+
+def save_plot_bar_from_used_achromatic_colors_average_rate_for_illustrators(illustrator_list):
+    """
+    引数で受け取るリスト内のイラストレーターの使用無彩色の平均比率を棒グラフにプロットする関数
+
+    引数:
+        illustrator_list: 使用色を抽出させたいイラストレーターのリスト(文字列)
+
+    戻り値:
+        None
+    """
+
+    used_achromatic_colors_average_rate_for_illustrators = {}
+
+    # 各イラストレーターの使用無彩色の平均比率を取得
+    for illustrator_name in illustrator_list:
+        used_achromatic_colors_average_rate = _extract_used_achromatic_colors_average_rate_from_json(illustrator_name)
+        print(f"=== {illustrator_name} ====================")
+        print(f"used_achromatic_colors_average_rate = {used_achromatic_colors_average_rate}")
+        used_achromatic_colors_average_rate_for_illustrators[illustrator_name] = used_achromatic_colors_average_rate
+
+    # 棒グラフを描画
+    plt.figure(figsize=(10, 10))
+    plt.bar(used_achromatic_colors_average_rate_for_illustrators.keys(), used_achromatic_colors_average_rate_for_illustrators.values())
+    # plt.bar(used_achromatic_colors_average_rate_for_illustrators.values(), used_achromatic_colors_average_rate_for_illustrators.keys())
+    plt.title("Used Achromatic Colors Average Rate by Illustrator")
+    plt.xlabel("Illustrator")
+    plt.ylabel("Used Achromatic Colors Average Rate")
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+
+    output_file_path = f'src/color_recommendation/data/output/bar_from_used_achromatic_colors_average_rate.png'
+    plt.savefig(output_file_path)
+    print(f"{output_file_path} が保存されました．")
+
+
 def save_plot_violin_from_used_hues_count_for_illustrators(illustrator_list):
     """
     引数で受け取るリスト内のイラストレーターの使用色相(有彩色)の数の分布をヴァイオリン図にプロットする関数
