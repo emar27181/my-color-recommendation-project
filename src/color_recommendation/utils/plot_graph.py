@@ -193,30 +193,6 @@ def save_plot_violin_from_used_hues_count_for_illustrators(illustrator_list):
     print(f"{output_file_path} が保存されました．")
 
 
-"""
-    # データフレーム化（"hue_index" と "used_count" のペアに展開）
-    df_list = []
-    for artist, counts in used_hues_counts_for_illustrators.items():
-        for i, count in enumerate(counts):
-            df_list.append({"hue_index": i, "used_count": count})
-
-    df = pd.DataFrame(df_list)
-
-    # ヴァイオリンプロット作成
-    plt.figure(figsize=(14, 6))
-    sns.violinplot(x="hue_index", y="used_count", data=df, inner="box", scale="width")
-    plt.title("Distribution of Used Hue Counts Across Illustrators")
-    plt.xlabel("Hue Index")
-    plt.ylabel("Used Count")
-    plt.grid(True)
-    plt.tight_layout()
-
-    output_file_path = f'src/color_recommendation/data/output/violin_from_used_hues_count.png'
-    plt.savefig(output_file_path)
-    print(f"{output_file_path} が保存されました．")
-    """
-
-
 def plot_scatter(illustrator_name):
     """
     引数で受け取るイラストレーターの使用色の散布図をプロットする関数
