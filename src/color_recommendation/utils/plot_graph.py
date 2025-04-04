@@ -163,9 +163,10 @@ def _extract_used_achromatic_colors_average_rate_from_json(illustrator_name):
     """
 
     input_file_path = f"src/color_recommendation/data/input/used_hues/used_hues_{illustrator_name}.json"
-    used_achromatic_colors_average_rate = 0.0
 
     data = get_json_data(input_file_path)
+
+    used_achromatic_colors_rate_sum = 0
 
     for illust_data in data:
         illust_name = illust_data["illust_name"]
@@ -176,9 +177,15 @@ def _extract_used_achromatic_colors_average_rate_from_json(illustrator_name):
             print(f"chromatic_colors_count = {chromatic_colors_count}, achromatic_colors_count = {achromatic_colors_count}")
 
         print(f"used_hues_rate = {used_hues_rate}")
-        # used_achromatic_colors_average_rate += achromatic_colors_count / len(data)
 
-    return used_achromatic_colors_average_rate
+        for hue_data in used_hues_rate:
+            print(f"hue_data = {hue_data}")
+            if (hue_data[0] == -10):  # 白の場合
+                used_achromatic_colors_rate_sum += hue_data[1]
+            elif (hue_data[0] == -11):  # 黒の場合
+                used_achromatic_colors_rate_sum += hue_data[1]
+
+    return used_achromatic_colors_rate_sum / len(data)
 
 
 def save_plot_bar_from_used_achromatic_colors_average_rate_for_illustrators(illustrator_list):
@@ -202,7 +209,7 @@ def save_plot_bar_from_used_achromatic_colors_average_rate_for_illustrators(illu
         used_achromatic_colors_average_rate_for_illustrators[illustrator_name] = used_achromatic_colors_average_rate
 
     # 棒グラフを描画
-    plt.figure(figsize=(10, 10))
+    plt.figure(figsize=(20, 10))
     plt.bar(used_achromatic_colors_average_rate_for_illustrators.keys(), used_achromatic_colors_average_rate_for_illustrators.values())
     # plt.bar(used_achromatic_colors_average_rate_for_illustrators.values(), used_achromatic_colors_average_rate_for_illustrators.keys())
     plt.title("Used Achromatic Colors Average Rate by Illustrator")
