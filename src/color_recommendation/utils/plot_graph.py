@@ -172,14 +172,7 @@ def _extract_used_achromatic_colors_average_rate_from_json(illustrator_name):
         illust_name = illust_data["illust_name"]
         used_hues_rate = illust_data["used_hues_rate"]
 
-        if (DEBUG):
-            print(f"=== {illust_name} ==========")
-            print(f"chromatic_colors_count = {chromatic_colors_count}, achromatic_colors_count = {achromatic_colors_count}")
-
-        print(f"used_hues_rate = {used_hues_rate}")
-
         for hue_data in used_hues_rate:
-            print(f"hue_data = {hue_data}")
             if (hue_data[0] == -10):  # 白の場合
                 used_achromatic_colors_rate_sum += hue_data[1]
             elif (hue_data[0] == -11):  # 黒の場合
@@ -190,7 +183,8 @@ def _extract_used_achromatic_colors_average_rate_from_json(illustrator_name):
 
 def save_plot_bar_from_used_achromatic_colors_average_rate_for_illustrators(illustrator_list):
     """
-    引数で受け取るリスト内のイラストレーターの使用無彩色の平均比率を棒グラフにプロットする関数
+    引数で受け取るリスト内のイラストレーターの使用無彩色の平均比率を
+    棒グラフ（積み上げ棒グラフ）にプロットする関数
 
     引数:
         illustrator_list: 使用色を抽出させたいイラストレーターのリスト(文字列)
@@ -208,17 +202,25 @@ def save_plot_bar_from_used_achromatic_colors_average_rate_for_illustrators(illu
         print(f"used_achromatic_colors_average_rate = {used_achromatic_colors_average_rate}")
         used_achromatic_colors_average_rate_for_illustrators[illustrator_name] = used_achromatic_colors_average_rate
 
-    # 棒グラフを描画
+    # イラストレーター名と無彩色の比率をリスト化
+    illustrators = list(used_achromatic_colors_average_rate_for_illustrators.keys())
+    achromatic_rates = list(used_achromatic_colors_average_rate_for_illustrators.values())
+
+    # 積み上げ棒グラフの描画
     plt.figure(figsize=(20, 10))
-    plt.bar(used_achromatic_colors_average_rate_for_illustrators.keys(), used_achromatic_colors_average_rate_for_illustrators.values())
-    # plt.bar(used_achromatic_colors_average_rate_for_illustrators.values(), used_achromatic_colors_average_rate_for_illustrators.keys())
+    # 無彩色部分（灰色）を描画
+    plt.bar(illustrators, achromatic_rates, color='#AAAAAA', label='achromatic_rate')
+    # 有彩色部分（赤色）：高さは (1 - 無彩色の割合) で、bottom を無彩色の割合に指定
+    plt.bar(illustrators, [1 - rate for rate in achromatic_rates], bottom=achromatic_rates, color='#990000', label='choromatic_rate')
+
     plt.title("Used Achromatic Colors Average Rate by Illustrator")
     plt.xlabel("Illustrator")
-    plt.ylabel("Used Achromatic Colors Average Rate")
+    plt.ylabel("achromatic rate vs chromatic rate")
     plt.xticks(rotation=45)
+    plt.legend()
     plt.tight_layout()
 
-    output_file_path = f'src/color_recommendation/data/output/bar_from_used_achromatic_colors_average_rate.png'
+    output_file_path = 'src/color_recommendation/data/output/bar_from_used_achromatic_colors_average_rate.png'
     plt.savefig(output_file_path)
     print(f"{output_file_path} が保存されました．")
 
