@@ -2,6 +2,8 @@ import json
 import matplotlib.pyplot as plt
 from matplotlib import colormaps
 from mpl_toolkits.mplot3d import Axes3D
+import pandas as pd
+import seaborn as sns
 import os
 
 DEBUG = False
@@ -117,17 +119,16 @@ def plot_recall_at_k(input_file_path, output_file_path):
     # print(recalls)
 
 
-def plot_violin_from_used_hues_count(illustrator_name):
+def _extract_used_hues_count_from_json(illustrator_name):
     """
-    引数で受け取るイラストレーターの使用配色(有彩色)の数の分布をバイオリンプロットで表示する関数
+    引数で受け取るイラストレーターの使用色相(有彩色)の数の分布を抽出する関数
 
     引数:
         illustrator_name: イラストレーター名
 
     戻り値:
-        None
+        used_hues_count: 有彩色の数の分布を格納するリスト(ex. used_hues_count[2] = 3 → 有彩色の数が2のイラストが3つある)
     """
-    print(f"=== {illustrator_name} ====================")
 
     input_file_path = f"src/color_recommendation/data/input/used_hues/used_hues_{illustrator_name}.json"
     used_hues_count = [0] * 20  # 有彩色の数の分布を格納するリスト(ex. used_hues_count[2] = 3 → 有彩色の数が2のイラストが3つある)
@@ -163,7 +164,73 @@ def plot_violin_from_used_hues_count(illustrator_name):
             print(f"chromatic_colors_count = {chromatic_colors_count}, achromatic_colors_count = {achromatic_colors_count}")
         used_hues_count[chromatic_colors_count] += 1
 
-    print(f"used_hues_count = {used_hues_count}")
+    return used_hues_count
+
+
+def save_plot_violin_from_used_hues_count_for_illustrators(illustrator_list):
+    """
+    引数で受け取るリスト内のイラストレーターの使用色相(有彩色)の数の分布をヴァイオリン図にプロットする関数
+
+    引数:
+        illustrator_list: 使用色を抽出させたいイラストレーターのリスト(文字列)
+
+    戻り値:
+        None
+    """
+
+    used_hues_counts_for_illustrators = {}
+
+    # 各イラストレーターの使用色相(有彩色)の数の分布を取得
+    for illustrator_name in illustrator_list:
+        used_hues_count = _extract_used_hues_count_from_json(illustrator_name)
+        print(f"=== {illustrator_name} ====================")
+        print(f"used_hues_count = {used_hues_count}")
+        used_hues_counts_for_illustrators[illustrator_name] = used_hues_count
+
+    # データを「イラストレータ」「要素番号」の形に“出現回数ぶん”展開
+    records = []
+    for illustrator, counts in used_hues_counts_for_illustrators.items():
+        for element_idx, count in enumerate(counts):
+            # その要素が count 回出てくるとみなし，countぶんだけ同じ行を追加
+            records.extend([{"Illustrator": illustrator, "Element": element_idx}] * count)
+
+    df = pd.DataFrame(records)
+
+    # ヴァイオリン図を描画（横軸がElement、縦軸がIllustrator）
+    plt.figure(figsize=(10, 12))
+    sns.violinplot(x="Element", y="Illustrator", data=df, inner="quartile", cut=0, scale="count")
+    plt.title("Violin Plot of Used hues count by Illustrator")
+    plt.xlabel("Used hues count")
+    plt.ylabel("Illustrator")
+    plt.tight_layout()
+
+    output_file_path = f'src/color_recommendation/data/output/violin_from_used_hues_count.png'
+    plt.savefig(output_file_path)
+    print(f"{output_file_path} が保存されました．")
+
+
+"""
+    # データフレーム化（"hue_index" と "used_count" のペアに展開）
+    df_list = []
+    for artist, counts in used_hues_counts_for_illustrators.items():
+        for i, count in enumerate(counts):
+            df_list.append({"hue_index": i, "used_count": count})
+
+    df = pd.DataFrame(df_list)
+
+    # ヴァイオリンプロット作成
+    plt.figure(figsize=(14, 6))
+    sns.violinplot(x="hue_index", y="used_count", data=df, inner="box", scale="width")
+    plt.title("Distribution of Used Hue Counts Across Illustrators")
+    plt.xlabel("Hue Index")
+    plt.ylabel("Used Count")
+    plt.grid(True)
+    plt.tight_layout()
+
+    output_file_path = f'src/color_recommendation/data/output/violin_from_used_hues_count.png'
+    plt.savefig(output_file_path)
+    print(f"{output_file_path} が保存されました．")
+    """
 
 
 def plot_scatter(illustrator_name):
