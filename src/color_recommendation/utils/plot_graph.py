@@ -4,6 +4,8 @@ from matplotlib import colormaps
 from mpl_toolkits.mplot3d import Axes3D
 import os
 
+DEBUG = False
+
 
 def plot_graph_3d(data, clusters, output_file_path):
     """三次元のクラスターマップを作成する関数"""
@@ -113,6 +115,55 @@ def plot_recall_at_k(input_file_path, output_file_path):
     plot_graph(recalls, 'recall', output_file_path)
     # print(timing_count)
     # print(recalls)
+
+
+def plot_violin_from_used_hues_count(illustrator_name):
+    """
+    引数で受け取るイラストレーターの使用配色(有彩色)の数の分布をバイオリンプロットで表示する関数
+
+    引数:
+        illustrator_name: イラストレーター名
+
+    戻り値:
+        None
+    """
+    print(f"=== {illustrator_name} ====================")
+
+    input_file_path = f"src/color_recommendation/data/input/used_hues/used_hues_{illustrator_name}.json"
+    used_hues_count = [0] * 20  # 有彩色の数の分布を格納するリスト(ex. used_hues_count[2] = 3 → 有彩色の数が2のイラストが3つある)
+
+    # ファイルの読み込み
+    try:
+        if not os.path.exists(input_file_path):
+            raise FileNotFoundError(f"File not found: {input_file_path}")
+            return
+
+        with open(input_file_path, 'r') as f:
+            data = json.load(f)
+            # print(f"{input_file_path} が読み込まれました．")
+    except FileNotFoundError as e:
+        print(f"エラー: {e}")
+        return
+    except json.JSONDecodeError as e:
+        print(f"JSONデコードエラー: {e}. ファイルの内容を確認してください。")
+        return
+    except Exception as e:
+        print(f"予期しないエラーが発生しました: {e}")
+        return
+
+    for illust_data in data:
+        illust_name = illust_data["illust_name"]
+        used_hues_rate = illust_data["used_hues_rate"]
+        chromatic_colors_count = illust_data["chromatic_colors_count"]
+        achromatic_colors_count = illust_data["achromatic_colors_count"]
+        used_chromatic_hues = illust_data["used_chromatic_hues"]
+
+        if (DEBUG):
+            print(f"=== {illust_name} ==========")
+            print(f"chromatic_colors_count = {chromatic_colors_count}, achromatic_colors_count = {achromatic_colors_count}")
+        used_hues_count[chromatic_colors_count] += 1
+
+    print(f"used_hues_count = {used_hues_count}")
 
 
 def plot_scatter(illustrator_name):
