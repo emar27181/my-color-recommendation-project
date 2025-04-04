@@ -1,5 +1,6 @@
 import json
 import matplotlib.pyplot as plt
+from utils.helpers.json_utils import get_json_data
 from matplotlib import colormaps
 from mpl_toolkits.mplot3d import Axes3D
 import pandas as pd
@@ -133,24 +134,7 @@ def _extract_used_hues_count_from_json(illustrator_name):
     input_file_path = f"src/color_recommendation/data/input/used_hues/used_hues_{illustrator_name}.json"
     used_hues_count = [0] * 20  # 有彩色の数の分布を格納するリスト(ex. used_hues_count[2] = 3 → 有彩色の数が2のイラストが3つある)
 
-    # ファイルの読み込み
-    try:
-        if not os.path.exists(input_file_path):
-            raise FileNotFoundError(f"File not found: {input_file_path}")
-            return
-
-        with open(input_file_path, 'r') as f:
-            data = json.load(f)
-            # print(f"{input_file_path} が読み込まれました．")
-    except FileNotFoundError as e:
-        print(f"エラー: {e}")
-        return
-    except json.JSONDecodeError as e:
-        print(f"JSONデコードエラー: {e}. ファイルの内容を確認してください。")
-        return
-    except Exception as e:
-        print(f"予期しないエラーが発生しました: {e}")
-        return
+    data = get_json_data(input_file_path)
 
     for illust_data in data:
         illust_name = illust_data["illust_name"]
