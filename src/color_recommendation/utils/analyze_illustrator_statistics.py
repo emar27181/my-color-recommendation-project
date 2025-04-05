@@ -1,4 +1,5 @@
 from utils.helpers.json_utils import get_json_data
+import json
 
 DEBUG = True
 DEBUG = False
@@ -65,6 +66,7 @@ def _extract_statistics_by_illustrator(illustrator_name):
                 achromatic_colors_rate_sum += used_hue_rate[1]
 
     statistics = {
+        "illustrator_name": illustrator_name,
         "chromatic_colors_count_ave": chromatic_colors_count_sum / len(data),
         "achromatic_colors_count_ave": achromatic_colors_count_sum / len(data),
         "chromatic_colors_rate_ave": 1 - (achromatic_colors_rate_sum / len(data)),
@@ -85,6 +87,7 @@ def save_statistics_for_illustrators(illustrator_list):
     戻り値:
         None
     """
+    statistics_data = []
 
     for illustrator_name in illustrator_list:
         print(f"\n=== {illustrator_name} ========================")
@@ -93,3 +96,12 @@ def save_statistics_for_illustrators(illustrator_list):
         print("~~~ statistics ~~~")
         for data in statistics:
             print(f"{data} = {statistics[data]}")
+
+        statistics_data.append(statistics)
+
+    # print(f"statistics_data = {statistics_data}")
+
+    output_file_path = "src/color_recommendation/data/input/statistics_for_illustrators.json"
+    with open(output_file_path, 'w', encoding='utf-8') as file:
+        json.dump(statistics_data, file, ensure_ascii=False, indent=4)
+        print(f"{output_file_path} が保存されました．")
