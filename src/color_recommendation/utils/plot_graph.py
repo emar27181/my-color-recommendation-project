@@ -267,6 +267,65 @@ def save_plot_violin_from_used_hues_count_for_illustrators(illustrator_list):
     print(f"{output_file_path} が保存されました．")
 
 
+def _extract_used_pccs_count_sum_distribution_from_json():
+    input_file_path = "src/color_recommendation/data/input/statistics_for_illustrators.json"
+
+    with open(input_file_path, 'r') as f:
+        data = json.load(f)
+        print(f"{input_file_path} が読み込まれました．")
+
+    used_pccs_count_sum_distributions_for_illustrators = {}
+
+    # 各イラストレーターの使用色相(有彩色)の分布を取得
+    for illustrator_data in data:
+        illustrator_name = illustrator_data["illustrator_name"]
+        used_pccs_count_sum_distribution = illustrator_data["used_pccs_count_sum_distribution"]
+
+        print(f"=== {illustrator_name} ====================")
+        print(f"used_pccs_count_sum_distribution = {used_pccs_count_sum_distribution}")
+        used_pccs_count_sum_distributions_for_illustrators[illustrator_name] = used_pccs_count_sum_distribution
+
+        # used_hues_counts_for_illustrators[illustrator_name] = used_hues_count
+
+    return used_pccs_count_sum_distributions_for_illustrators
+
+
+def save_plot_violin_from_used_pccs_distribution_for_illustrators():
+    """
+    イラストレーターの使用PCCS(1~24)の分布をヴァイオリン図にプロットする関数
+
+    引数:
+        None
+
+    戻り値:
+        None
+    """
+
+    used_pccs_count_sum_distributions_for_illustrators = _extract_used_pccs_count_sum_distribution_from_json()
+
+    # データを「イラストレータ」「要素番号」の形に“出現回数ぶん”展開
+    records = []
+    for illustrator, counts in used_pccs_count_sum_distributions_for_illustrators.items():
+        for element_idx, count in enumerate(counts):
+            # その要素が count 回出てくるとみなし，countぶんだけ同じ行を追加
+            records.extend([{"Illustrator": illustrator, "Element": element_idx}] * count)
+    df = pd.DataFrame(records)
+
+    # df = pd.DataFrame(used_pccs_count_sum_distributions_for_illustrators)
+
+    # ヴァイオリン図を描画（横軸がElement、縦軸がIllustrator）
+    plt.figure(figsize=(10, 12))
+    sns.violinplot(x="Element", y="Illustrator", data=df, inner="quartile", cut=0, scale="count")
+    plt.title("Violin Plot of Used pccs count by Illustrator")
+    plt.xlabel("Used PCCS (1~24)")
+    plt.ylabel("Illustrator")
+    plt.tight_layout()
+
+    output_file_path = f'src/color_recommendation/data/output/violin_from_used_pccs_count.png'
+    plt.savefig(output_file_path)
+    print(f"{output_file_path} が保存されました．")
+
+
 def plot_scatter(illustrator_name):
     """
     引数で受け取るイラストレーターの使用色の散布図をプロットする関数
