@@ -6,6 +6,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import pandas as pd
 import seaborn as sns
 import os
+import colorsys
 
 DEBUG = False
 
@@ -292,36 +293,45 @@ def _extract_used_pccs_count_sum_distribution_from_json():
 
 def save_plot_violin_from_used_pccs_distribution_for_illustrators():
     """
-    イラストレーターの使用PCCS(1~24)の分布をヴァイオリン図にプロットする関数
-
-    引数:
-        None
-
-    戻り値:
-        None
+    イラストレーターの使用PCCS(1~24)の分布をヴァイオリン図にプロットする関数。
+    横軸の背景に色相のグラデーションを表示する。
     """
-
+    # ダミーデータまたは既存の関数からデータを取得
     used_pccs_count_sum_distributions_for_illustrators = _extract_used_pccs_count_sum_distribution_from_json()
 
-    # データを「イラストレータ」「要素番号」の形に“出現回数ぶん”展開
+    # データを「Illustrator」「Element」の形に展開
     records = []
     for illustrator, counts in used_pccs_count_sum_distributions_for_illustrators.items():
         for element_idx, count in enumerate(counts):
-            # その要素が count 回出てくるとみなし，countぶんだけ同じ行を追加
             records.extend([{"Illustrator": illustrator, "Element": element_idx}] * count)
     df = pd.DataFrame(records)
 
-    # df = pd.DataFrame(used_pccs_count_sum_distributions_for_illustrators)
+    # 図の準備
+    fig, ax = plt.subplots(figsize=(10, 12))
 
-    # ヴァイオリン図を描画（横軸がElement、縦軸がIllustrator）
-    plt.figure(figsize=(10, 12))
-    sns.violinplot(x="Element", y="Illustrator", data=df, inner="quartile", cut=0, scale="count")
-    plt.title("Violin Plot of Used pccs count by Illustrator")
-    plt.xlabel("Used PCCS (1~24)")
-    plt.ylabel("Illustrator")
+    # 横軸に沿って 24 個の区間で色相360度のグラデーションを作成
+    n_elements = 24
+    colors = []
+    for i in range(n_elements):
+        hue = i * (360 / n_elements)         # 0〜360の範囲
+        # colorsys.hls_to_rgb() は引数 (h, l, s) を受け取る（hは0～1に正規化）
+        # CSSの HSL(hue, saturation, lightness) に対応させるため、lightness と saturation をそれぞれ設定
+        rgb = colorsys.hls_to_rgb(hue / 360, 0.75, 1)  # lightness=0.75, saturation=1
+        colors.append(rgb)
+
+    # 各区間ごとに背景の縦帯を描画
+    for i in range(n_elements):
+        ax.axvspan((i + 1) - 0.5, (i + 1) + 0.5, color=colors[i], alpha=0.3, zorder=0)
+
+    # ヴァイオリンプロットの描画
+    sns.violinplot(x="Element", y="Illustrator", data=df, inner="quartile", cut=0, scale="count", ax=ax)
+
+    ax.set_title("Violin Plot of Used PCCS count by Illustrator")
+    ax.set_xlabel("Used PCCS (1~24)")
+    ax.set_ylabel("Illustrator")
+
     plt.tight_layout()
-
-    output_file_path = f'src/color_recommendation/data/output/violin_from_used_pccs_count.png'
+    output_file_path = 'src/color_recommendation/data/output/violin_from_used_pccs_count.png'
     plt.savefig(output_file_path)
     print(f"{output_file_path} が保存されました．")
 
