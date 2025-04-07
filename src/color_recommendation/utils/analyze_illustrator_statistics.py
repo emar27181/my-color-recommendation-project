@@ -50,6 +50,7 @@ def _extract_statistics_by_illustrator(illustrator_name):
     used_hues_rate_sum_distribution = [0] * 360
     used_pccs_count_sum_distribution = [0] * 25
     mean_resultant_length_sum = 0
+    chromatic_colors_count_distribution = [0] * 20
 
     for illust_data in data:
         illust_name = illust_data["illust_name"]
@@ -87,6 +88,9 @@ def _extract_statistics_by_illustrator(illustrator_name):
         chromatic_colors_count_sum += chromatic_colors_count
         achromatic_colors_count_sum += achromatic_colors_count
 
+        # 有彩色の出現回数の分布の加算
+        chromatic_colors_count_distribution[chromatic_colors_count] += 1
+
         # 無彩色の使用率の加算
         for used_hue_rate in used_hues_rate:
             if (used_hue_rate[0] == -10):  # 黒の場合
@@ -100,6 +104,7 @@ def _extract_statistics_by_illustrator(illustrator_name):
         "achromatic_colors_count_ave": achromatic_colors_count_sum / len(data),
         "chromatic_colors_rate_ave": 1 - (achromatic_colors_rate_sum / len(data)),
         "achromatic_colors_rate_ave": achromatic_colors_rate_sum / len(data),
+        "chromatic_colors_count_distribution": chromatic_colors_count_distribution,
         # "used_hues_rate_ave_distribution": [x / len(data) for x in used_hues_rate_sum_distribution], # 使っていないためコメントアウト(2025/04/06)
         "used_pccs_count_sum_distribution": used_pccs_count_sum_distribution,
         "mean_resultant_length_ave": mean_resultant_length_sum / len(data),
