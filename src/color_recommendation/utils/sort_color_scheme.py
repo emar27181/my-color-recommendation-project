@@ -1,5 +1,6 @@
 from utils.helpers.color_utils import print_color_scheme, calc_color_scheme_difference_delta_e_cie2000, print_color_schemes
 import random
+from utils.helpers.json_utils import get_json_data
 
 DEBUG = False
 
@@ -37,10 +38,41 @@ def sort_color_scheme_by_color_difference(base_color_scheme, color_schemes):
     return color_schemes
 
 
-def sort_color_scheme_by_used_trend(color_schemes):
+def _get_analysis_data(illustrator_name):
+    """イラストレーターの統計データを取得する関数
+    引数:
+        illustrator_name: イラストレーター名
+
+    戻り値:
+        illustrator_data: イラストレーターの統計データ
+    """
+
+    data = get_json_data("src/color_recommendation/data/input/statistics_for_illustrators.json")
+
+    for illustrator_data in data:
+        if illustrator_data["illustrator_name"] == illustrator_name:
+            print(illustrator_data)
+
+            chromatic_colors_count_ave = illustrator_data["chromatic_colors_count_ave"]
+            achromatic_colors_count_ave = illustrator_data["achromatic_colors_count_ave"]
+            chromatic_colors_rate_ave = illustrator_data["chromatic_colors_rate_ave"]
+            achromatic_colors_rate_ave = illustrator_data["achromatic_colors_rate_ave"]
+            used_pccs_count_sum_distribution = illustrator_data["used_pccs_count_sum_distribution"]
+            mean_resultant_length_ave = illustrator_data["mean_resultant_length_ave"]
+
+            return chromatic_colors_count_ave, achromatic_colors_count_ave, chromatic_colors_rate_ave, achromatic_colors_rate_ave, used_pccs_count_sum_distribution, mean_resultant_length_ave
+
+    print(f"イラストレーター名: {illustrator_name} のデータが見つかりませんでした．")
+    return None, None, None, None, None, None
+
+
+def sort_color_scheme_by_used_trend(color_schemes, illustrator_name):
     """引数で受け取った配色をイラストレーターの使用比率を基にソートする関数
     """
-    # print(f"color_schemes: {color_schemes}")
+
+    print(f"=== {illustrator_name} ==================== ")
+
+    chromatic_colors_count_ave, achromatic_colors_count_ave, chromatic_colors_rate_ave, achromatic_colors_rate_ave, used_pccs_count_sum_distribution, mean_resultant_length_ave = _get_analysis_data(illustrator_name)
 
     new_color_schemes = []
 

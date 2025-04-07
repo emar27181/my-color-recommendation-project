@@ -19,7 +19,7 @@ def read_file(file_path):
         return data
 
 
-def generate_recommend_colors(data, sort_type):
+def generate_recommend_colors(data, sort_type, illustrator_name):
 
     output_data = []
 
@@ -47,7 +47,7 @@ def generate_recommend_colors(data, sort_type):
         elif (sort_type == "random"):
             recommend_color_schemes_rgb = shuffle_color_schemes(recommend_color_schemes_rgb)  # 推薦配色をランダムにシャッフル
         elif (sort_type == "used_trend"):
-            recommend_color_schemes_rgb = sort_color_scheme_by_used_trend(recommend_color_schemes_rgb)
+            recommend_color_schemes_rgb = sort_color_scheme_by_used_trend(recommend_color_schemes_rgb, illustrator_name)
         else:
             print("ソートの種類が間違っているため，推薦配色は並び替えられずに挿入されます．(ソートの種類:  'random', 'color_diff')")
 
@@ -71,7 +71,7 @@ def generate_recommend_colors(data, sort_type):
     return output_data
 
 
-def save_recommend_colors_for_illustraters(illutrater_list, sort_type):
+def save_recommend_colors_for_illustrators(illutrator_list, sort_type):
     """
     引数で受け取るリスト内のイラストレーターのイラストの推薦配色を保存する関数
 
@@ -82,15 +82,15 @@ def save_recommend_colors_for_illustraters(illutrater_list, sort_type):
         None
     """
 
-    for illustrater_name in illutrater_list:
-        print(f"=== {illustrater_name} ====================")
+    for illustrator_name in illutrator_list:
+        print(f"=== {illustrator_name} ====================")
 
-        input_file_path = f"src/color_recommendation/data/input/used_colors/used_colors_{illustrater_name}.json"
+        input_file_path = f"src/color_recommendation/data/input/used_colors/used_colors_{illustrator_name}.json"
         used_colors_data = read_file(input_file_path)
 
-        recommend_colors_data = generate_recommend_colors(used_colors_data, sort_type)
+        recommend_colors_data = generate_recommend_colors(used_colors_data, sort_type, illustrator_name)
         # 推薦配色の生成と推薦配色のソートを別処理にした方が分かりやすいかも
-        output_file_path = f"src/color_recommendation/data/output/recommend_colors/sort_by_{sort_type}/recommend_colors_{illustrater_name}.json"
+        output_file_path = f"src/color_recommendation/data/output/recommend_colors/sort_by_{sort_type}/recommend_colors_{illustrator_name}.json"
 
         with open(output_file_path, 'w', encoding='utf-8') as file:
             json.dump(recommend_colors_data, file, ensure_ascii=False, indent=4)
