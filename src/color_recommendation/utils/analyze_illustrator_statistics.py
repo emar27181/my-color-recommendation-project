@@ -140,3 +140,28 @@ def save_statistics_for_illustrators(illustrator_list):
     with open(output_file_path, 'w', encoding='utf-8') as file:
         json.dump(statistics_data, file, ensure_ascii=False, indent=4)
         print(f"{output_file_path} が保存されました．")
+
+
+def get_not_monochrome_illustrator_list():
+    """モノクロイラストを除くイラストレーターのリストを取得する関数
+    """
+    MONOCHROME_THRESHOLD = 0.5  # モノクロ率の閾値
+
+    input_file_path = "src/color_recommendation/data/input/statistics_for_illustrators.json"
+    data = get_json_data(input_file_path)
+    illustrater_list = []
+
+    for illustrator_data in data:
+        illustrator_name = illustrator_data["illustrator_name"]
+        print(f"=== {illustrator_name} ========================")
+        chromatic_colors_count_distribution = illustrator_data["chromatic_colors_count_distribution"]
+        # print(f"chromatic_colors_count_distribution = {chromatic_colors_count_distribution}")
+        monochrome_rate = chromatic_colors_count_distribution[0] / sum(chromatic_colors_count_distribution)
+
+        if (monochrome_rate < MONOCHROME_THRESHOLD):
+            illustrater_list.append(illustrator_name)
+            print(f"モノクロ率 = {(round(monochrome_rate * 10000) / 100 )}%: モノクロイラストのイラストレーターではないため，リストに追加します．")
+        else:
+            print(f"モノクロ率 = {(round(monochrome_rate * 10000) / 100 )}%: モノクロイラストのイラストレーターのため，リストに追加しません．")
+
+    return illustrater_list
