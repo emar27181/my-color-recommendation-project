@@ -48,6 +48,8 @@ def generate_recommend_colors(data, sort_type, illustrator_name):
             recommend_color_schemes_rgb = shuffle_color_schemes(recommend_color_schemes_rgb)  # 推薦配色をランダムにシャッフル
         elif (sort_type == "used_trend"):
             recommend_color_schemes_rgb = sort_color_scheme_by_used_trend(recommend_color_schemes_rgb, illustrator_name)
+        elif (sort_type == "no_sort"):
+            pass
         else:
             print("ソートの種類が間違っているため，推薦配色は並び替えられずに挿入されます．(ソートの種類:  'random', 'color_diff')")
 
