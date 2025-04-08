@@ -45,7 +45,7 @@ def save_data_is_contained_next_color_for_illustrators(illutrator_list, sort_typ
     for illutrator_name in illutrator_list:
         print(f"=== {illutrator_name} ========================")
 
-        input_file_path = f"src/color_recommendation/data/output/recommend_colors/{sort_type}/recommend_colors_{illutrator_name}.json"
+        input_file_path = f"src/color_recommendation/data/output/recommend_colors/sort_by_{sort_type}/recommend_colors_{illutrator_name}.json"
 
         with open(input_file_path, 'r', encoding='utf-8') as file:
             recommended_colors_data = json.load(file)
