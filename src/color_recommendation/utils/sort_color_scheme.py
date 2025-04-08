@@ -51,19 +51,18 @@ def _get_analysis_data(illustrator_name):
 
     for illustrator_data in data:
         if illustrator_data["illustrator_name"] == illustrator_name:
-            print(illustrator_data)
-
             chromatic_colors_count_ave = illustrator_data["chromatic_colors_count_ave"]
             achromatic_colors_count_ave = illustrator_data["achromatic_colors_count_ave"]
             chromatic_colors_rate_ave = illustrator_data["chromatic_colors_rate_ave"]
             achromatic_colors_rate_ave = illustrator_data["achromatic_colors_rate_ave"]
+            chromatic_colors_count_distribution = illustrator_data["chromatic_colors_count_distribution"]
             used_pccs_count_sum_distribution = illustrator_data["used_pccs_count_sum_distribution"]
             mean_resultant_length_ave = illustrator_data["mean_resultant_length_ave"]
 
-            return chromatic_colors_count_ave, achromatic_colors_count_ave, chromatic_colors_rate_ave, achromatic_colors_rate_ave, used_pccs_count_sum_distribution, mean_resultant_length_ave
+            return chromatic_colors_count_ave, achromatic_colors_count_ave, chromatic_colors_rate_ave, achromatic_colors_rate_ave, chromatic_colors_count_distribution, used_pccs_count_sum_distribution, mean_resultant_length_ave
 
     print(f"イラストレーター名: {illustrator_name} のデータが見つかりませんでした．")
-    return None, None, None, None, None, None
+    return None, None, None, None, None, None, None
 
 
 def sort_color_scheme_by_used_trend(color_schemes, illustrator_name):
@@ -72,14 +71,23 @@ def sort_color_scheme_by_used_trend(color_schemes, illustrator_name):
 
     print(f"=== {illustrator_name} ==================== ")
 
-    chromatic_colors_count_ave, achromatic_colors_count_ave, chromatic_colors_rate_ave, achromatic_colors_rate_ave, used_pccs_count_sum_distribution, mean_resultant_length_ave = _get_analysis_data(illustrator_name)
+    chromatic_colors_count_ave, achromatic_colors_count_ave, chromatic_colors_rate_ave, achromatic_colors_rate_ave, chromatic_colors_count_distribution, used_pccs_count_sum_distribution, mean_resultant_length_ave = _get_analysis_data(illustrator_name)
+
+    # 使用頻度順に色相数を並べ替え
+    chromatic_colors_count_list_sorted_by_used_times = sorted(
+        [i for i in range(len(chromatic_colors_count_distribution))],
+        key=lambda i: chromatic_colors_count_distribution[i],
+        reverse=True
+    )  # chromatic_colors_count_list_sorted_by_used_times: 使われた回数が多い順で色相数を並べたリスト
 
     new_color_schemes = []
 
-    for color_scheme in reversed(color_schemes):
-        new_color_schemes.append(color_scheme)
-
-    # print(f"new_color_schemes: {new_color_schemes}")
+    # よく使われた色相数の順で配色を追加
+    for colors_count in chromatic_colors_count_list_sorted_by_used_times:
+        for color_scheme in color_schemes:
+            if len(color_scheme) == colors_count:
+                new_color_schemes.append(color_scheme)
+                # color_schemes.remove(color_scheme)
 
     return new_color_schemes
 
