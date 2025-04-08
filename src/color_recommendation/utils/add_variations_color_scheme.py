@@ -15,7 +15,7 @@ def add_lightness_variations_color_scheme(color_scheme, ligtness_diff):
 
 
 # バリエーションを増やした配色を返す関数
-def add_all_variations_color_schemes(color_schemes):
+def add_all_variations_color_schemes(color_schemes, lightness_diff):
     # new_color_schemes = color_schemes
 
     # print(new_color_schemes)
@@ -31,13 +31,10 @@ def add_all_variations_color_schemes(color_schemes):
         # 確認用出力
         if False:
             print_color_scheme(color_scheme)
-            print_color_scheme(add_lightness_variations_color_scheme(color_scheme, +20))
-            print_color_scheme(add_lightness_variations_color_scheme(color_scheme, -20))
+            print_color_scheme(add_lightness_variations_color_scheme(color_scheme, lightness_diff))
 
-        color_schemes.append(add_lightness_variations_color_scheme(color_scheme, +20))
-        color_schemes.append(add_lightness_variations_color_scheme(color_scheme, -20))
-        new_color_schemes.append(add_lightness_variations_color_scheme(color_scheme, +20))
-        new_color_schemes.append(add_lightness_variations_color_scheme(color_scheme, -20))
+        color_schemes.append(add_lightness_variations_color_scheme(color_scheme, lightness_diff))
+        new_color_schemes.append(add_lightness_variations_color_scheme(color_scheme, lightness_diff))
 
     # color_schemes.append(new_color_schemes)
 

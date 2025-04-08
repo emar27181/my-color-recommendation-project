@@ -5,7 +5,7 @@ from utils.helpers.color_utils import print_colored_text, print_color_schemes, p
 from utils.helpers.transform_color import hex_to_rgb, transform_color_schemes_rgb_to_hex
 from utils.helpers.json_utils import convert_color_schemes_to_color_data
 from utils.check_data_is_contained_next_color import check_data_is_contained_next_color
-from utils.plot_graph import plot_recall_at_k
+
 from utils.estimate_used_color_scheme import generate_json_used_color_scheme, save_estimated_used_colors
 from utils.download_instagram_images import download_instagram_images
 from utils.sort_color_scheme import sort_color_scheme_by_color_difference, shuffle_color_schemes, sort_color_scheme_by_used_trend
@@ -40,7 +40,10 @@ def generate_recommend_colors(data, sort_type, illustrator_name):
         # あるイラストに対して推薦配色群を生成
         base_color_rgb = hex_to_rgb(illust_data[0]['color'])  # 推薦配色の基となる色を取得
         recommend_color_schemes_rgb = generate_all_color_schemes(base_color_rgb)  # 17(?)パターンの配色群を生成
-        recommend_color_schemes_rgb = add_all_variations_color_schemes(recommend_color_schemes_rgb)  # 明度の異なる2パターンの配色群を追加
+        recommend_color_schemes_rgb = add_all_variations_color_schemes(recommend_color_schemes_rgb, +20)
+        recommend_color_schemes_rgb = add_all_variations_color_schemes(recommend_color_schemes_rgb, -20)
+        recommend_color_schemes_rgb = add_all_variations_color_schemes(recommend_color_schemes_rgb, +40)
+        recommend_color_schemes_rgb = add_all_variations_color_schemes(recommend_color_schemes_rgb, -40)
 
         if (sort_type == "color_diff"):
             recommend_color_schemes_rgb = sort_color_scheme_by_color_difference(used_color_scheme_rgb, recommend_color_schemes_rgb)  # 使用配色との類似度順にソート

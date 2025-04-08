@@ -50,9 +50,13 @@ def plot_graph(plot_data, graph_name, output_file_path):
     plt.savefig(output_file_path)
 
 
-def calculate_recall(file_path):
+def calculate_recall(file_path, recommend_colors_count):
+    """
+    引数:
+        recommend_colors_count: 推薦配色(パターン)の数
+    """
 
-    recalls = [0] * 100
+    recalls = [0] * recommend_colors_count
     timing_count = 0
 
     with open(file_path, 'r') as f:
@@ -78,14 +82,23 @@ def calculate_recall(file_path):
     return recalls
 
 
+def _get_recommend_colors_count(illustrator_name, sort_type):
+    input_file_path = f"src/color_recommendation/data/output/recommend_colors/sort_by_{sort_type}/recommend_colors_{illustrator_name}.json"
+    data = get_json_data(input_file_path)
+    return len(data[0]['recommend_color_schemes'])
+
+
 def save_plot_recall_at_k_for_illustrators(illustrator_list, sort_type):
+
+    recommned_colors_count = _get_recommend_colors_count(illustrator_list[0], sort_type)
+
     # マーカーと線種の候補リスト
     markers = itertools.cycle(['o', 's', 'v', '^', 'd', '>', '<', 'p', '*', 'h'])
     linestyles = itertools.cycle(['-', '--', '-.', ':'])
 
     for illustrator_name in illustrator_list:
         IS_CONTAINED_NEXT_COLOR_FILE_PATH = f"src/color_recommendation/data/output/is_contained_next_color/{sort_type}/is_contained_next_color_{illustrator_name}.json"
-        recalls = calculate_recall(IS_CONTAINED_NEXT_COLOR_FILE_PATH)
+        recalls = calculate_recall(IS_CONTAINED_NEXT_COLOR_FILE_PATH, recommned_colors_count)
 
         # マーカーサイズは適度なサイズに設定し、線種も適用
         plt.plot(recalls,
@@ -96,7 +109,7 @@ def save_plot_recall_at_k_for_illustrators(illustrator_list, sort_type):
 
     plt.title(f"recall@k sort_type={sort_type}")
     plt.ylim(0, 1)
-    plt.xlim(0, 60)
+    plt.xlim(0, recommned_colors_count)
     plt.xlabel('color_scheme')
     plt.ylabel('recall')
     plt.grid(True)
@@ -109,12 +122,14 @@ def save_plot_recall_at_k_for_illustrators(illustrator_list, sort_type):
     print(f"{GRAPH_PATH} が保存されました．(グラフの作成)")
 
 
+"""
 def plot_recall_at_k(input_file_path, output_file_path):
 
     recalls = calculate_recall(input_file_path)
     plot_graph(recalls, 'recall', output_file_path)
     # print(timing_count)
     # print(recalls)
+"""
 
 
 def _extract_used_hues_count_from_json(illustrator_name):
@@ -416,7 +431,8 @@ def plot_scatter(illustrator_name):
 
 
 def main():
-    plot_recall_at_k("src/color_recommendation/data/output/test_is_contained_next_color_simple_data.json", 'src/color_recommendation/data/output/test_recall_at_k.png')
+    # plot_recall_at_k("src/color_recommendation/data/output/test_is_contained_next_color_simple_data.json", 'src/color_recommendation/data/output/test_recall_at_k.png')
+    pass
 
 
 if __name__ == '__main__':
