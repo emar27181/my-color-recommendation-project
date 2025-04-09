@@ -115,7 +115,7 @@ def save_plot_recall_at_k_for_illustrators(illustrator_list, sort_type):
     plt.grid(True)
 
     # 凡例はフォントサイズや位置も調整可能
-    plt.legend(title="Illustrators", fontsize=8, loc='upper right')
+    plt.legend(title="Illustrators", fontsize=5, loc='upper left')
 
     GRAPH_PATH = f'src/color_recommendation/data/output/recall_at_k_{sort_type}.png'
     plt.savefig(GRAPH_PATH, bbox_inches="tight")  # bbox_inchesを指定するとレイアウトが崩れにくい
