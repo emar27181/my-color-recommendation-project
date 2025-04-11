@@ -124,6 +124,24 @@ def _extract_statistics_by_illustrator(illustrator_name):
     return statistics
 
 
+def print_statistics_for_illustrators(illustrator_list, keyword):
+    """ 引数で受け取るイラストレーターのイラストのキーワードの統計データを表示する関数
+
+    引数:
+        illustrater_list: 推薦配色を生成させたいイラストレーターのリスト(文字列)
+
+    戻り値:
+        None
+    """
+    for illustrator_name in illustrator_list:
+        print(f"\n=== {illustrator_name} ========================")
+        statistics = _extract_statistics_by_illustrator(illustrator_name)
+
+        for data in statistics:
+            if (data == keyword or keyword == "all"):
+                print(f"{data} = {statistics[data]}")
+
+
 def save_statistics_for_illustrators(illustrator_list):
     """ 引数で受け取るイラストレーターのイラストの統計データを保存する関数
 
