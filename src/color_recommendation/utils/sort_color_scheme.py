@@ -1,6 +1,7 @@
 from utils.helpers.color_utils import print_color_scheme, calc_color_scheme_difference_delta_e_cie2000, print_color_schemes
 import random
 from utils.helpers.json_utils import get_json_data
+from utils.analyze_illustrator_statistics import get_statistics_by_illustrator
 
 DEBUG = False
 
@@ -35,6 +36,26 @@ def sort_color_scheme_by_color_difference(base_color_scheme, color_schemes):
     color_schemes.sort(key=lambda color_scheme: calc_color_scheme_difference_delta_e_cie2000(base_color_scheme, color_scheme))
 
     # print_color_schemes(color_schemes)
+    return color_schemes
+
+
+def sort_color_schemes_by_mean_resultant_length(color_schemes, illustrator_name):
+    """引数で受け取った配色群を平均結果長にソートする関数
+    引数:
+        color_schemes: ソートする配色群
+
+    戻り値:
+        color_schemes: 色差の昇順にソートされた配色群
+
+    """
+    mean_resultant_length_distribution = get_statistics_by_illustrator(illustrator_name, "mean_resultant_length_distribution")
+    print(f"mean_resultant_length_distribution: {mean_resultant_length_distribution}")
+
+    sorted_indices = sorted(range(len(mean_resultant_length_distribution)),
+                            key=lambda i: mean_resultant_length_distribution[i],
+                            reverse=True)  # 値で降順に並べたときのインデックスを取得
+    print(sorted_indices)
+
     return color_schemes
 
 
