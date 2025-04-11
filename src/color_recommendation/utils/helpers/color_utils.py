@@ -228,6 +228,21 @@ def calc_color_scheme_difference_delta_e_cie2000(color_scheme1, color_scheme2):
 
     return ave_delta_e
 
+def _angle_diff_to_pccs_diff(angle_diff):
+    """角度の差をPCCS色差に変換する関数
+    引数:
+        angle_diff: 角度の差 (0-180)
+    戻り値:
+        pccs_diff: PCCS色差 (0-12)
+    """
+
+    for i in range(0, 12):
+        if angle_diff <= i * 15 + 7.5:
+            return i
+
+    return 12
+
+
 
 # 引数で受け取ったRGB値の文字を表示させる関数
 def print_colored_text(text, rgb):
