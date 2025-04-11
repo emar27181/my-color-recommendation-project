@@ -98,6 +98,11 @@ def save_recommend_colors_for_illustrators(illutrator_list, sort_type):
         # 推薦配色の生成と推薦配色のソートを別処理にした方が分かりやすいかも
         output_file_path = f"src/color_recommendation/data/output/recommend_colors/sort_by_{sort_type}/recommend_colors_{illustrator_name}.json"
 
+        if not os.path.exists(os.path.dirname(output_file_path)):
+            output_dir_path = f"src/color_recommendation/data/output/recommend_colors/sort_by_{sort_type}"
+            os.makedirs(output_dir_path)
+            print(f"{output_dir_path} ディレクトリが作成されました．")
+
         with open(output_file_path, 'w', encoding='utf-8') as file:
             json.dump(recommend_colors_data, file, ensure_ascii=False, indent=4)
             print(f"{output_file_path} が保存されました．(推薦配色群の生成)")
