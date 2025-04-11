@@ -228,6 +228,7 @@ def calc_color_scheme_difference_delta_e_cie2000(color_scheme1, color_scheme2):
 
     return ave_delta_e
 
+
 def _angle_diff_to_pccs_diff(angle_diff):
     """角度の差をPCCS色差に変換する関数
     引数:
@@ -242,6 +243,43 @@ def _angle_diff_to_pccs_diff(angle_diff):
 
     return 12
 
+
+def calc_pccs_color_diff(base_color, color_scheme):
+    """引数で受け取った色と配色のPCCS色差(0~12)を計算する関数
+
+    引数:
+        base_color: 色 (R, G, B)
+        color_scheme: 配色 (リスト)
+
+    戻り値:
+        pccs_diffs: PCCS色相差のリスト (0-12)
+    """
+    pccs_diffs = []
+
+    for color in color_scheme:
+        # 色相を計算
+        base_color_hsl = rgb_to_hsl(base_color)
+        color_hsl = rgb_to_hsl(color)
+        base_color_hue = base_color_hsl[0]
+        color_hue = color_hsl[0]
+
+        # 色相差を計算
+        hue_diff = calc_angle_diff(base_color_hue, color_hue)
+        pccs_diff = _angle_diff_to_pccs_diff(hue_diff)  # PCCS色相差に変換
+
+        pccs_diffs.append(pccs_diff)
+
+        if (DEBUG):
+            print(f"base_color: ", end="")
+            print_colored_text("■", base_color)
+            print(" , color: ", end="")
+            print_colored_text("■", color)
+            print(f" pccs_diff = {pccs_diff}")
+
+    if (DEBUG):
+        print(f"pccs_diffs = {pccs_diffs}")
+
+    return pccs_diffs
 
 
 # 引数で受け取ったRGB値の文字を表示させる関数
