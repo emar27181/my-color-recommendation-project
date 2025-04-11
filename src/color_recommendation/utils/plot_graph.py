@@ -237,6 +237,61 @@ def save_plot_bar_from_used_achromatic_colors_average_rate_for_illustrators(illu
     print(f"{output_file_path} が保存されました．")
 
 
+def _extract_mean_resultant_length_from_json(illstrator_name):
+    """ jsonファイルからイラストレーターの平均結果長の分布を抽出する関数
+    """
+
+    input_file_path = f"src/color_recommendation/data/input/statistics_for_illustrators.json"
+    data = get_json_data(input_file_path)
+
+    for illstrator_data in data:
+        if (illstrator_name == illstrator_data["illustrator_name"]):
+            mean_resultant_length_distribution = illstrator_data["mean_resultant_length_distribution"]
+            return mean_resultant_length_distribution
+    return None
+
+
+def save_plot_violin_from_mean_resultant_length_count_for_illustrators(illustrator_list):
+    """
+    引数で受け取るリスト内のイラストレーターの平均結果長の分布をヴァイオリン図にプロットする関数
+
+    引数:
+        illustrator_list: 使用色を抽出させたいイラストレーターのリスト(文字列)
+
+    戻り値:
+        None
+    """
+
+    mean_resultant_length_distribution_for_illustrators = {}
+
+    # 各イラストレーターの使用色相(有彩色)の数の分布を取得
+    for illustrator_name in illustrator_list:
+        mean_resultant_length_distribution = _extract_mean_resultant_length_from_json(illustrator_name)
+        print(f"=== {illustrator_name} ====================")
+        mean_resultant_length_distribution_for_illustrators[illustrator_name] = mean_resultant_length_distribution
+
+    # データを「イラストレータ」「要素番号」の形に“出現回数ぶん”展開
+    records = []
+    for illustrator, counts in mean_resultant_length_distribution_for_illustrators.items():
+        for element_idx, count in enumerate(counts):
+            # その要素が count 回出てくるとみなし，countぶんだけ同じ行を追加
+            records.extend([{"Illustrator": illustrator, "Element": element_idx}] * count)
+
+    df = pd.DataFrame(records)
+
+    # ヴァイオリン図を描画（横軸がElement、縦軸がIllustrator）
+    plt.figure(figsize=(10, 12))
+    sns.violinplot(x="Element", y="Illustrator", data=df, inner="quartile", cut=0, scale="count")
+    plt.title("Violin Plot of Mean resultant length distribution by Illustrator")
+    plt.xlabel("Mean resultant length(0~12)")
+    plt.ylabel("Illustrator")
+    plt.tight_layout()
+
+    output_file_path = f'src/color_recommendation/data/output/violin_from_mean_resultant_length.png'
+    plt.savefig(output_file_path)
+    print(f"{output_file_path} が保存されました．")
+
+
 def save_plot_violin_from_used_hues_count_for_illustrators(illustrator_list):
     """
     引数で受け取るリスト内のイラストレーターの使用色相(有彩色)の数の分布をヴァイオリン図にプロットする関数
