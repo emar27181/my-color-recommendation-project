@@ -108,6 +108,8 @@ def _extract_statistics_by_illustrator(illustrator_name):
             elif (used_hue_rate[0] == -11):  # 白の場合
                 achromatic_colors_rate_sum += used_hue_rate[1]
 
+    mean_resultant_length_sum_distribution.reverse()  # 0~12(違う角度を使っている順) → 12~0(同じ角度を使っている順)に反転
+
     statistics = {
         "illustrator_name": illustrator_name,
         "chromatic_colors_count_ave": chromatic_colors_count_sum / len(data),
