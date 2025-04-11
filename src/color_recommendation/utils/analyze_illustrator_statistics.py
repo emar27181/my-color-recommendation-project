@@ -40,6 +40,8 @@ def _extract_statistics_by_illustrator(illustrator_name):
         statistics: イラストレーターの統計データ
     """
 
+    DIV_NUMBER = 12  # 平均結果長の分布で分割する数
+
     input_file_path = f"src/color_recommendation/data/input/used_hues/used_hues_{illustrator_name}.json"
     data = get_json_data(input_file_path)
 
@@ -49,7 +51,9 @@ def _extract_statistics_by_illustrator(illustrator_name):
     achromatic_colors_rate_sum = 0
     used_hues_rate_sum_distribution = [0] * 360
     used_pccs_count_sum_distribution = [0] * 25
+    count_two_or_more_colors_used = 0
     mean_resultant_length_sum = 0
+    mean_resultant_length_sum_distribution = [0] * (DIV_NUMBER + 1)
     chromatic_colors_count_distribution = [0] * 20
 
     for illust_data in data:
@@ -77,8 +81,14 @@ def _extract_statistics_by_illustrator(illustrator_name):
             if (used_hue_rate[0] >= 0):  # 有彩色の場合
                 used_hues_rate_sum_distribution[used_hue_rate[0] % 360] += used_hue_rate[1]
 
-        # 使用色相の平均結果長の計算
-        mean_resultant_length_sum += _mean_resultant_length(used_chromatic_hues)
+        if (len(used_chromatic_hues) >= 2):
+            count_two_or_more_colors_used += 1
+            # 使用色相の平均結果長の計算
+            mean_resultant_length_sum += _mean_resultant_length(used_chromatic_hues)
+
+            # 使用色相の平均結果長の分布の加算
+            mean_resultant_index = round(_mean_resultant_length(used_chromatic_hues) * DIV_NUMBER)  # (0.0 ~ 1.0) -> (0 ~ DIV_NUMBER)
+            mean_resultant_length_sum_distribution[mean_resultant_index] += 1
 
         # 使用PCCSの出現回数の分布の加算
         for pccs in used_pccs:
@@ -107,7 +117,8 @@ def _extract_statistics_by_illustrator(illustrator_name):
         "chromatic_colors_count_distribution": chromatic_colors_count_distribution,
         # "used_hues_rate_ave_distribution": [x / len(data) for x in used_hues_rate_sum_distribution], # 使っていないためコメントアウト(2025/04/06)
         "used_pccs_count_sum_distribution": used_pccs_count_sum_distribution,
-        "mean_resultant_length_ave": mean_resultant_length_sum / len(data),
+        "mean_resultant_length_ave": mean_resultant_length_sum / count_two_or_more_colors_used,
+        "mean_resultant_length_distribution": mean_resultant_length_sum_distribution,
     }
 
     return statistics
