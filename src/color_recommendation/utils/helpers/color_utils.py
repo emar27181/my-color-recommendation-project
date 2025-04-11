@@ -138,6 +138,22 @@ def quantize_color_rgb(rgb, threshold):
     return tuple((value // threshold) * threshold if value % threshold < 3 else (value // threshold) * threshold + threshold for value in rgb)
 
 
+def is_exist_same_color(color, colors, same_color_threshold):
+    """引数で受け取った色が配列に存在するかどうかを調べる関数
+    引数:
+        color: 調べたい色 (R, G, B)
+        colors: 調べる配列 (リスト)
+    戻り値:
+        True: 存在する
+        False: 存在しない
+    """
+    for c in colors:
+        # print(f"calculate_rgb_distance_by_euclidean({color}, {c}) = {calculate_rgb_distance_by_euclidean(color, c)}")
+        if calculate_rgb_distance_by_euclidean(color, c) <= same_color_threshold:
+            return True
+    return False
+
+
 def calculate_color_difference_delta_e_cie2000(color1, color2):
     """二色間の色の差をΔEを用いて計算する関数
     引数:
@@ -203,6 +219,9 @@ def calc_color_scheme_difference_delta_e_cie2000(color_scheme1, color_scheme2):
     min_delta_e_list = [x for x in min_delta_e_list if x != 101]
 
     # print(f"min_delta_e = {min_delta_e_list}")
+
+    if len(min_delta_e_list) == 0:
+        return 100
 
     ave_delta_e = sum([x for x in min_delta_e_list]) / len(min_delta_e_list)
     # print(f"ave_delta_e = {ave_delta_e}")
