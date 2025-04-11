@@ -11,6 +11,9 @@ from utils.download_instagram_images import download_instagram_images
 from utils.sort_color_scheme import sort_color_scheme_by_color_difference, shuffle_color_schemes, sort_color_scheme_by_used_trend, sort_color_schemes_by_mean_resultant_length
 import os
 
+DEBUG = True
+DEBUG = False
+
 
 def read_file(file_path):
     with open(file_path, 'r') as f:
@@ -67,9 +70,10 @@ def generate_recommend_colors(data, sort_type, illustrator_name):
         }
 
         # 確認用出力
-        for i in range(len(recommend_color_schemes_rgb)):
-            print(f"[{i}]: ", end="")
-            print_color_scheme(recommend_color_schemes_rgb[i])
+        if (DEBUG):
+            for i in range(len(recommend_color_schemes_rgb)):
+                print(f"[{i}]: ", end="")
+                print_color_scheme(recommend_color_schemes_rgb[i])
 
         # print(new_illust_data)
         output_data.append(new_illust_data)
