@@ -8,7 +8,7 @@ from utils.check_data_is_contained_next_color import check_data_is_contained_nex
 
 from utils.estimate_used_color_scheme import generate_json_used_color_scheme, save_estimated_used_colors
 from utils.download_instagram_images import download_instagram_images
-from utils.sort_color_scheme import sort_color_scheme_by_color_difference, shuffle_color_schemes, sort_color_scheme_by_used_trend, sort_color_schemes_by_mean_resultant_length
+from utils.sort_color_scheme import sort_color_scheme_by_color_difference, shuffle_color_schemes, sort_color_scheme_by_used_color_count, sort_color_schemes_by_mean_resultant_length
 import os
 
 DEBUG = True
@@ -53,8 +53,8 @@ def generate_recommend_colors(data, sort_type, illustrator_name):
             recommend_color_schemes_rgb = sort_color_scheme_by_color_difference(used_color_scheme_rgb, recommend_color_schemes_rgb)  # 使用配色との類似度順にソート
         elif (sort_type == "random"):
             recommend_color_schemes_rgb = shuffle_color_schemes(recommend_color_schemes_rgb)  # 推薦配色をランダムにシャッフル
-        elif (sort_type == "used_trend"):
-            recommend_color_schemes_rgb = sort_color_scheme_by_used_trend(recommend_color_schemes_rgb, illustrator_name)
+        elif (sort_type == "used_color_count"):
+            recommend_color_schemes_rgb = sort_color_scheme_by_used_color_count(recommend_color_schemes_rgb, illustrator_name)
         elif (sort_type == "mean_resultant_length"):
             recommend_color_schemes_rgb = sort_color_schemes_by_mean_resultant_length(recommend_color_schemes_rgb, illustrator_name)
         elif (sort_type == "no_sort"):

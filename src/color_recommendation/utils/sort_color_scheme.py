@@ -124,7 +124,7 @@ def _get_analysis_data(illustrator_name):
     return None, None, None, None, None, None, None
 
 
-def sort_color_scheme_by_used_trend(color_schemes, illustrator_name):
+def sort_color_scheme_by_used_color_count(color_schemes, illustrator_name):
     """引数で受け取った配色をイラストレーターの使用比率を基にソートする関数
     """
 
