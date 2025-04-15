@@ -151,7 +151,42 @@ def sort_color_scheme_by_used_color_count(color_schemes, illustrator_name):
     return new_color_schemes
 
 
+def _print_color_schemes_info(color_schemes_info):
+    """配色群の情報を表示する関数
+    引数:
+        color_schemes_info: 配色群の情報
+    戻り値:
+        None
+    """
+
+    for color_scheme_info in color_schemes_info:
+        print(f"score = {color_scheme_info['score']}, color_scheme = ", end="")
+        print_color_scheme(color_scheme_info['color_scheme'])
+
+
 def sort_color_scheme_by_custom_v0(color_schemes, illustrator_name):
+    """ カスタムの順序で配色をソートする関数
+
+    Args:
+        color_schemes (_type_): 配色群
+        illustrator_name (_type_): イラストレーター名
+    Returns:
+        _type_: _description_
+    """
+
+    color_schemes_info = []
+
+    print(f"=== {illustrator_name} ==================== ")
+
+    for color_scheme in color_schemes:
+        print_color_scheme(color_scheme)
+        color_schemes_info.append({
+            "color_scheme": color_scheme,
+            "score": -1,
+        })
+
+    _print_color_schemes_info(color_schemes_info)
+
     return color_schemes
 
 
