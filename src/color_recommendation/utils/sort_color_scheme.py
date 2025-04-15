@@ -151,6 +151,10 @@ def sort_color_scheme_by_used_color_count(color_schemes, illustrator_name):
     return new_color_schemes
 
 
+def sort_color_scheme_by_custom_v0(color_schemes, illustrator_name):
+    return color_schemes
+
+
 def shuffle_color_schemes(color_schemes):
     """引数で受け取った配色群をランダムに並び替える関数"""
 
