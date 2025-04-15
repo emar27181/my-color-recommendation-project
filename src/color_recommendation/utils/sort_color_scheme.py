@@ -182,9 +182,10 @@ def sort_color_scheme_by_custom_v0(color_schemes, illustrator_name):
         print_color_scheme(color_scheme)
         color_schemes_info.append({
             "color_scheme": color_scheme,
-            "score": -1,
+            "score": round(random.random() * 10),
         })
 
+    color_schemes_info = sorted(color_schemes_info, key=lambda x: x['score'], reverse=True)
     _print_color_schemes_info(color_schemes_info)
 
     return color_schemes
