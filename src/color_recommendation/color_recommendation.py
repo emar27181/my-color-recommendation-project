@@ -58,7 +58,7 @@ def generate_recommend_colors(data, sort_type, illustrator_name):
         elif (sort_type == "mean_resultant_length"):
             recommend_color_schemes_rgb = sort_color_schemes_by_mean_resultant_length(recommend_color_schemes_rgb, illustrator_name)
         elif (sort_type == "custom_v0"):
-            recommend_color_schemes_rgb = sort_color_scheme_by_custom_v0(recommend_color_schemes_rgb, illustrator_name)
+            recommend_color_schemes_rgb = sort_color_scheme_by_custom_v0(used_color_scheme_rgb, recommend_color_schemes_rgb, illustrator_name)
         elif (sort_type == "no_sort"):
             pass
         else:

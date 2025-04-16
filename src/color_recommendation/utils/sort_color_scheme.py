@@ -2,6 +2,7 @@ from utils.helpers.color_utils import print_color_scheme, calc_color_scheme_diff
 import random
 from utils.helpers.json_utils import get_json_data
 from utils.analyze_illustrator_statistics import get_statistics_by_illustrator
+from utils.helpers.calc_rec_score import calc_same_hue_score
 
 DEBUG = False
 
@@ -151,8 +152,8 @@ def sort_color_scheme_by_used_color_count(color_schemes, illustrator_name):
     return new_color_schemes
 
 
-def _print_color_schemes_info(color_schemes_info):
-    """配色群の情報を表示する関数
+def _print_rec_color_schemes_info(color_schemes_info):
+    """配色群の情報(配色の色やスコア)を表示する関数
     引数:
         color_schemes_info: 配色群の情報
     戻り値:
@@ -160,11 +161,27 @@ def _print_color_schemes_info(color_schemes_info):
     """
 
     for color_scheme_info in color_schemes_info:
-        print(f"score = {color_scheme_info['score']}, color_scheme = ", end="")
-        print_color_scheme(color_scheme_info['color_scheme'])
+        print(f"score = {color_scheme_info['score']}, rec_color_scheme = ", end="")
+        print_color_scheme(color_scheme_info['rec_color_scheme'])
 
 
-def sort_color_scheme_by_custom_v0(color_schemes, illustrator_name):
+def _calc_rec_color_scheme_score(used_color_scheme, rec_color_scheme):
+    """推薦配色のスコアを計算する関数
+    引数:
+        used_color_scheme: 使用配色
+        rec_color_scheme: 推薦配色
+
+    戻り値:
+        score: スコア
+    """
+
+    # 同じ色相かどうかでスコアを計算
+    same_hue_score = calc_same_hue_score(used_color_scheme, rec_color_scheme)
+
+    return same_hue_score
+
+
+def sort_color_scheme_by_custom_v0(used_color_scheme, rec_color_schemes, illustrator_name):
     """ カスタムの順序で配色をソートする関数
 
     Args:
@@ -174,21 +191,24 @@ def sort_color_scheme_by_custom_v0(color_schemes, illustrator_name):
         _type_: _description_
     """
 
-    color_schemes_info = []
+    rec_color_schemes_info = []
 
     print(f"=== {illustrator_name} ==================== ")
 
-    for color_scheme in color_schemes:
-        print_color_scheme(color_scheme)
-        color_schemes_info.append({
-            "color_scheme": color_scheme,
-            "score": round(random.random() * 10),
+    # 推薦配色ごとにスコアを計算
+    for rec_color_scheme in rec_color_schemes:
+        rec_color_schemes_info.append({
+            "rec_color_scheme": rec_color_scheme,
+            "score": _calc_rec_color_scheme_score(used_color_scheme, rec_color_scheme)
         })
 
-    color_schemes_info = sorted(color_schemes_info, key=lambda x: x['score'], reverse=True)
-    _print_color_schemes_info(color_schemes_info)
+    # スコアの降順でソート
+    rec_color_schemes_info = sorted(rec_color_schemes_info, key=lambda x: x['score'], reverse=True)
 
-    return color_schemes
+    # 確認用出力
+    # _print_rec_color_schemes_info(rec_color_schemes_info)
+
+    return rec_color_schemes
 
 
 def shuffle_color_schemes(color_schemes):
