@@ -14,18 +14,21 @@ def add_lightness_variations_color_scheme(color_scheme, ligtness_diff):
     return new_color_scheme
 
 
-# バリエーションを増やした配色を返す関数
-def add_all_variations_color_schemes(color_schemes, lightness_diff):
-    # new_color_schemes = color_schemes
+def get_lightness_variations_color_schemes(color_schemes, lightness_diff):
+    """ 
+    明度による配色のバリエーションを増やす関数
 
-    # print(new_color_schemes)
+    引数:
+        color_schemes: 配色群
+        lightness_diff: 明度の差(-100 ~ +100)
+
+    戻り値:
+        new_color_schemes: 明度の差を加えた配色群(基の配色群に明度の差を加えたもの)
+    """
 
     new_color_schemes = []
 
-    before_color_schemes_len = len(color_schemes)
-
-    # for color_scheme in color_schemes:
-    for i in range(before_color_schemes_len):
+    for i in range(len(color_schemes)):
         color_scheme = color_schemes[i]
 
         # 確認用出力
@@ -33,17 +36,14 @@ def add_all_variations_color_schemes(color_schemes, lightness_diff):
             print_color_scheme(color_scheme)
             print_color_scheme(add_lightness_variations_color_scheme(color_scheme, lightness_diff))
 
-        color_schemes.append(add_lightness_variations_color_scheme(color_scheme, lightness_diff))
         new_color_schemes.append(add_lightness_variations_color_scheme(color_scheme, lightness_diff))
 
-    # color_schemes.append(new_color_schemes)
-
-    return (color_schemes)
+    return (new_color_schemes)
 
 
 def main():
     test_color_schemes = generate_all_color_schemes([255, 128, 0])
-    print_color_schemes(add_all_variations_color_schemes(test_color_schemes))
+    print_color_schemes(get_lightness_variations_color_schemes(test_color_schemes))
 
 
 if __name__ == "__main__":

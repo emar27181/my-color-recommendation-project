@@ -1,6 +1,6 @@
 import json
 from utils.generate_color_scheme_method import generate_all_color_schemes, remove_duplicated_color_from_color_schemes
-from utils.add_variations_color_scheme import add_all_variations_color_schemes
+from utils.add_variations_color_scheme import get_lightness_variations_color_schemes
 from utils.helpers.color_utils import print_colored_text, print_color_schemes, print_color_scheme
 from utils.helpers.transform_color import hex_to_rgb, transform_color_schemes_rgb_to_hex
 from utils.helpers.json_utils import convert_color_schemes_to_color_data
@@ -42,12 +42,15 @@ def generate_recommend_colors(data, sort_type, illustrator_name):
 
         # あるイラストに対して推薦配色群を生成
         base_color_rgb = hex_to_rgb(illust_data[0]['color'])  # 推薦配色の基となる色を取得
-        recommend_color_schemes_rgb = generate_all_color_schemes(base_color_rgb)  # 17(?)パターンの配色群を生成
+        recommend_base_color_schemes_rgb = generate_all_color_schemes(base_color_rgb)  # 17(?)パターンの配色群を生成
+        recommend_color_schemes_rgb = recommend_base_color_schemes_rgb.copy()
         # recommend_color_schemes_rgb = remove_duplicated_color_from_color_schemes(recommend_color_schemes_rgb) # 重複色を削除
-        recommend_color_schemes_rgb = add_all_variations_color_schemes(recommend_color_schemes_rgb, +20)
-        recommend_color_schemes_rgb = add_all_variations_color_schemes(recommend_color_schemes_rgb, -20)
-        recommend_color_schemes_rgb = add_all_variations_color_schemes(recommend_color_schemes_rgb, +40)
-        recommend_color_schemes_rgb = add_all_variations_color_schemes(recommend_color_schemes_rgb, -40)
+
+        # 生成された推薦配色群に明度彩度が異なる色を追加
+        recommend_color_schemes_rgb += get_lightness_variations_color_schemes(recommend_base_color_schemes_rgb, +20)
+        recommend_color_schemes_rgb += get_lightness_variations_color_schemes(recommend_base_color_schemes_rgb, -20)
+        recommend_color_schemes_rgb += get_lightness_variations_color_schemes(recommend_base_color_schemes_rgb, +40)
+        recommend_color_schemes_rgb += get_lightness_variations_color_schemes(recommend_base_color_schemes_rgb, -40)
 
         if (sort_type == "color_diff"):
             recommend_color_schemes_rgb = sort_color_scheme_by_color_difference(used_color_scheme_rgb, recommend_color_schemes_rgb)  # 使用配色との類似度順にソート
