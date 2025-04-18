@@ -22,7 +22,7 @@ def read_file(file_path):
         return data
 
 
-def generate_recommend_colors(data, sort_type, illustrator_name):
+def generate_recommend_colors(data, sort_type, illustrator_name, lightness_diffs):
 
     output_data = []
 
@@ -47,10 +47,8 @@ def generate_recommend_colors(data, sort_type, illustrator_name):
         # recommend_color_schemes_rgb = remove_duplicated_color_from_color_schemes(recommend_color_schemes_rgb) # 重複色を削除
 
         # 生成された推薦配色群に明度彩度が異なる色を追加
-        recommend_color_schemes_rgb += get_lightness_variations_color_schemes(recommend_base_color_schemes_rgb, +20)
-        recommend_color_schemes_rgb += get_lightness_variations_color_schemes(recommend_base_color_schemes_rgb, -20)
-        recommend_color_schemes_rgb += get_lightness_variations_color_schemes(recommend_base_color_schemes_rgb, +40)
-        recommend_color_schemes_rgb += get_lightness_variations_color_schemes(recommend_base_color_schemes_rgb, -40)
+        for lightness_diff in lightness_diffs:
+            recommend_color_schemes_rgb += get_lightness_variations_color_schemes(recommend_base_color_schemes_rgb, lightness_diff)
 
         if (sort_type == "color_diff"):
             recommend_color_schemes_rgb = sort_color_scheme_by_color_difference(used_color_scheme_rgb, recommend_color_schemes_rgb)  # 使用配色との類似度順にソート
@@ -88,13 +86,14 @@ def generate_recommend_colors(data, sort_type, illustrator_name):
     return output_data
 
 
-def save_recommend_colors_for_illustrators(illutrator_list, sort_type):
+def save_recommend_colors_for_illustrators(illutrator_list, sort_type, lightness_diffs):
     """
     引数で受け取るリスト内のイラストレーターのイラストの推薦配色を保存する関数
 
     引数:
         illutrater_list: 推薦配色を生成させたいイラストレーターのリスト(文字列)
-        sort_type: ソートの種類(random/color_diff)
+        sort_type: ソートの種類(random/color_diff/...)
+        lightness_diffs: 明度の差のリスト(例: [+20, -20, +40, -40])
     戻り値:
         None
     """
@@ -105,7 +104,7 @@ def save_recommend_colors_for_illustrators(illutrator_list, sort_type):
         input_file_path = f"src/color_recommendation/data/input/used_colors/used_colors_{illustrator_name}.json"
         used_colors_data = read_file(input_file_path)
 
-        recommend_colors_data = generate_recommend_colors(used_colors_data, sort_type, illustrator_name)
+        recommend_colors_data = generate_recommend_colors(used_colors_data, sort_type, illustrator_name, lightness_diffs)
         # 推薦配色の生成と推薦配色のソートを別処理にした方が分かりやすいかも
         output_file_path = f"src/color_recommendation/data/output/recommend_colors/sort_by_{sort_type}/recommend_colors_{illustrator_name}.json"
 
