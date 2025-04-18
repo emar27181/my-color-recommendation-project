@@ -444,5 +444,32 @@ def bring_element_to_front(list, target):
     return list
 
 
+def extract_specific_range_of_hsl_from_color_scheme(color_scheme, hue_range, saturation_range, lightness_range):
+    """引数で受け取った配色から指定した範囲の色を抽出する関数
+    引数:
+        color_scheme: 配色のリスト 
+        hue_range: 色相の範囲 (0~360) (ex. [0, 30])
+        saturation_range: 彩度の範囲 (0~100) (ex. [0, 30])
+        lightness_range: 明度の範囲 (0~100) (ex. [0, 30])
+
+    戻り値:
+        extracted_colors: 抽出された色のリスト
+
+    """
+    extracted_colors = []
+
+    for color in color_scheme:
+        # 色相、彩度、明度を取得
+        color_hsl = rgb_to_hsl(color)
+
+        # 指定した範囲に含まれるか確認
+        if (hue_range[0] <= color_hsl[0] <= hue_range[1] and
+                saturation_range[0] <= color_hsl[1] <= saturation_range[1] and
+                lightness_range[0] <= color_hsl[2] <= lightness_range[1]):
+            extracted_colors.append(color)
+
+    return extracted_colors
+
+
 if __name__ == "__main__":
     print("=== color_utils.py =====================")
