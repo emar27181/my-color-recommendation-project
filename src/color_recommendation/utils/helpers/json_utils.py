@@ -61,3 +61,22 @@ def get_json_data(file_path):
     except Exception as e:
         print(f"予期しないエラーが発生しました: {e}")
         return []
+
+
+def save_json_data(data, output_dir_path, output_file_path):
+    """ 引数で受け取るパスにjsonファイルを保存する関数
+
+    引数:
+        output_dir_path:
+        output_file_path: jsonファイルのパス
+        data: 保存するデータ
+    """
+
+    # 推薦配色群の保存
+    if not os.path.exists(os.path.dirname(output_file_path)):
+        os.makedirs(output_dir_path)
+        print(f"{output_dir_path} ディレクトリが作成されました．")
+
+    with open(output_file_path, 'w', encoding='utf-8') as file:
+        json.dump(data, file, ensure_ascii=False, indent=4)
+        print(f"{output_file_path} が保存されました．")
