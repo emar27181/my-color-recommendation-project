@@ -1,6 +1,7 @@
 from utils.helpers.color_utils import calculate_color_difference_delta_e_cie2000, print_colored_text
 from utils.helpers.transform_color import hex_to_rgb
 import json
+import os
 
 IS_PRINT_CONTAINED_NEXT_COLOR_INFO = False
 
@@ -45,7 +46,7 @@ def save_data_is_contained_next_color_for_illustrators(illutrator_list, sort_typ
     for illutrator_name in illutrator_list:
         print(f"=== {illutrator_name} ========================")
 
-        input_file_path = f"src/color_recommendation/data/output/recommend_colors/{sort_type}/recommend_colors_{illutrator_name}.json"
+        input_file_path = f"src/color_recommendation/data/output/recommend_colors/sort_by_{sort_type}/recommend_colors_{illutrator_name}.json"
 
         with open(input_file_path, 'r', encoding='utf-8') as file:
             recommended_colors_data = json.load(file)
@@ -55,6 +56,12 @@ def save_data_is_contained_next_color_for_illustrators(illutrator_list, sort_typ
         # print(f"{is_contained_next_color_data}")
 
         output_file_path = f"src/color_recommendation/data/output/is_contained_next_color/{sort_type}/is_contained_next_color_{illutrator_name}.json"
+
+        if not os.path.exists(os.path.dirname(output_file_path)):
+            output_dir_path = f"src/color_recommendation/data/output/is_contained_next_color/{sort_type}"
+            os.makedirs(output_dir_path)
+            print(f"{output_dir_path} ディレクトリが作成されました．")
+
         with open(output_file_path, 'w', encoding='utf-8') as file:
             json.dump(is_contained_next_color_data, file, ensure_ascii=False, indent=4)
             print(f"{output_file_path} が保存されました．(次の色が含まれているかどうかを保存するデータの作成)")

@@ -2,6 +2,13 @@ import numpy as np
 from skimage.color import rgb2lab
 
 
+def _calc_angle_diff(angle1, angle2):
+    """角度の差(0°~180°)を計算する関数
+    """
+    diff = abs(angle1 - angle2)
+    return diff if diff <= 180 else 360 - diff
+
+
 def hex_to_rgb(hex_color):
     hex_color = hex_color.lstrip('#')
     return tuple(int(hex_color[i:i + 2], 16) for i in (0, 2, 4))
@@ -96,6 +103,126 @@ def transform_color_schemes_rgb_to_hex(color_schemes_rgb):
         # print("color_scheme_rgb: ", color_scheme_rgb)
         color_schemes_hex.append(transform_color_scheme_rgb_to_hex(color_scheme_rgb))
     return color_schemes_hex
+
+
+def transform_hues_to_pccs(hues):
+    pccs = []
+    for hue in hues:
+        pccs.append(hue_to_pccs(hue))
+    pccs.sort()
+    return pccs
+
+
+def hue_to_pccs(hue_angle):
+    """
+    HSLの色相角度（0°〜360°）をPCCSの色相番号（1〜24）に変換する関数
+    ※PCCSの黄色は8だが，この関数では5になってしまっている(2025/04/02)
+
+    引数:
+        hue_angle (float): HSLの色相角度（0°〜360°）
+
+    戻り値:
+        pccs_number (int): PCCSの色相番号（1〜24）
+
+    """
+    # HSLの色相角度をPCCSの色相番号にマッピング
+    pccs_number = round((hue_angle / 360) * 24) + 1
+
+    if (pccs_number > 24):
+        pccs_number = 1
+
+    return pccs_number
+
+
+def _is_angle_between_angles(angle, angle_start, angle_end):
+    """ ある角度同士の間にあるかどうかを判定する関数
+    """
+    return ((angle_start <= angle) & (angle <= angle_end))
+
+
+def hue_diffs_to_color_method(hue_diffs):
+    """ 色相差から配色方法を推定する関数
+    ※現時点では推定された配色技法をコンソールに出力するだけ(2025/04/02)
+
+    引数:
+        hue_diffs (list): 色相差のリスト
+
+    戻り値:
+        None: なし
+    """
+
+    print("推定結果 => ", end="")
+    if (len(hue_diffs) == 0):
+        print("0色相: モノクロ配色")
+
+    # 色相の数が1色だった場合
+    elif (len(hue_diffs) == 1):
+        print("1色相: アイデンティティ配色")
+
+    # 色相の数が2色だった場合
+    elif (len(hue_diffs) == 2):
+        if (hue_diffs[1] >= 165):
+            # used_color_scheme_method ColorScheme.DYAD_COLOR
+            print("2色相: ダイアード配色")
+        elif (_is_angle_between_angles(hue_diffs[1], 75, 105)):
+            print("2色相: インターミディエート配色")
+        elif (_is_angle_between_angles(hue_diffs[1], 105, 165)):
+            print("2色相: オポーネント配色")
+        elif (_is_angle_between_angles(hue_diffs[1], 15, 45)):
+            print("2色相: アナロジー配色")
+        else:
+            print("2色相: エラー")
+
+    # 色相の数が3色だった場合
+    elif (len(hue_diffs) == 3):
+        if ((hue_diffs[1] <= 30) & (hue_diffs[2] <= 60)):
+            print("3色相: ドミナント配色")
+        elif (((120 <= hue_diffs[1]) & (hue_diffs[1] <= 150)) & ((120 <= hue_diffs[2]) & (hue_diffs[2] <= 150))):
+            print("3色相: トライアド配色")
+        elif ((hue_diffs[1] >= 150) & (hue_diffs[2] >= 150)):
+            print("3色相: スプリットコンプリメンタリー配色")
+        elif (_is_angle_between_angles(hue_diffs[1], 15, 60) & _is_angle_between_angles(hue_diffs[2], 135, 165)):
+            print("3色相: スプリットコンプリメンタリー配色")
+        elif (_is_angle_between_angles(hue_diffs[2], 15, 60) & _is_angle_between_angles(hue_diffs[1], 135, 165)):
+            print("3色相: スプリットコンプリメンタリー配色")
+        else:
+            print("3色相: エラー")
+
+    # 色相の数が4色だった場合
+    elif (len(hue_diffs) == 4):
+        if (_is_angle_between_angles(hue_diffs[1], 75, 105) & _is_angle_between_angles(hue_diffs[2], 75, 105) & (hue_diffs[3] >= 165)):
+            print("4色相: テトラード配色")
+        else:
+            print("4色相: エラー")
+
+    # 色相の数が5色だった場合
+    elif (len(hue_diffs) == 5):
+        print("5色相: ペンタード配色")
+
+    # 色相の数が6色だった場合
+    elif (len(hue_diffs) == 6):
+        print("6色相: ヘキサード配色")
+
+    # 色相の数が7色だった場合
+    else:
+        print("7色相以上: エラー")
+
+
+def chromatic_hues_to_hue_diffs(chromatic_hues):
+    """
+    有彩色の色相のリストから色相差のリストを生成する関数
+    """
+
+    hue_diffs = []
+
+    # 色相差の計算
+    for i in range(0, len(chromatic_hues)):
+        hue_diff = _calc_angle_diff(chromatic_hues[0], chromatic_hues[i])
+        hue_diffs.append(hue_diff)
+
+    hue_diffs.sort()
+
+    return hue_diffs
 
 
 def main():

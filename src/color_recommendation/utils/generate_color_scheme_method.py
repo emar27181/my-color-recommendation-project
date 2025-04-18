@@ -1,5 +1,7 @@
 from .helpers.transform_color import rgb_to_hsl, hsl_to_rgb, rgb_to_hex, hex_to_rgb
-from .helpers.color_utils import print_colored_text, print_color_schemes
+from .helpers.color_utils import print_colored_text, print_color_schemes, print_color_scheme, is_exist_same_color
+
+DEBUG = False
 
 
 def generate_all_color_schemes(base_color_rgb):
@@ -112,6 +114,43 @@ def generate_pentad_color_scheme(base_color_rgb):
 def generate_hexad_color_scheme(base_color_rgb):
     color_scheme = generate_color_scheme(base_color_rgb, [60, 120, 180, 240, 300])
     return color_scheme,
+
+
+def remove_duplicated_color_from_color_schemes(color_schemes):
+    """ 重複した色を削除する関数
+
+    引数:
+        color_schemes: 色の配列のリスト
+    戻り値:
+        color_schemes: 重複した色を削除した配列のリスト
+    """
+
+    SAME_COLOR_THRESHOLD = 0.01  # 色の閾値
+
+    new_colors = []
+    for color_scheme in color_schemes:
+        unique_colors = []
+        for color in color_scheme:
+            if (is_exist_same_color(color, new_colors, SAME_COLOR_THRESHOLD)):
+                pass
+            else:
+                new_colors.append(color)
+
+    if (DEBUG):
+        print(f"\ncolor_schemes: (重複した色を削除する前の配色群)")
+        print_color_schemes(color_schemes)
+
+    new_color_schemes = []
+    for color in new_colors:
+        new_color_scheme = []
+        new_color_scheme.append(color)
+        new_color_schemes.append(new_color_scheme)
+
+    if (DEBUG):
+        print(f"\nnew_color_schemes: (重複した色を削除した配色群)")
+        print_color_schemes(new_color_schemes)
+
+    return new_color_schemes
 
 
 def main():

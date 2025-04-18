@@ -138,6 +138,22 @@ def quantize_color_rgb(rgb, threshold):
     return tuple((value // threshold) * threshold if value % threshold < 3 else (value // threshold) * threshold + threshold for value in rgb)
 
 
+def is_exist_same_color(color, colors, same_color_threshold):
+    """引数で受け取った色が配列に存在するかどうかを調べる関数
+    引数:
+        color: 調べたい色 (R, G, B)
+        colors: 調べる配列 (リスト)
+    戻り値:
+        True: 存在する
+        False: 存在しない
+    """
+    for c in colors:
+        # print(f"calculate_rgb_distance_by_euclidean({color}, {c}) = {calculate_rgb_distance_by_euclidean(color, c)}")
+        if calculate_rgb_distance_by_euclidean(color, c) <= same_color_threshold:
+            return True
+    return False
+
+
 def calculate_color_difference_delta_e_cie2000(color1, color2):
     """二色間の色の差をΔEを用いて計算する関数
     引数:
@@ -204,10 +220,66 @@ def calc_color_scheme_difference_delta_e_cie2000(color_scheme1, color_scheme2):
 
     # print(f"min_delta_e = {min_delta_e_list}")
 
+    if len(min_delta_e_list) == 0:
+        return 100
+
     ave_delta_e = sum([x for x in min_delta_e_list]) / len(min_delta_e_list)
     # print(f"ave_delta_e = {ave_delta_e}")
 
     return ave_delta_e
+
+
+def _angle_diff_to_pccs_diff(angle_diff):
+    """角度の差をPCCS色差に変換する関数
+    引数:
+        angle_diff: 角度の差 (0-180)
+    戻り値:
+        pccs_diff: PCCS色差 (0-12)
+    """
+
+    for i in range(0, 12):
+        if angle_diff <= i * 15 + 7.5:
+            return i
+
+    return 12
+
+
+def calc_pccs_color_diff(base_color, color_scheme):
+    """引数で受け取った色と配色のPCCS色差(0~12)を計算する関数
+
+    引数:
+        base_color: 色 (R, G, B)
+        color_scheme: 配色 (リスト)
+
+    戻り値:
+        pccs_diffs: PCCS色相差のリスト (0-12)
+    """
+    pccs_diffs = []
+
+    for color in color_scheme:
+        # 色相を計算
+        base_color_hsl = rgb_to_hsl(base_color)
+        color_hsl = rgb_to_hsl(color)
+        base_color_hue = base_color_hsl[0]
+        color_hue = color_hsl[0]
+
+        # 色相差を計算
+        hue_diff = calc_angle_diff(base_color_hue, color_hue)
+        pccs_diff = _angle_diff_to_pccs_diff(hue_diff)  # PCCS色相差に変換
+
+        pccs_diffs.append(pccs_diff)
+
+        if (DEBUG):
+            print(f"base_color: ", end="")
+            print_colored_text("■", base_color)
+            print(" , color: ", end="")
+            print_colored_text("■", color)
+            print(f" pccs_diff = {pccs_diff}")
+
+    if (DEBUG):
+        print(f"pccs_diffs = {pccs_diffs}")
+
+    return pccs_diffs
 
 
 # 引数で受け取ったRGB値の文字を表示させる関数
@@ -315,6 +387,88 @@ def calc_angle_diff(angle1, angle2):
     """
     diff = abs(angle1 - angle2)
     return diff if diff <= 180 else 360 - diff
+
+
+def calc_mean_angle(degrees):
+    """
+    平均角度を計算する関数
+
+    Args:
+        degrees: 角度のリスト
+
+    Returns:
+        mean_degree : 角度の平均値
+    """
+    # ラジアンに変換
+    radians = np.radians(degrees)
+    # 各角度の単位ベクトルを計算
+    sin_sum = np.sum(np.sin(radians))
+    cos_sum = np.sum(np.cos(radians))
+    # 平均ベクトルの角度を計算
+    mean_radian = np.arctan2(sin_sum, cos_sum)
+    # ラジアンを度に変換し、0-360度の範囲に調整
+    mean_degree = np.degrees(mean_radian) % 360
+    return mean_degree
+
+
+def calc_closest_angle(angles, target):
+    """
+    angles: 度単位の角度のリスト
+    target: ターゲット角度。2π未満ならラジアンとみなし度に変換する。
+    ターゲットに最も近い角度（度単位）を返す。
+    """
+    # ターゲットが2π未満の場合、ラジアンとみなして度に変換
+    if target < 2 * math.pi:
+        target = math.degrees(target)
+
+    best = None
+    min_diff = 360  # 初期値は最大の360度
+    for angle in angles:
+        # 循環する角度の差を計算（0〜180の最小差）
+        diff = abs(angle - target) % 360
+        if diff > 180:
+            diff = 360 - diff
+        if diff < min_diff:
+            min_diff = diff
+            best = angle
+    return best
+
+
+def bring_element_to_front(list, target):
+    """ ターゲットを先頭に持ってくる関数
+    """
+    # リストに対象の要素が存在するか確認
+    if target in list:
+        list.remove(target)    # まずリストから削除
+        list.insert(0, target)  # 先頭に挿入
+    return list
+
+
+def extract_specific_range_of_hsl_from_color_scheme(color_scheme, hue_range, saturation_range, lightness_range):
+    """引数で受け取った配色から指定した範囲の色を抽出する関数
+    引数:
+        color_scheme: 配色のリスト 
+        hue_range: 色相の範囲 (0~360) (ex. [0, 30])
+        saturation_range: 彩度の範囲 (0~100) (ex. [0, 30])
+        lightness_range: 明度の範囲 (0~100) (ex. [0, 30])
+
+    戻り値:
+        extracted_colors: 抽出された色のリスト
+
+    """
+    extracted_colors = []
+
+    for color in color_scheme:
+        # 色相、彩度、明度を取得
+        color_hsl = rgb_to_hsl(color)
+
+        # 指定した範囲に含まれるか確認
+        if (hue_range[0] <= color_hsl[0] <= hue_range[1] and
+                saturation_range[0] <= color_hsl[1] <= saturation_range[1] and
+                lightness_range[0] <= color_hsl[2] <= lightness_range[1]):
+            extracted_colors.append(color)
+
+    return extracted_colors
 
 
 if __name__ == "__main__":
