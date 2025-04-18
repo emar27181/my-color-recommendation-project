@@ -7,3 +7,4 @@ tmp/
 *sandbox*
 *memo.md
 .env
+*.code-workspace
