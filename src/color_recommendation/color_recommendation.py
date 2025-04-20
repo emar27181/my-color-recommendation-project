@@ -39,7 +39,23 @@ def generate_recommend_hues(data, sort_type, illustrator_name):
 
         # あるイラストに対して推薦配色群を生成
         base_color_rgb = hex_to_rgb(illust_data[0]['color'])  # 推薦配色の基となる色を取得
-        recommend_color_schemes_rgb = generate_all_color_schemes(base_color_rgb)  # 17(?)パターンの配色群を生成
+        recommend_color_schemes_rgb = generate_all_color_schemes(base_color_rgb)  # 17パターンの配色群を生成
+
+        # 推薦配色群の並び替え
+        if (sort_type == "color_diff"):
+            recommend_color_schemes_rgb = sort_color_scheme_by_color_difference(used_color_scheme_rgb, recommend_color_schemes_rgb)  # 使用配色との類似度順にソート
+        elif (sort_type == "random"):
+            recommend_color_schemes_rgb = shuffle_color_schemes(recommend_color_schemes_rgb)  # 推薦配色をランダムにシャッフル
+        elif (sort_type == "used_color_count"):
+            recommend_color_schemes_rgb = sort_color_scheme_by_used_color_count(recommend_color_schemes_rgb, illustrator_name)
+        elif (sort_type == "mean_resultant_length"):
+            recommend_color_schemes_rgb = sort_color_schemes_by_mean_resultant_length(recommend_color_schemes_rgb, illustrator_name)
+        elif (sort_type == "custom_v0"):
+            recommend_color_schemes_rgb = sort_color_scheme_by_custom_v0(used_color_scheme_rgb, recommend_color_schemes_rgb, illustrator_name)
+        elif (sort_type == "no_sort"):
+            pass
+        else:
+            print("ソートの種類が間違っているため，推薦配色は並び替えられずに挿入されます．(ソートの種類:  'random', 'color_diff')")
 
         new_illust_data = {
             "illust_name": illust_data[0]['illustName'],
@@ -48,6 +64,12 @@ def generate_recommend_hues(data, sort_type, illustrator_name):
         }
 
         output_data.append(new_illust_data)
+
+        # 確認用出力
+        if (DEBUG):
+            for i in range(len(recommend_color_schemes_rgb)):
+                print(f"[{i}]: ", end="")
+                print_color_scheme(recommend_color_schemes_rgb[i])
 
     return output_data
 
@@ -101,12 +123,6 @@ def generate_recommend_colors(data, sort_type, illustrator_name, lightness_diffs
             "recommend_color_schemes": convert_color_schemes_to_color_data(transform_color_schemes_rgb_to_hex(recommend_color_schemes_rgb)),
         }
 
-        # 確認用出力
-        if (DEBUG):
-            for i in range(len(recommend_color_schemes_rgb)):
-                print(f"[{i}]: ", end="")
-                print_color_scheme(recommend_color_schemes_rgb[i])
-
         output_data.append(new_illust_data)
 
     return output_data
@@ -123,6 +139,7 @@ def save_recommend_colors_for_illustrators(illutrator_list, sort_type, lightness
     戻り値:
         None
     """
+    print(f"=== {sort_type} ====================")
 
     for illustrator_name in illutrator_list:
         print(f"=== {illustrator_name} ====================")
