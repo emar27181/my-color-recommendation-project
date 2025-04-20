@@ -82,22 +82,22 @@ def calculate_recall(file_path, recommend_colors_count):
     return recalls
 
 
-def _get_recommend_colors_count(illustrator_name, sort_type):
-    input_file_path = f"src/color_recommendation/data/output/recommend_colors/sort_by_{sort_type}/recommend_colors_{illustrator_name}.json"
+def _get_recommend_colors_count(illustrator_name, sort_type, check_subject):
+    input_file_path = f"src/color_recommendation/data/output/recommend_{check_subject}s/sort_by_{sort_type}/recommend_{check_subject}s_{illustrator_name}.json"
     data = get_json_data(input_file_path)
     return len(data[0]['recommend_color_schemes'])
 
 
-def save_plot_recall_at_k_for_illustrators(illustrator_list, sort_type):
+def save_plot_recall_at_k_for_illustrators(illustrator_list, sort_type, check_subject):
 
-    recommned_colors_count = _get_recommend_colors_count(illustrator_list[0], sort_type)
+    recommned_colors_count = _get_recommend_colors_count(illustrator_list[0], sort_type, check_subject)
 
     # マーカーと線種の候補リスト
     markers = itertools.cycle(['o', 's', 'v', '^', 'd', '>', '<', 'p', '*', 'h'])
     linestyles = itertools.cycle(['-', '--', '-.', ':'])
 
     for illustrator_name in illustrator_list:
-        IS_CONTAINED_NEXT_COLOR_FILE_PATH = f"src/color_recommendation/data/output/is_contained_next_color/{sort_type}/is_contained_next_color_{illustrator_name}.json"
+        IS_CONTAINED_NEXT_COLOR_FILE_PATH = f"src/color_recommendation/data/output/is_contained_next_{check_subject}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}.json"
         recalls = calculate_recall(IS_CONTAINED_NEXT_COLOR_FILE_PATH, recommned_colors_count)
 
         # マーカーサイズは適度なサイズに設定し、線種も適用
@@ -107,7 +107,7 @@ def save_plot_recall_at_k_for_illustrators(illustrator_list, sort_type):
                  markersize=0,
                  linestyle=next(linestyles))
 
-    plt.title(f"recall@k sort_type={sort_type}")
+    plt.title(f"recall@k({check_subject}) sort_type={sort_type}")
     plt.ylim(0, 1)
     plt.xlim(0, recommned_colors_count)
     plt.xlabel('color_scheme')
@@ -117,7 +117,7 @@ def save_plot_recall_at_k_for_illustrators(illustrator_list, sort_type):
     # 凡例はフォントサイズや位置も調整可能
     plt.legend(title="Illustrators", fontsize=5, loc='upper left')
 
-    GRAPH_PATH = f'src/color_recommendation/data/output/recall_at_k_{sort_type}.png'
+    GRAPH_PATH = f'src/color_recommendation/data/output/{check_subject}_recall_at_k_{sort_type}.png'
     plt.savefig(GRAPH_PATH, bbox_inches="tight")  # bbox_inchesを指定するとレイアウトが崩れにくい
     print(f"{GRAPH_PATH} が保存されました．(グラフの作成)")
 
