@@ -4,7 +4,7 @@ from utils.add_variations_color_scheme import get_lightness_variations_color_sch
 from utils.helpers.color_utils import print_colored_text, print_color_schemes, print_color_scheme
 from utils.helpers.transform_color import hex_to_rgb, transform_color_schemes_rgb_to_hex
 from utils.helpers.json_utils import convert_color_schemes_to_color_data, save_json_data
-from utils.check_data_is_contained_next_color import check_data_is_contained_next_color
+from utils.check_data_is_contained_next_color import check_data_is_contained_next
 
 from utils.estimate_used_color_scheme import generate_json_used_color_scheme, save_estimated_used_colors
 from utils.download_instagram_images import download_instagram_images

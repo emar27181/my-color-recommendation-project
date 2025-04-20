@@ -30,13 +30,14 @@ def is_contained_color(next_color, color_schemes):
     return False, -1
 
 
-def save_data_is_contained_next_color_for_illustrators(illutrator_list, sort_type):
+def save_data_is_contained_next_for_illustrators(illutrator_list, sort_type, check_subject):
     """
     引数で受け取るリスト内のイラストレーターの推薦配色群に次に塗ったとされる色があるかを保存する関数
 
     引数:
         illutrater_list: 評価したいイラストレーターのリスト(文字列)
         sort_type: ソートの種類(random/color_diff)
+        check_subject: チェックされる対象(color/hue)
     戻り値:
         None
     """
@@ -44,17 +45,17 @@ def save_data_is_contained_next_color_for_illustrators(illutrator_list, sort_typ
     for illutrator_name in illutrator_list:
         print(f"=== {illutrator_name} ========================")
 
-        input_file_path = f"src/color_recommendation/data/output/recommend_colors/sort_by_{sort_type}/recommend_colors_{illutrator_name}.json"
+        input_file_path = f"src/color_recommendation/data/output/recommend_{check_subject}s/sort_by_{sort_type}/recommend_{check_subject}s_{illutrator_name}.json"
 
         with open(input_file_path, 'r', encoding='utf-8') as file:
             recommended_colors_data = json.load(file)
 
-        is_contained_next_color_data = check_data_is_contained_next_color(recommended_colors_data)
+        is_contained_next_color_data = check_data_is_contained_next(recommended_colors_data, "color")
 
-        output_file_path = f"src/color_recommendation/data/output/is_contained_next_color/{sort_type}/is_contained_next_color_{illutrator_name}.json"
+        output_file_path = f"src/color_recommendation/data/output/is_contained_next_{check_subject}/{sort_type}/is_contained_next_{check_subject}_{illutrator_name}.json"
 
         if not os.path.exists(os.path.dirname(output_file_path)):
-            output_dir_path = f"src/color_recommendation/data/output/is_contained_next_color/{sort_type}"
+            output_dir_path = f"src/color_recommendation/data/output/is_contained_next_{check_subject}/{sort_type}"
             os.makedirs(output_dir_path)
             print(f"{output_dir_path} ディレクトリが作成されました．")
 
@@ -63,7 +64,17 @@ def save_data_is_contained_next_color_for_illustrators(illutrator_list, sort_typ
             print(f"{output_file_path} が保存されました．(次の色が含まれているかどうかを保存するデータの作成)")
 
 
-def check_data_is_contained_next_color(data):
+def check_data_is_contained_next(data, check_subject):
+    """ 引数で受け取る対象が次の色が含まれているかどうかを調べる関数
+
+    引数:
+        data (_type_): データ
+        check_subject (_type_): チェックされる対象(color/hue)
+
+    戻り値:
+        data_recall_at_k (_type_): 次の色が含まれているかどうかのデータ
+    """
+
     data_recall_at_k = []
 
     illust_count = 0
@@ -87,7 +98,13 @@ def check_data_is_contained_next_color(data):
             next_color = color_scheme[i + 1]["color"]
 
             # 次の色が含まれているかどうかを判定
-            is_contained, scheme_index = is_contained_color(next_color, recommend_color_schemes)
+            if (check_subject == "color"):
+                is_contained, scheme_index = is_contained_color(next_color, recommend_color_schemes)
+            elif (check_subject == "hue"):
+                is_contained, scheme_index = false, -1
+                print("~~~ 未実装 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+            else:
+                print("check_subjectの値が不正です")
 
             # recall@kのデータの作成
             is_contained_data = {
