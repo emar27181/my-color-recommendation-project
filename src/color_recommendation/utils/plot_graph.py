@@ -88,7 +88,7 @@ def _get_recommend_colors_count(illustrator_name, sort_type, check_subject):
     return len(data[0]['recommend_color_schemes'])
 
 
-def save_plot_recall_at_k_for_illustrators(illustrator_list, sort_type, check_subject):
+def save_plot_recall_at_k_for_illustrators(illustrator_list, sort_type, check_subject, legend_location):
 
     recommned_colors_count = _get_recommend_colors_count(illustrator_list[0], sort_type, check_subject)
 
@@ -115,7 +115,7 @@ def save_plot_recall_at_k_for_illustrators(illustrator_list, sort_type, check_su
     plt.grid(True)
 
     # 凡例はフォントサイズや位置も調整可能
-    plt.legend(title="Illustrators", fontsize=5, loc='upper left')
+    plt.legend(title="Illustrators", fontsize=5, loc=f'{legend_location}')
 
     GRAPH_PATH = f'src/color_recommendation/data/output/{check_subject}_recall_at_k_{sort_type}.png'
     plt.savefig(GRAPH_PATH, bbox_inches="tight")  # bbox_inchesを指定するとレイアウトが崩れにくい
