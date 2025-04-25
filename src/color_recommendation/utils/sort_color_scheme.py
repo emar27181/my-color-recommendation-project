@@ -5,7 +5,7 @@ from utils.analyze_illustrator_statistics import get_statistics_by_illustrator
 from utils.helpers.calc_rec_score import calc_same_hue_score
 
 DEBUG = False
-DEBUG = True
+# DEBUG = True
 
 
 def sort_color_scheme_by_color_difference(base_color_scheme, color_schemes):

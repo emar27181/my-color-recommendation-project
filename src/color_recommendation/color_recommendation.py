@@ -1,5 +1,5 @@
 import json
-from utils.generate_color_scheme_method import generate_all_color_schemes, remove_duplicated_color_from_color_schemes
+from utils.generate_color_scheme_method import generate_all_color_schemes, remove_duplicated_color_from_color_schemes, remove_monochrome_color_from_color_schemes
 from utils.add_variations_color_scheme import get_lightness_variations_color_schemes
 from utils.helpers.color_utils import print_colored_text, print_color_schemes, print_color_scheme
 from utils.helpers.transform_color import hex_to_rgb, transform_color_schemes_rgb_to_hex
@@ -99,6 +99,9 @@ def generate_recommend_colors(data, sort_type, illustrator_name, lightness_diffs
         # 生成された推薦配色群に明度彩度が異なる色を追加
         for lightness_diff in lightness_diffs:
             recommend_color_schemes_rgb += get_lightness_variations_color_schemes(recommend_base_color_schemes_rgb, lightness_diff)
+
+        # 彩度が0になったになった色を削除
+        recommend_color_schemes_rgb = remove_monochrome_color_from_color_schemes(recommend_color_schemes_rgb)
 
         # 推薦配色群の並び替え
         if (sort_type == "color_diff"):
