@@ -123,6 +123,12 @@ def generate_recommend_colors(data, sort_type, illustrator_name, lightness_diffs
             "recommend_color_schemes": convert_color_schemes_to_color_data(transform_color_schemes_rgb_to_hex(recommend_color_schemes_rgb)),
         }
 
+        # 確認用出力
+        if (DEBUG):
+            for i in range(len(recommend_color_schemes_rgb)):
+                print(f"[{i}]: ", end="")
+                print_color_scheme(recommend_color_schemes_rgb[i])
+
         output_data.append(new_illust_data)
 
     return output_data
