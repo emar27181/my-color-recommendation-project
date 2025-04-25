@@ -153,6 +153,26 @@ def remove_duplicated_color_from_color_schemes(color_schemes):
     return new_color_schemes
 
 
+def remove_monochrome_color_from_color_schemes(color_schemes):
+    LOWER_LIMIT = 10  # 彩度の閾値
+    UPPER_LIMIT = 90  # 彩度の閾値
+
+    def is_valid_hsl(color_rgb):
+        color_hsl = rgb_to_hsl(color_rgb)
+        return all(LOWER_LIMIT <= value <= UPPER_LIMIT for value in color_hsl[1:])
+
+    def is_valid_scheme(color_scheme):
+        return all(is_valid_hsl(color) for color in color_scheme)
+
+    new_color_schemes = []
+
+    for color_scheme in color_schemes:
+        if is_valid_scheme(color_scheme):
+            new_color_schemes.append(color_scheme)
+
+    return new_color_schemes
+
+
 def main():
     recommend_color_schemes = []
     recommend_color_schemes.append(generate_analogy_color_scheme([255, 0, 0]))
