@@ -471,5 +471,46 @@ def extract_specific_range_of_hsl_from_color_scheme(color_scheme, hue_range, sat
     return extracted_colors
 
 
+def calc_mean_resultant_length(angles_deg):
+    """
+    角度のリスト（度単位）から、平均結果長を計算して返す関数。
+    """
+
+    if len(angles_deg) == 0:
+        return 0
+
+    # 角度をラジアンに変換
+    angles_rad = [math.radians(angle) for angle in angles_deg]
+
+    # 各角度のcosとsinの合計を計算
+    sum_cos = sum(math.cos(angle) for angle in angles_rad)
+    sum_sin = sum(math.sin(angle) for angle in angles_rad)
+
+    n = len(angles_rad)
+    avg_cos = sum_cos / n
+    avg_sin = sum_sin / n
+
+    # 平均結果長の計算
+    R = math.sqrt(avg_cos**2 + avg_sin**2)
+    return R
+
+
+def calc_color_scheme_to_mean_resultant_length(color_scheme):
+    """引数で受け取った配色の平均色相を計算する関数
+    引数:
+        color_scheme: 配色のリスト
+
+    戻り値:
+        mean_resultant_length: 平均色相 (0-1)
+    """
+    # 色相を取得
+    color_hues = [rgb_to_hsl(color)[0] for color in color_scheme]
+
+    # 平均色相を計算
+    mean_resultant_length = calc_mean_resultant_length(color_hues)
+
+    return mean_resultant_length
+
+
 if __name__ == "__main__":
     print("=== color_utils.py =====================")
