@@ -5,6 +5,7 @@ from utils.analyze_illustrator_statistics import get_statistics_by_illustrator
 from utils.helpers.calc_rec_score import calc_same_hue_score
 
 DEBUG = False
+DEBUG = True
 
 
 def sort_color_scheme_by_color_difference(base_color_scheme, color_schemes):
@@ -161,7 +162,7 @@ def _print_rec_color_schemes_info(color_schemes_info):
     """
 
     for color_scheme_info in color_schemes_info:
-        print(f"score = {color_scheme_info['score']}, rec_color_scheme = ", end="")
+        print(f"score = {round(color_scheme_info['score']*1000)/1000} ", end="")
         print_color_scheme(color_scheme_info['rec_color_scheme'])
 
 
@@ -197,18 +198,26 @@ def sort_color_scheme_by_custom_v0(used_color_scheme, rec_color_schemes, illustr
 
     # 推薦配色ごとにスコアを計算
     for rec_color_scheme in rec_color_schemes:
+        score = _calc_rec_color_scheme_score(used_color_scheme, rec_color_scheme)
+
         rec_color_schemes_info.append({
             "rec_color_scheme": rec_color_scheme,
-            "score": _calc_rec_color_scheme_score(used_color_scheme, rec_color_scheme)
+            "score": score
         })
 
     # スコアの降順でソート
     rec_color_schemes_info = sorted(rec_color_schemes_info, key=lambda x: x['score'], reverse=True)
 
     # 確認用出力
-    # _print_rec_color_schemes_info(rec_color_schemes_info)
+    if (DEBUG):
+        _print_rec_color_schemes_info(rec_color_schemes_info)
 
-    return rec_color_schemes
+    sorted_rec_color_schemes = []
+
+    for rec_color_scheme_info in rec_color_schemes_info:
+        sorted_rec_color_schemes.append(rec_color_scheme_info['rec_color_scheme'])
+
+    return sorted_rec_color_schemes
 
 
 def shuffle_color_schemes(color_schemes):
