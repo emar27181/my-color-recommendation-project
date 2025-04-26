@@ -12,7 +12,7 @@ from utils.sort_color_scheme import sort_color_scheme_by_color_difference, shuff
 import os
 
 DEBUG = True
-# DEBUG = False
+DEBUG = False
 
 
 def read_file(file_path):

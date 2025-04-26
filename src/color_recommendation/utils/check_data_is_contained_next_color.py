@@ -4,7 +4,7 @@ import json
 import os
 
 DEBUG = True
-# DEBUG = False
+DEBUG = False
 
 
 def is_contained_color(next_color, color_schemes):
