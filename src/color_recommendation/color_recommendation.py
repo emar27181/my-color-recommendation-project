@@ -12,7 +12,7 @@ from utils.sort_color_scheme import sort_color_scheme_by_color_difference, shuff
 import os
 
 DEBUG = True
-# DEBUG = False
+DEBUG = False
 
 
 def read_file(file_path):
@@ -97,9 +97,11 @@ def generate_recommend_colors(data, sort_type, illustrator_name, diff_values):
         # recommend_color_schemes_rgb = remove_duplicated_color_from_color_schemes(recommend_color_schemes_rgb)
 
         # 生成された推薦配色群に明度彩度が異なる色を追加
-        for diff_value in diff_values:
-            recommend_color_schemes_rgb += get_variations_for_color_schemes(recommend_base_color_schemes_rgb, diff_value, "lightness")
-            recommend_color_schemes_rgb += get_variations_for_color_schemes(recommend_base_color_schemes_rgb, diff_value, "saturation")
+        for lightness_diff in diff_values:
+            for saturation_diff in diff_values:
+                recommend_color_schemes_rgb += get_variations_for_color_schemes(recommend_base_color_schemes_rgb, lightness_diff, saturation_diff, "saturation_and_lightness")
+            # recommend_color_schemes_rgb += get_variations_for_color_schemes(recommend_base_color_schemes_rgb, diff_value, "lightness")
+            # recommend_color_schemes_rgb += get_variations_for_color_schemes(recommend_base_color_schemes_rgb, diff_value, "saturation")
 
         # 彩度が0になったになった色を削除
         recommend_color_schemes_rgb = remove_monochrome_color_from_color_schemes(recommend_color_schemes_rgb)
