@@ -1,4 +1,5 @@
 from utils.helpers.json_utils import get_json_data
+from utils.helpers.transform_color import hex_to_rgb, rgb_to_hsl
 import json
 import math
 
@@ -30,6 +31,37 @@ def _mean_resultant_length(angles_deg):
     return R
 
 
+def _get_saturation_lightness_count_distribution(illustrator_name, illust_name, index_num):
+    """_summary_
+
+    Args:
+        illustrator_name (_type_): _description_
+        illust_name (_type_): _description_
+        index_num (_type_): _description_
+
+    ## メモ
+    - 使用色相(used_hues~.json)と使用色(used_colors~.json)を別々で保存してるからややこしいことになってる(2025/04/27)
+        - それぞれのjsonで同じイラスト群を読み込んでいれば，読込んだイラストとそのインデックス番号が一致するためindex_numでused_colorsのインデックスを参照している
+    """
+
+    saturation_lightness_count_distribution = [[0 for _ in range(11)] for _ in range(11)]
+    input_file_path = f'src/color_recommendation/data/input/used_colors/used_colors_{illustrator_name}.json'
+    used_colors_data = get_json_data(input_file_path)
+
+    # print(f"{used_colors_data[index_num][0]['illustName']}") # これがillust_nameと一致していれば同画像を参照できている
+
+    used_colors_info = used_colors_data[index_num]
+    for used_color_info in used_colors_info:
+        used_color_hex = used_color_info['color']
+        used_color_rgb = hex_to_rgb(used_color_hex)
+        used_color_hsl = rgb_to_hsl(used_color_rgb)
+        saturation_index, lightness_index = round(used_color_hsl[1] / 10), round(used_color_hsl[2] / 10)
+        saturation_lightness_count_distribution[saturation_index][lightness_index] += 1
+
+    # print(f"saturation_lightness_count_distribution = {saturation_lightness_count_distribution}")
+    return saturation_lightness_count_distribution
+
+
 def _extract_statistics_by_illustrator(illustrator_name):
     """ イラストレーターの統計データを抽出する関数
 
@@ -55,6 +87,8 @@ def _extract_statistics_by_illustrator(illustrator_name):
     mean_resultant_length_sum = 0
     mean_resultant_length_sum_distribution = [0] * (DIV_NUMBER + 1)
     chromatic_colors_count_distribution = [0] * 20
+    saturation_lightness_count_distribution = [[0 for _ in range(11)] for _ in range(11)]
+    index_count = 0
 
     for illust_data in data:
         illust_name = illust_data["illust_name"]
@@ -108,6 +142,14 @@ def _extract_statistics_by_illustrator(illustrator_name):
             elif (used_hue_rate[0] == -11):  # 白の場合
                 achromatic_colors_rate_sum += used_hue_rate[1]
 
+        # 明度と彩度の分布を加算
+        new_saturation_lightness_count_distribution = _get_saturation_lightness_count_distribution(illustrator_name, illust_name, index_count)
+        for i in range(len(saturation_lightness_count_distribution)):
+            for j in range(len(saturation_lightness_count_distribution[i])):
+                saturation_lightness_count_distribution[i][j] += new_saturation_lightness_count_distribution[i][j]
+
+        index_count += 1
+
     mean_resultant_length_sum_distribution.reverse()  # 0~12(違う角度を使っている順) → 12~0(同じ角度を使っている順)に反転
 
     statistics = {
@@ -121,6 +163,7 @@ def _extract_statistics_by_illustrator(illustrator_name):
         "used_pccs_count_sum_distribution": used_pccs_count_sum_distribution,
         "mean_resultant_length_ave": mean_resultant_length_sum / count_one_or_more_colors_used,
         "mean_resultant_length_distribution": mean_resultant_length_sum_distribution,
+        "saturation_lightness_count_distribution": saturation_lightness_count_distribution,
     }
 
     return statistics
@@ -213,7 +256,6 @@ def get_not_monochrome_illustrator_list(illustrator_list):
                 chromatic_colors_count_distribution = illustrator_data["chromatic_colors_count_distribution"]
                 # print(f"chromatic_colors_count_distribution = {chromatic_colors_count_distribution}")
                 monochrome_rate = chromatic_colors_count_distribution[0] / sum(chromatic_colors_count_distribution)
-
                 if (monochrome_rate < MONOCHROME_THRESHOLD):
                     not_monochrome_illustrator_list.append(illustrator_name)
                     if (DEBUG):
