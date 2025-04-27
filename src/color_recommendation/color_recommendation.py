@@ -1,6 +1,6 @@
 import json
 from utils.generate_color_scheme_method import generate_all_color_schemes, remove_duplicated_color_from_color_schemes, remove_monochrome_color_from_color_schemes
-from utils.add_variations_color_scheme import get_lightness_variations_color_schemes
+from utils.add_variations_color_scheme import get_variations_for_color_schemes
 from utils.helpers.color_utils import print_colored_text, print_color_schemes, print_color_scheme
 from utils.helpers.transform_color import hex_to_rgb, transform_color_schemes_rgb_to_hex
 from utils.helpers.json_utils import convert_color_schemes_to_color_data, save_json_data
@@ -12,7 +12,7 @@ from utils.sort_color_scheme import sort_color_scheme_by_color_difference, shuff
 import os
 
 DEBUG = True
-DEBUG = False
+# DEBUG = False
 
 
 def read_file(file_path):
@@ -74,7 +74,7 @@ def generate_recommend_hues(data, sort_type, illustrator_name):
     return output_data
 
 
-def generate_recommend_colors(data, sort_type, illustrator_name, lightness_diffs):
+def generate_recommend_colors(data, sort_type, illustrator_name, diff_values):
 
     output_data = []
     for illust_data in data:
@@ -97,8 +97,9 @@ def generate_recommend_colors(data, sort_type, illustrator_name, lightness_diffs
         # recommend_color_schemes_rgb = remove_duplicated_color_from_color_schemes(recommend_color_schemes_rgb)
 
         # 生成された推薦配色群に明度彩度が異なる色を追加
-        for lightness_diff in lightness_diffs:
-            recommend_color_schemes_rgb += get_lightness_variations_color_schemes(recommend_base_color_schemes_rgb, lightness_diff)
+        for diff_value in diff_values:
+            recommend_color_schemes_rgb += get_variations_for_color_schemes(recommend_base_color_schemes_rgb, diff_value, "lightness")
+            recommend_color_schemes_rgb += get_variations_for_color_schemes(recommend_base_color_schemes_rgb, diff_value, "saturation")
 
         # 彩度が0になったになった色を削除
         recommend_color_schemes_rgb = remove_monochrome_color_from_color_schemes(recommend_color_schemes_rgb)
