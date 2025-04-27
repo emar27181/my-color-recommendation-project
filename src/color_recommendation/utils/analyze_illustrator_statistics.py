@@ -176,9 +176,10 @@ def save_statistics_for_illustrators(illustrator_list):
         print(f"\n=== {illustrator_name} ========================")
         statistics = _extract_statistics_by_illustrator(illustrator_name)
 
-        print("~~~ statistics ~~~")
-        for data in statistics:
-            print(f"{data} = {statistics[data]}")
+        if (DEBUG):
+            print("~~~ statistics ~~~")
+            for data in statistics:
+                print(f"{data} = {statistics[data]}")
 
         statistics_data.append(statistics)
 
@@ -203,7 +204,8 @@ def get_not_monochrome_illustrator_list(illustrator_list):
     not_monochrome_illustrator_list = []
 
     for illustrator_name in illustrator_list:
-        print(f"=== {illustrator_name} ========================")
+        if (DEBUG):
+            print(f"=== {illustrator_name} ========================")
         for illustrator_data in data:
             illustrator_data_name = illustrator_data["illustrator_name"]
             if (illustrator_name == illustrator_data_name):
@@ -214,8 +216,10 @@ def get_not_monochrome_illustrator_list(illustrator_list):
 
                 if (monochrome_rate < MONOCHROME_THRESHOLD):
                     not_monochrome_illustrator_list.append(illustrator_name)
-                    print(f"モノクロ率 = {(round(monochrome_rate * 10000) / 100 )}%: モノクロイラストのイラストレーターではないため，リストに追加します．")
+                    if (DEBUG):
+                        print(f"モノクロ率 = {(round(monochrome_rate * 10000) / 100 )}%: モノクロイラストのイラストレーターではないため，リストに追加します．")
                 else:
-                    print(f"モノクロ率 = {(round(monochrome_rate * 10000) / 100 )}%: モノクロイラストのイラストレーターのため，リストに追加しません．")
+                    if (DEBUG):
+                        print(f"モノクロ率 = {(round(monochrome_rate * 10000) / 100 )}%: モノクロイラストのイラストレーターのため，リストに追加しません．")
 
     return not_monochrome_illustrator_list
