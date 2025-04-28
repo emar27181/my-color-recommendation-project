@@ -169,6 +169,24 @@ def _extract_statistics_by_illustrator(illustrator_name):
     return statistics
 
 
+def get_statistics_by_illustrator(illustrator_name, keyword):
+    """ 引数で受け取るイラストレーターのイラストのキーワードの統計データを取得する関数
+
+    引数:
+        illustrator_name: イラストレーター名(文字列)
+        keyword: 統計データのキーワード(文字列)
+
+    戻り値:
+        statistics: イラストレーターの統計データ
+    """
+    statistics = _extract_statistics_by_illustrator(illustrator_name)
+
+    if (keyword == "all"):
+        return statistics
+    else:
+        return statistics[keyword]
+
+
 def print_statistics_for_illustrators(illustrator_list, keyword):
     """ 引数で受け取るイラストレーターのイラストのキーワードの統計データを表示する関数
 
