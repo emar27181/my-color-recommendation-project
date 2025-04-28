@@ -483,6 +483,11 @@ def plot_used_colors_scatter(illustrator_name):
     plt.close()
 
 
+def save_plot_scatter_for_illustrators(illustrater_list):
+    for illustrator in illustrater_list:
+        plot_used_colors_scatter(illustrator)
+
+
 def main():
     # plot_recall_at_k("src/color_recommendation/data/output/test_is_contained_next_color_simple_data.json", 'src/color_recommendation/data/output/test_recall_at_k.png')
     pass
