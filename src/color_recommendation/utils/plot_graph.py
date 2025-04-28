@@ -402,41 +402,18 @@ def save_plot_violin_from_used_pccs_distribution_for_illustrators():
     print(f"{output_file_path} が保存されました．")
 
 
-def plot_scatter(illustrator_name):
+def _get_scatter_data_by_used_colors(data):
     """
-    引数で受け取るイラストレーターの使用色の散布図をプロットする関数
-
+    使用色データを基に明度と彩度を計算し、散布図用のデータを生成する関数
     引数:
-        illustrator_name: イラストレーター名
-
+        data: 使用色データ（JSON形式）
     戻り値:
-        None
+        lightness_list: 明度リスト
+        saturation_list: 彩度リスト
+        color_labels: 色ラベルリスト
+        sizes: サイズリスト
     """
-    print(f"=== {illustrator_name} ====================")
 
-    input_file_path = f"src/color_recommendation/data/input/used_colors_{illustrator_name}.json"
-
-    # ファイルの読み込み
-    try:
-        if not os.path.exists(input_file_path):
-            raise FileNotFoundError(f"File not found: {input_file_path}")
-            return
-
-        with open(input_file_path, 'r') as f:
-            data = json.load(f)
-            print(f"{input_file_path} が読み込まれました．")
-
-    except FileNotFoundError as e:
-        print(f"エラー: {e}")
-        return
-    except json.JSONDecodeError as e:
-        print(f"JSONデコードエラー: {e}. ファイルの内容を確認してください。")
-        return
-    except Exception as e:
-        print(f"予期しないエラーが発生しました: {e}")
-        return
-
-    # 明度と彩度を計算
     lightness_list = []
     saturation_list = []
     color_labels = []
@@ -465,6 +442,27 @@ def plot_scatter(illustrator_name):
             color_labels.append(hex_color)
             sizes.append(color_info["rate"] * 400)
 
+    return lightness_list, saturation_list, color_labels, sizes
+
+
+def plot_used_colors_scatter(illustrator_name):
+    """
+    引数で受け取るイラストレーターの使用色の散布図をプロットする関数
+
+    引数:
+        illustrator_name: イラストレーター名
+
+    戻り値:
+        None
+    """
+    print(f"=== {illustrator_name} ====================")
+
+    input_file_path = f"src/color_recommendation/data/input/used_colors/used_colors_{illustrator_name}.json"
+    data = get_json_data(input_file_path)
+
+    # 明度と彩度を計算
+    lightness_list, saturation_list, color_labels, sizes = _get_scatter_data_by_used_colors(data)
+
     # 散布図を作成
     plt.figure(figsize=(8, 6))
     plt.scatter(saturation_list, lightness_list, s=sizes, c=color_labels, edgecolor=None)
@@ -476,7 +474,7 @@ def plot_scatter(illustrator_name):
     plt.grid(True)
     # plt.show()
 
-    output_file_path = f'src/color_recommendation/data/output/scatter_plot_{illustrator_name}.png'
+    output_file_path = f'src/color_recommendation/data/output/scatter_graph/scatter_plot_{illustrator_name}.png'
 
     plt.savefig(output_file_path)
     print(f"{output_file_path} が保存されました．")
