@@ -56,7 +56,7 @@ def _get_saturation_lightness_count_distribution(illustrator_name, illust_name, 
         used_color_rgb = hex_to_rgb(used_color_hex)
         used_color_hsl = rgb_to_hsl(used_color_rgb)
         saturation_index, lightness_index = round(used_color_hsl[1] / 10), round(used_color_hsl[2] / 10)
-        saturation_lightness_count_distribution[saturation_index][lightness_index] += 1
+        saturation_lightness_count_distribution[lightness_index][saturation_index] += 1
 
     # print(f"saturation_lightness_count_distribution = {saturation_lightness_count_distribution}")
     return saturation_lightness_count_distribution

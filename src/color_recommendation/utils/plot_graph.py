@@ -1,6 +1,7 @@
 import json
 import matplotlib.pyplot as plt
 from utils.helpers.json_utils import get_json_data
+from utils.analyze_illustrator_statistics import get_statistics_by_illustrator
 from matplotlib import colormaps
 from mpl_toolkits.mplot3d import Axes3D
 import pandas as pd
@@ -486,6 +487,25 @@ def plot_used_colors_scatter(illustrator_name):
 def save_plot_scatter_for_illustrators(illustrater_list):
     for illustrator in illustrater_list:
         plot_used_colors_scatter(illustrator)
+
+
+def save_plot_heatmap(illustrator_name, data):
+
+    plt.figure(figsize=(6, 6))
+    plt.imshow(data, origin='lower')
+    plt.title("Heatmap of Provided Data")
+    plt.xlabel("Column Index")
+    plt.ylabel("Row Index")
+    plt.colorbar(label="Value")
+    output_file_path = f'src/color_recommendation/data/output/heatmap/heatmap_plot_{illustrator_name}.png'
+    plt.savefig(output_file_path)
+    print(f"{output_file_path} が保存されました．")
+
+
+def save_plot_heatmap_for_illustrators(illustrator_list):
+    for illustrator in illustrator_list:
+        data = get_statistics_by_illustrator(illustrator, 'saturation_lightness_count_distribution')
+        save_plot_heatmap(illustrator, data)
 
 
 def main():
