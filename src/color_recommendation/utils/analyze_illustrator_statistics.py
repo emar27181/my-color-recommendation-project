@@ -2,6 +2,7 @@ from utils.helpers.json_utils import get_json_data
 from utils.helpers.transform_color import hex_to_rgb, rgb_to_hsl
 import json
 import math
+import os
 
 DEBUG = True
 DEBUG = False
@@ -283,4 +284,37 @@ def get_not_monochrome_illustrator_list(illustrator_list):
                     if (DEBUG):
                         print(f"モノクロ率 = {(round(monochrome_rate * 10000) / 100 )}%: モノクロイラストのイラストレーターのため，リストに追加しません．")
 
+    print("モノクロイラストを含むイラストレーターが除外されました．")
+
     return not_monochrome_illustrator_list
+
+
+def _get_illust_count_by_illustrator(illustrator_name):
+
+    input_dir_path = f"src/color_recommendation/data/input/illustration/{illustrator_name}"
+
+    count = 0
+    for filename in os.listdir(input_dir_path):
+        if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+            count += 1
+
+    if DEBUG:
+        print(f"イラストの枚数: {count:5d} ({illustrator_name})")
+
+    return count
+
+
+def get_excluded_small_number_illustrator_list(illustrator_list, threshold):
+    """ イラストの枚数が少ないイラストレーターを除外する関数
+    """
+
+    new_illustrator_list = []
+
+    for illustrator in illustrator_list:
+        illust_count = _get_illust_count_by_illustrator(illustrator)
+        if illust_count >= threshold:
+            new_illustrator_list.append(illustrator)
+
+    print(f"イラストの枚数が{threshold}枚未満のイラストレーターが除外されました．")
+
+    return new_illustrator_list
