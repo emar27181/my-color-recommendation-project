@@ -5,6 +5,7 @@ import math
 
 DEBUG = True
 DEBUG = False
+DIVIDE_NUM = 5  # 明度と彩度をいくつで区切るか
 
 
 def _mean_resultant_length(angles_deg):
@@ -44,7 +45,7 @@ def _get_saturation_lightness_count_distribution(illustrator_name, illust_name, 
         - それぞれのjsonで同じイラスト群を読み込んでいれば，読込んだイラストとそのインデックス番号が一致するためindex_numでused_colorsのインデックスを参照している
     """
 
-    saturation_lightness_count_distribution = [[0 for _ in range(11)] for _ in range(11)]
+    saturation_lightness_count_distribution = [[0 for _ in range(DIVIDE_NUM + 1)] for _ in range(DIVIDE_NUM + 1)]
     input_file_path = f'src/color_recommendation/data/input/used_colors/used_colors_{illustrator_name}.json'
     used_colors_data = get_json_data(input_file_path)
 
@@ -55,7 +56,7 @@ def _get_saturation_lightness_count_distribution(illustrator_name, illust_name, 
         used_color_hex = used_color_info['color']
         used_color_rgb = hex_to_rgb(used_color_hex)
         used_color_hsl = rgb_to_hsl(used_color_rgb)
-        saturation_index, lightness_index = round(used_color_hsl[1] / 10), round(used_color_hsl[2] / 10)
+        saturation_index, lightness_index = round(used_color_hsl[1] / (100 / DIVIDE_NUM)), round(used_color_hsl[2] / (100 / DIVIDE_NUM))
         saturation_lightness_count_distribution[lightness_index][saturation_index] += 1
 
     # print(f"saturation_lightness_count_distribution = {saturation_lightness_count_distribution}")
@@ -87,7 +88,7 @@ def _extract_statistics_by_illustrator(illustrator_name):
     mean_resultant_length_sum = 0
     mean_resultant_length_sum_distribution = [0] * (DIV_NUMBER + 1)
     chromatic_colors_count_distribution = [0] * 20
-    saturation_lightness_count_distribution = [[0 for _ in range(11)] for _ in range(11)]
+    saturation_lightness_count_distribution = [[0 for _ in range(DIVIDE_NUM + 1)] for _ in range(DIVIDE_NUM + 1)]
     index_count = 0
 
     for illust_data in data:
