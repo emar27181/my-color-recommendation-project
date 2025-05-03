@@ -90,6 +90,21 @@ def calculate_rgb_distance_by_euclidean(rgb1, rgb2):
     return distance / max_distance
 
 
+def calc_distance_diff(x1, y1, x2, y2):
+    """
+    2点間の距離を計算する関数
+    引数:
+        x1: 点1のx座標
+        y1: 点1のy座標
+        x2: 点2のx座標
+        y2: 点2のy座標
+    戻り値:
+        distance: 2点間の距離
+    """
+    distance = math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
+    return distance
+
+
 def transform_tuple_to_list(color_counts_tuple):
     """tuple型の色の数を保存するデータをlist型に変換する関数"""
     color_counts_list = []
