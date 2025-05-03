@@ -84,7 +84,10 @@ def calculate_recall(file_path, recommend_colors_count):
 
 
 def _get_recommend_colors_count(illustrator_name, sort_type, check_subject):
-    input_file_path = f"src/color_recommendation/data/output/recommend_{check_subject}s/sort_by_{sort_type}/recommend_{check_subject}s_{illustrator_name}.json"
+    if (check_subject == "tone"):
+        input_file_path = f"src/color_recommendation/data/output/recommend_colors/sort_by_{sort_type}/recommend_colors_{illustrator_name}.json"
+    else:
+        input_file_path = f"src/color_recommendation/data/output/recommend_{check_subject}s/sort_by_{sort_type}/recommend_{check_subject}s_{illustrator_name}.json"
     data = get_json_data(input_file_path)
     return len(data[0]['recommend_color_schemes'])
 
