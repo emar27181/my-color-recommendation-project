@@ -1,6 +1,9 @@
 from .generate_color_scheme_method import generate_all_color_schemes
 from .helpers.transform_color import rgb_to_hsl, hsl_to_rgb
-from .helpers.color_utils import print_color_scheme, print_color_schemes
+from .helpers.color_utils import print_color_scheme, print_color_schemes, print_colored_text
+
+DEBUG = False
+DEBUG = True
 
 
 def add_lightness_variations_color_scheme(color_scheme, ligtness_diff):
@@ -30,6 +33,7 @@ def add_lightness_variations_color_scheme(color_scheme, saturation_diff):
 def add_saturation_and_lightness_variations_color_scheme(color_scheme, saturation_diff, ligtness_diff):
     """明度と彩度による配色のバリエーションを増やす関数
     """
+
     new_color_scheme = []
     for color_rgb in color_scheme:
         color_hsl = rgb_to_hsl(color_rgb)

@@ -34,6 +34,20 @@ def generate_all_color_schemes(base_color_rgb):
     return color_schemes
 
 
+def generate_one_color_schemes(base_color_rgb):
+    color_schemes_by_color_scheme_methods = []
+
+    color_schemes_by_color_scheme_methods.append(generate_identity_color_scheme(base_color_rgb))
+
+    color_schemes = []
+    # 配色技法ごとの配色群を取り出してcolor_schemesに追加(ドミナントカラー配色などは一つの配色技法に対して複数の配色を生成するため)
+    for color_schemes_per_color_scheme_method in color_schemes_by_color_scheme_methods:
+        for color_scheme in color_schemes_per_color_scheme_method:
+            color_schemes.append(color_scheme)
+
+    return color_schemes
+
+
 def generate_color_scheme(base_color_rgb, hue_differences):
     base_color_hsl = (rgb_to_hsl(base_color_rgb))
     base_color_hue = base_color_hsl[0]
