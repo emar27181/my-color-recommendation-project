@@ -153,6 +153,17 @@ def quantize_color_rgb(rgb, threshold):
     return tuple((value // threshold) * threshold if value % threshold < 3 else (value // threshold) * threshold + threshold for value in rgb)
 
 
+def is_valid_color(color):
+    """引数で受け取ったRGB値が有効な色かどうかを判定する関数
+    引数:
+        color: 色 (R, G, B)
+    戻り値:
+        True: 有効な色
+        False: 無効な色
+    """
+    return all(0 <= value <= 255 for value in color)
+
+
 def is_exist_same_color(color, colors, same_color_threshold):
     """引数で受け取った色が配列に存在するかどうかを調べる関数
     引数:
