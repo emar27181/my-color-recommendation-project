@@ -187,6 +187,23 @@ def remove_monochrome_color_from_color_schemes(color_schemes):
     return new_color_schemes
 
 
+def remove_empty_color_scheme_from_color_schemes(color_schemes):
+    """ 空の配色群を削除する関数
+
+    引数:
+        color_schemes: 色の配列のリスト
+    戻り値:
+        color_schemes: 空の配色群を削除した配列のリスト
+    """
+
+    new_color_schemes = []
+    for color_scheme in color_schemes:
+        if len(color_scheme) > 0:
+            new_color_schemes.append(color_scheme)
+
+    return new_color_schemes
+
+
 def main():
     recommend_color_schemes = []
     recommend_color_schemes.append(generate_analogy_color_scheme([255, 0, 0]))
