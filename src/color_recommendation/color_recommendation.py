@@ -1,5 +1,5 @@
 import json
-from utils.generate_color_scheme_method import generate_all_color_schemes, remove_duplicated_color_from_color_schemes, remove_monochrome_color_from_color_schemes, generate_one_color_schemes
+from utils.generate_color_scheme_method import generate_all_color_schemes, remove_duplicated_color_from_color_schemes, remove_monochrome_color_from_color_schemes, generate_one_color_schemes, remove_empty_color_scheme_from_color_schemes
 from utils.add_variations_color_scheme import get_variations_for_color_schemes
 from utils.helpers.color_utils import print_colored_text, print_color_schemes, print_color_scheme
 from utils.helpers.transform_color import hex_to_rgb, transform_color_schemes_rgb_to_hex
@@ -93,9 +93,6 @@ def generate_recommend_tones(data, sort_type, illustrator_name, diff_values):
         recommend_base_color_schemes_rgb = generate_one_color_schemes(base_color_rgb)  # 1パターンの配色群を生成
         recommend_color_schemes_rgb = recommend_base_color_schemes_rgb.copy()
 
-        print("before: ", )
-        print_color_schemes(recommend_color_schemes_rgb)
-
         # 重複色を削除
         # recommend_color_schemes_rgb = remove_duplicated_color_from_color_schemes(recommend_color_schemes_rgb)
 
@@ -104,8 +101,8 @@ def generate_recommend_tones(data, sort_type, illustrator_name, diff_values):
             for saturation_diff in diff_values:
                 recommend_color_schemes_rgb += get_variations_for_color_schemes(recommend_base_color_schemes_rgb, lightness_diff, saturation_diff, "saturation_and_lightness")
 
-        print("after: ", )
-        print_color_schemes(recommend_color_schemes_rgb)
+        # 空の配色を削除
+        recommend_color_schemes_rgb = remove_empty_color_scheme_from_color_schemes(recommend_color_schemes_rgb)
 
         # 彩度が0になったになった色を削除
         recommend_color_schemes_rgb = remove_monochrome_color_from_color_schemes(recommend_color_schemes_rgb)
@@ -173,7 +170,7 @@ def generate_recommend_colors(data, sort_type, illustrator_name, diff_values):
             # recommend_color_schemes_rgb += get_variations_for_color_schemes(recommend_base_color_schemes_rgb, diff_value, "lightness")
             # recommend_color_schemes_rgb += get_variations_for_color_schemes(recommend_base_color_schemes_rgb, diff_value, "saturation")
 
-        # 彩度が0になったになった色を削除
+        # 無彩色と判定された色を削除
         recommend_color_schemes_rgb = remove_monochrome_color_from_color_schemes(recommend_color_schemes_rgb)
 
         # 推薦配色群の並び替え

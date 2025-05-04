@@ -1,6 +1,6 @@
 from .generate_color_scheme_method import generate_all_color_schemes
 from .helpers.transform_color import rgb_to_hsl, hsl_to_rgb
-from .helpers.color_utils import print_color_scheme, print_color_schemes, print_colored_text
+from .helpers.color_utils import print_color_scheme, print_color_schemes, print_colored_text, is_valid_color
 
 DEBUG = False
 DEBUG = True
@@ -32,13 +32,15 @@ def add_lightness_variations_color_scheme(color_scheme, saturation_diff):
 
 def add_saturation_and_lightness_variations_color_scheme(color_scheme, saturation_diff, ligtness_diff):
     """明度と彩度による配色のバリエーションを増やす関数
+    rgb値が無効な場合([-199, -199, -199]など)になった場合は空の配列を返す
     """
 
     new_color_scheme = []
     for color_rgb in color_scheme:
         color_hsl = rgb_to_hsl(color_rgb)
         new_color = hsl_to_rgb(color_hsl[0], color_hsl[1] + saturation_diff, color_hsl[2] + ligtness_diff)
-        new_color_scheme.append(new_color)
+        if is_valid_color(new_color):
+            new_color_scheme.append(new_color)
 
     return new_color_scheme
 
