@@ -1,5 +1,6 @@
 from utils.helpers.color_utils import calculate_color_difference_delta_e_cie2000, print_colored_text, calc_angle_diff, calc_distance_diff
 from utils.helpers.transform_color import hex_to_rgb, rgb_to_hsl
+from utils.helpers.json_utils import save_json_data, get_json_data
 import json
 import os
 
@@ -121,23 +122,17 @@ def save_data_is_contained_next_for_illustrators(illutrator_list, sort_type, che
 
     for illutrator_name in illutrator_list:
         print(f"=== {illutrator_name} ========================")
-        input_file_path = f"src/color_recommendation/data/output/recommend_{check_subject}s/sort_by_{sort_type}/recommend_{check_subject}s_{illutrator_name}.json"
 
-        with open(input_file_path, 'r', encoding='utf-8') as file:
-            recommended_colors_data = json.load(file)
+        if (check_subject == "tone"):
+            print("現在未実装")
+        else:
+            input_file_path = f"src/color_recommendation/data/output/recommend_{check_subject}s/sort_by_{sort_type}/recommend_{check_subject}s_{illutrator_name}.json"
+            recommended_colors_data = get_json_data(input_file_path)
 
-        is_contained_next_color_data = check_data_is_contained_next(recommended_colors_data, check_subject)
-
-        output_file_path = f"src/color_recommendation/data/output/is_contained_next_{check_subject}/{sort_type}/is_contained_next_{check_subject}_{illutrator_name}.json"
-
-        if not os.path.exists(os.path.dirname(output_file_path)):
+            is_contained_next_color_data = check_data_is_contained_next(recommended_colors_data, check_subject)
             output_dir_path = f"src/color_recommendation/data/output/is_contained_next_{check_subject}/{sort_type}"
-            os.makedirs(output_dir_path)
-            print(f"{output_dir_path} ディレクトリが作成されました．")
-
-        with open(output_file_path, 'w', encoding='utf-8') as file:
-            json.dump(is_contained_next_color_data, file, ensure_ascii=False, indent=4)
-            print(f"{output_file_path} が保存されました．(次の色が含まれているかどうかを保存するデータの作成)")
+            output_file_path = f"{output_dir_path}/is_contained_next_{check_subject}_{illutrator_name}.json"
+            save_json_data(is_contained_next_color_data, output_dir_path, output_file_path)
 
 
 def check_data_is_contained_next(data, check_subject):
