@@ -228,8 +228,10 @@ def save_recommend_colors_for_illustrators(illutrator_list, sort_type, lightness
         output_file_path_hues = f"src/color_recommendation/data/output/recommend_hues/sort_by_{sort_type}/recommend_hues_{illustrator_name}.json"
         output_dir_path_colors = f"src/color_recommendation/data/output/recommend_colors/sort_by_{sort_type}"
         output_file_path_colors = f"src/color_recommendation/data/output/recommend_colors/sort_by_{sort_type}/recommend_colors_{illustrator_name}.json"
-        output_dir_path_tones = f"src/color_recommendation/data/output/recommend_tones/sort_by_{sort_type}"
-        output_file_path_tones = f"src/color_recommendation/data/output/recommend_tones/sort_by_{sort_type}/recommend_tones_{illustrator_name}.json"
+
+        diffs_dir_name = '[' + ','.join(str(v) for v in lightness_diffs).replace(' ', '') + ']'
+        output_dir_path_tones = f"src/color_recommendation/data/output/recommend_tones/{diffs_dir_name}/sort_by_{sort_type}"
+        output_file_path_tones = f"{output_dir_path_tones}/recommend_tones_{illustrator_name}.json"
         used_colors_data = read_file(input_file_path)
 
         # 推薦配色群の生成
