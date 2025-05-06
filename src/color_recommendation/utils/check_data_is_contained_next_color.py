@@ -123,8 +123,20 @@ def save_data_is_contained_next_for_illustrators(illutrator_list, sort_type, che
     for illutrator_name in illutrator_list:
         print(f"=== {illutrator_name} ========================")
 
+        # チェックするのがトーンの場合バリエーション毎にチェック
         if (check_subject == "tone"):
-            print("現在未実装")
+            target_dir = f'src/color_recommendation/data/output/recommend_{check_subject}s/'  # 調べたいパスに変更
+            dir_names = [d for d in os.listdir(target_dir) if os.path.isdir(os.path.join(target_dir, d))]
+            print(dir_names)
+
+            for dir_name in dir_names:
+                input_file_path = f"src/color_recommendation/data/output/recommend_{check_subject}s/{dir_name}/sort_by_{sort_type}/recommend_{check_subject}s_{illutrator_name}.json"
+                recommended_colors_data = get_json_data(input_file_path)
+
+                is_contained_next_color_data = check_data_is_contained_next(recommended_colors_data, check_subject)
+                output_dir_path = f"src/color_recommendation/data/output/is_contained_next_{check_subject}/{dir_name}/{sort_type}"
+                output_file_path = f"{output_dir_path}/is_contained_next_{check_subject}_{illutrator_name}.json"
+                save_json_data(is_contained_next_color_data, output_dir_path, output_file_path)
         else:
             input_file_path = f"src/color_recommendation/data/output/recommend_{check_subject}s/sort_by_{sort_type}/recommend_{check_subject}s_{illutrator_name}.json"
             recommended_colors_data = get_json_data(input_file_path)
