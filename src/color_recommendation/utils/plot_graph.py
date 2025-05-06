@@ -85,9 +85,12 @@ def calculate_recall(file_path, recommend_colors_count):
     return recalls
 
 
-def _get_recommend_colors_count(illustrator_name, sort_type, check_subject):
+def _get_recommendations_count(illustrator_name, sort_type, check_subject):
+    """
+    推薦したパターンの数(色の数/色相の数/トーンの数)を取得する関数
+    """
     if (check_subject == "tone"):
-        # input_file_path = f"src/color_recommendation/data/output/recommend_colors/sort_by_{sort_type}/recommend_colors_{illustrator_name}.json"
+        # 本当はここでバリエーションの数を取得したいが固定値を返している
         return 100
     else:
         input_file_path = f"src/color_recommendation/data/output/recommend_{check_subject}s/sort_by_{sort_type}/recommend_{check_subject}s_{illustrator_name}.json"
@@ -96,7 +99,7 @@ def _get_recommend_colors_count(illustrator_name, sort_type, check_subject):
 
 
 def _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, legend_location):
-    recommned_colors_count = _get_recommend_colors_count(illustrator_list[0], sort_type, check_subject)
+    recommned_colors_count = _get_recommendations_count(illustrator_list[0], sort_type, check_subject)
 
     # マーカーと線種の候補リスト
     markers = itertools.cycle(['o', 's', 'v', '^', 'd', '>', '<', 'p', '*', 'h'])
