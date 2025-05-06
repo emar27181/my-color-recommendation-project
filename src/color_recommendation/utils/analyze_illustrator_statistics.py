@@ -318,3 +318,32 @@ def get_excluded_small_number_illustrator_list(illustrator_list, threshold):
     print(f"イラストの枚数が{threshold}枚未満のイラストレーターが除外されました．")
 
     return new_illustrator_list
+
+
+def save_recall_at_k(input_file_path, output_file_path):
+    """ recall@kを保存する関数
+
+    Args:
+        input_file_path (str): 入力ファイルパス
+        output_file_path (str): 出力ファイルパス
+    """
+    data = get_json_data(input_file_path)
+    # print(f"data = {data}")
+
+
+def save_recall_at_k_for_illustrators(illustrator_list, sort_type, check_subject):
+    """ 引数で受け取るイラストレーターリストのrecall@kを保存する関数
+
+    Args:
+        illustrator_list (list): イラストレーターのリスト
+    """
+    recall_at_k_data = []
+
+    for illustrator_name in illustrator_list:
+        print(f"\n=== {illustrator_name} ========================")
+        if (check_subject == "tone"):
+            print("未実装")
+        else:
+            input_file_path = f"src/color_recommendation/data/output/is_contained_next_{check_subject}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}.json"
+            output_file_path = f"src/color_recommendation/data/output/recall_at_k/recall_at_k_{check_subject}_{sort_type}_{illustrator_name}.json"
+            save_recall_at_k(input_file_path, output_file_path)
