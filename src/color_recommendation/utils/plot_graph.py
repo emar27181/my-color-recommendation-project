@@ -95,7 +95,7 @@ def _get_recommend_colors_count(illustrator_name, sort_type, check_subject):
         return len(data[0]['recommend_color_schemes'])
 
 
-def _save_plot_recall_at_k(input_dir_path, illustrator_list, sort_type, check_subject, legend_location):
+def _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, legend_location):
     recommned_colors_count = _get_recommend_colors_count(illustrator_list[0], sort_type, check_subject)
 
     # マーカーと線種の候補リスト
@@ -123,27 +123,27 @@ def _save_plot_recall_at_k(input_dir_path, illustrator_list, sort_type, check_su
     # 凡例はフォントサイズや位置も調整可能
     plt.legend(title="Illustrators", fontsize=5, loc=f'{legend_location}')
 
-    GRAPH_PATH = f'src/color_recommendation/data/output/{check_subject}_recall_at_k_{sort_type}.png'
-    plt.savefig(GRAPH_PATH, bbox_inches="tight")  # bbox_inchesを指定するとレイアウトが崩れにくい
+    # GRAPH_PATH = f'src/color_recommendation/data/output/{check_subject}_recall_at_k_{sort_type}.png'
+    plt.savefig(output_file_path, bbox_inches="tight")  # bbox_inchesを指定するとレイアウトが崩れにくい
     plt.clf()
-    print(f"{GRAPH_PATH} が保存されました．(グラフの作成)")
+    print(f"{output_file_path} が保存されました．(グラフの作成)")
 
 
 def save_plot_recall_at_k_for_illustrators(illustrator_list, sort_type, check_subject, legend_location):
 
     if check_subject == "tone":
-        print("現在作成中")
         target_dir = f'src/color_recommendation/data/output/recommend_{check_subject}s/'  # 調べたいパスに変更
         dir_names = get_dir_list(target_dir)
         print(dir_names)
         for dir_name in dir_names:
-            print(f"=== {dir_name} ========================")
+            print(f"=== {dir_name} ===")
             input_dir_path = f'src/color_recommendation/data/output/is_contained_next_{check_subject}/{dir_name}'
-            print(input_dir_path)
-            _save_plot_recall_at_k(input_dir_path, illustrator_list, sort_type, check_subject, legend_location)
+            output_file_path = f'src/color_recommendation/data/output/{check_subject}_{dir_name}_recall_at_k_{sort_type}.png'
+            _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, legend_location)
     else:
         input_dir_path = f'src/color_recommendation/data/output/is_contained_next_{check_subject}'
-        _save_plot_recall_at_k(input_dir_path, illustrator_list, sort_type, check_subject, legend_location)
+        output_file_path = f'src/color_recommendation/data/output/{check_subject}_recall_at_k_{sort_type}.png'
+        _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, legend_location)
 
 
 """
