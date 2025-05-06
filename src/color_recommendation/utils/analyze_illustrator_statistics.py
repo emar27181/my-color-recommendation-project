@@ -1,4 +1,4 @@
-from utils.helpers.json_utils import get_json_data
+from utils.helpers.json_utils import get_json_data, get_dir_list
 from utils.helpers.transform_color import hex_to_rgb, rgb_to_hsl
 import json
 import math
@@ -342,7 +342,11 @@ def save_recall_at_k_for_illustrators(illustrator_list, sort_type, check_subject
     for illustrator_name in illustrator_list:
         print(f"\n=== {illustrator_name} ========================")
         if (check_subject == "tone"):
-            print("未実装")
+            dir_name_list = get_dir_list(f"src/color_recommendation/data/output/is_contained_next_{check_subject}")
+            for dir_name in dir_name_list:
+                input_file_path = f"src/color_recommendation/data/output/is_contained_next_{check_subject}/{dir_name}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}.json"
+                output_file_path = f"src/color_recommendation/data/output/recall_at_k/recall_at_k_{check_subject}_{dir_name}_{illustrator_name}.json"
+                save_recall_at_k(input_file_path, output_file_path)
         else:
             input_file_path = f"src/color_recommendation/data/output/is_contained_next_{check_subject}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}.json"
             output_file_path = f"src/color_recommendation/data/output/recall_at_k/recall_at_k_{check_subject}_{sort_type}_{illustrator_name}.json"
