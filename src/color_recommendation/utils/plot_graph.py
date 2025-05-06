@@ -1,6 +1,6 @@
 import json
 import matplotlib.pyplot as plt
-from utils.helpers.json_utils import get_json_data
+from utils.helpers.json_utils import get_json_data, get_dir_list
 from utils.analyze_illustrator_statistics import get_statistics_by_illustrator
 from matplotlib import colormaps
 from mpl_toolkits.mplot3d import Axes3D
@@ -92,8 +92,7 @@ def _get_recommend_colors_count(illustrator_name, sort_type, check_subject):
     return len(data[0]['recommend_color_schemes'])
 
 
-def save_plot_recall_at_k_for_illustrators(illustrator_list, sort_type, check_subject, legend_location):
-
+def _save_plot_recall_at_k(illustrator_list, sort_type, check_subject, legend_location):
     recommned_colors_count = _get_recommend_colors_count(illustrator_list[0], sort_type, check_subject)
 
     # マーカーと線種の候補リスト
@@ -124,6 +123,19 @@ def save_plot_recall_at_k_for_illustrators(illustrator_list, sort_type, check_su
     GRAPH_PATH = f'src/color_recommendation/data/output/{check_subject}_recall_at_k_{sort_type}.png'
     plt.savefig(GRAPH_PATH, bbox_inches="tight")  # bbox_inchesを指定するとレイアウトが崩れにくい
     print(f"{GRAPH_PATH} が保存されました．(グラフの作成)")
+
+
+def save_plot_recall_at_k_for_illustrators(illustrator_list, sort_type, check_subject, legend_location):
+
+    if check_subject == "tone":
+        print("現在作成中")
+        target_dir = f'src/color_recommendation/data/output/recommend_{check_subject}s/'  # 調べたいパスに変更
+        dir_names = get_dir_list(target_dir)
+        print(dir_names)
+        for dir_name in dir_names:
+            print(f"=== {dir_name} ========================")
+    else:
+        _save_plot_recall_at_k(illustrator_list, sort_type, check_subject, legend_location)
 
 
 """
