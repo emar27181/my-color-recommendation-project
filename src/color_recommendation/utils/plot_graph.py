@@ -84,15 +84,16 @@ def calculate_recall(file_path, recommend_colors_count):
 
 
 def _get_recommend_colors_count(illustrator_name, sort_type, check_subject):
-    # if (check_subject == "tone"):
-    #     input_file_path = f"src/color_recommendation/data/output/recommend_colors/sort_by_{sort_type}/recommend_colors_{illustrator_name}.json"
-    # else:
-    input_file_path = f"src/color_recommendation/data/output/recommend_{check_subject}s/sort_by_{sort_type}/recommend_{check_subject}s_{illustrator_name}.json"
-    data = get_json_data(input_file_path)
-    return len(data[0]['recommend_color_schemes'])
+    if (check_subject == "tone"):
+        # input_file_path = f"src/color_recommendation/data/output/recommend_colors/sort_by_{sort_type}/recommend_colors_{illustrator_name}.json"
+        return 100
+    else:
+        input_file_path = f"src/color_recommendation/data/output/recommend_{check_subject}s/sort_by_{sort_type}/recommend_{check_subject}s_{illustrator_name}.json"
+        data = get_json_data(input_file_path)
+        return len(data[0]['recommend_color_schemes'])
 
 
-def _save_plot_recall_at_k(illustrator_list, sort_type, check_subject, legend_location):
+def _save_plot_recall_at_k(input_dir_path, illustrator_list, sort_type, check_subject, legend_location):
     recommned_colors_count = _get_recommend_colors_count(illustrator_list[0], sort_type, check_subject)
 
     # マーカーと線種の候補リスト
@@ -100,7 +101,7 @@ def _save_plot_recall_at_k(illustrator_list, sort_type, check_subject, legend_lo
     linestyles = itertools.cycle(['-', '--', '-.', ':'])
 
     for illustrator_name in illustrator_list:
-        IS_CONTAINED_NEXT_COLOR_FILE_PATH = f"src/color_recommendation/data/output/is_contained_next_{check_subject}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}.json"
+        IS_CONTAINED_NEXT_COLOR_FILE_PATH = f"{input_dir_path}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}.json"
         recalls = calculate_recall(IS_CONTAINED_NEXT_COLOR_FILE_PATH, recommned_colors_count)
 
         # マーカーサイズは適度なサイズに設定し、線種も適用
@@ -134,8 +135,12 @@ def save_plot_recall_at_k_for_illustrators(illustrator_list, sort_type, check_su
         print(dir_names)
         for dir_name in dir_names:
             print(f"=== {dir_name} ========================")
+            input_dir_path = f'src/color_recommendation/data/output/is_contained_next_{check_subject}/{dir_name}'
+            print(input_dir_path)
+            _save_plot_recall_at_k(input_dir_path, illustrator_list, sort_type, check_subject, legend_location)
     else:
-        _save_plot_recall_at_k(illustrator_list, sort_type, check_subject, legend_location)
+        input_dir_path = f'src/color_recommendation/data/output/is_contained_next_{check_subject}'
+        _save_plot_recall_at_k(input_dir_path, illustrator_list, sort_type, check_subject, legend_location)
 
 
 """
