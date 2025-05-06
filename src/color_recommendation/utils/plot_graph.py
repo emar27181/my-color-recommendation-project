@@ -35,6 +35,7 @@ def plot_graph_3d(data, clusters, output_file_path):
     ax.set_zlabel('Z-axis')
     plt.legend()
     plt.savefig(output_file_path)
+    plt.clf()
 
 
 def plot_graph(plot_data, graph_name, output_file_path):
@@ -49,6 +50,7 @@ def plot_graph(plot_data, graph_name, output_file_path):
 
     # ファイルに保存
     plt.savefig(output_file_path)
+    plt.clf()
 
 
 def calculate_recall(file_path, recommend_colors_count):
@@ -123,6 +125,7 @@ def _save_plot_recall_at_k(input_dir_path, illustrator_list, sort_type, check_su
 
     GRAPH_PATH = f'src/color_recommendation/data/output/{check_subject}_recall_at_k_{sort_type}.png'
     plt.savefig(GRAPH_PATH, bbox_inches="tight")  # bbox_inchesを指定するとレイアウトが崩れにくい
+    plt.clf()
     print(f"{GRAPH_PATH} が保存されました．(グラフの作成)")
 
 
@@ -255,6 +258,7 @@ def save_plot_bar_from_used_achromatic_colors_average_rate_for_illustrators(illu
 
     output_file_path = 'src/color_recommendation/data/output/bar_from_used_achromatic_colors_average_rate.png'
     plt.savefig(output_file_path)
+    plt.clf()
     print(f"{output_file_path} が保存されました．")
 
 
@@ -310,6 +314,7 @@ def save_plot_violin_from_mean_resultant_length_count_for_illustrators(illustrat
 
     output_file_path = f'src/color_recommendation/data/output/violin_from_mean_resultant_length.png'
     plt.savefig(output_file_path)
+    plt.clf()
     print(f"{output_file_path} が保存されました．")
 
 
@@ -352,6 +357,7 @@ def save_plot_violin_from_used_hues_count_for_illustrators(illustrator_list):
 
     output_file_path = f'src/color_recommendation/data/output/violin_from_used_hues_count.png'
     plt.savefig(output_file_path)
+    plt.clf()
     print(f"{output_file_path} が保存されました．")
 
 
@@ -420,6 +426,7 @@ def save_plot_violin_from_used_pccs_distribution_for_illustrators():
     plt.tight_layout()
     output_file_path = 'src/color_recommendation/data/output/violin_from_used_pccs_count.png'
     plt.savefig(output_file_path)
+    plt.clf()
     print(f"{output_file_path} が保存されました．")
 
 
@@ -498,6 +505,7 @@ def plot_used_colors_scatter(illustrator_name):
     output_file_path = f'src/color_recommendation/data/output/scatter_graph/scatter_plot_{illustrator_name}.png'
 
     plt.savefig(output_file_path)
+    plt.clf()
     print(f"{output_file_path} が保存されました．")
     print(f"イラスト:  src/color_recommendation/data/input/illustration/{illustrator_name}")
 
@@ -519,6 +527,7 @@ def save_plot_heatmap(illustrator_name, data):
     plt.colorbar(label="Value")
     output_file_path = f'src/color_recommendation/data/output/heatmap/heatmap_plot_{illustrator_name}.png'
     plt.savefig(output_file_path)
+    plt.clf()
     print(f"{output_file_path} が保存されました．")
 
 
