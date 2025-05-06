@@ -207,9 +207,9 @@ def generate_recommend_colors(data, sort_type, illustrator_name, diff_values):
     return output_data
 
 
-def save_recommend_colors_for_illustrators(illutrator_list, sort_type, lightness_diffs):
+def save_recommendations_for_illustrators(illutrator_list, sort_type, lightness_diffs):
     """
-    引数で受け取るリスト内のイラストレーターのイラストの推薦配色を保存する関数
+    引数で受け取るリスト内のイラストレーターのイラストの推薦配色・推薦色相・推薦トーンを保存する関数
 
     引数:
         illutrater_list: 推薦配色を生成させたいイラストレーターのリスト(文字列)
