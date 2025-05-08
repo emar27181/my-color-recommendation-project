@@ -173,6 +173,9 @@ def generate_recommend_colors(data, sort_type, illustrator_name, diff_values):
         # 無彩色と判定された色を削除
         recommend_color_schemes_rgb = remove_monochrome_color_from_color_schemes(recommend_color_schemes_rgb)
 
+        # 空の配色を削除
+        recommend_color_schemes_rgb = remove_empty_color_scheme_from_color_schemes(recommend_color_schemes_rgb)
+
         # 推薦配色群の並び替え
         if (sort_type == "color_diff"):
             recommend_color_schemes_rgb = sort_color_scheme_by_color_difference(used_color_scheme_rgb, recommend_color_schemes_rgb)  # 使用配色との類似度順にソート
