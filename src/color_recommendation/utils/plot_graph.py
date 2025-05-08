@@ -53,6 +53,14 @@ def plot_graph(plot_data, graph_name, output_file_path):
     plt.clf()
 
 
+def _get_max_recommendations_count(data):
+    max = 0
+    for illust_data in data:
+        if (illust_data['recommendations_count'] > max):
+            max = illust_data['recommendations_count']
+    return max
+
+
 def calculate_recall(file_path, recommend_colors_count):
     """
     引数:
@@ -65,16 +73,11 @@ def calculate_recall(file_path, recommend_colors_count):
     with open(file_path, 'r') as f:
         data = json.load(f)
 
-    # print(len(data))
-
     for illust_data in data:
-        # print(illust_data['recall_at_k'])
 
         for illust_data_at_timing in illust_data['recall_at_k']:
             timing_count += 1
-            # print(illust_data_at_timing)
             if (illust_data_at_timing['is_contained_next_color']):
-                # print(illust_data_at_timing["k"])
                 for i in range(illust_data_at_timing["k"], len(recalls)):
                     recalls[i] += 1
 
@@ -99,7 +102,17 @@ def _get_recommendations_count(illustrator_name, sort_type, check_subject):
 
 
 def _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, legend_location):
-    recommned_colors_count = _get_recommendations_count(illustrator_list[0], sort_type, check_subject)
+
+    # 推薦したパターンの数を取得
+    recommendations_count_max = 0
+    for illustrator_name in illustrator_list:
+        IS_CONTAINED_NEXT_COLOR_FILE_PATH = f"{input_dir_path}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}.json"
+        data = get_json_data(IS_CONTAINED_NEXT_COLOR_FILE_PATH)
+        recommnedations_count = _get_max_recommendations_count(data)
+        if (recommnedations_count > recommendations_count_max):
+            recommendations_count_max = recommnedations_count
+
+    print(f"recommendations_count_max = {recommendations_count_max}")
 
     # マーカーと線種の候補リスト
     markers = itertools.cycle(['o', 's', 'v', '^', 'd', '>', '<', 'p', '*', 'h'])
@@ -107,7 +120,7 @@ def _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, s
 
     for illustrator_name in illustrator_list:
         IS_CONTAINED_NEXT_COLOR_FILE_PATH = f"{input_dir_path}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}.json"
-        recalls = calculate_recall(IS_CONTAINED_NEXT_COLOR_FILE_PATH, recommned_colors_count)
+        recalls = calculate_recall(IS_CONTAINED_NEXT_COLOR_FILE_PATH, recommnedations_count)
 
         # マーカーサイズは適度なサイズに設定し、線種も適用
         plt.plot(recalls,
@@ -118,7 +131,7 @@ def _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, s
 
     plt.title(f"recall@k({check_subject}) sort_type={sort_type}")
     plt.ylim(0, 1)
-    plt.xlim(0, recommned_colors_count)
+    plt.xlim(0, recommnedations_count)
     plt.xlabel('color_scheme')
     plt.ylabel('recall')
     plt.grid(True)
