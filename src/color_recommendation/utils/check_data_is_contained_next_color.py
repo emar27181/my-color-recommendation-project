@@ -200,6 +200,7 @@ def check_data_is_contained_next(data, check_subject):
 
         data_recall_at_k_per_illust = {
             "illust_name": illust_data["illust_name"],
+            "recommendations_count": len(recommend_color_schemes),
             "recall_at_k": recall_at_k_per_illust,
         }
         data_recall_at_k.append(data_recall_at_k_per_illust)
