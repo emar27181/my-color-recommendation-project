@@ -210,12 +210,13 @@ def generate_recommend_colors(data, sort_type, illustrator_name, diff_values):
     return output_data
 
 
-def save_recommendations_for_illustrators(illutrator_list, sort_type, lightness_diffs):
+def save_recommendations_for_illustrators(illutrator_list, recommend_type, sort_type, lightness_diffs):
     """
     引数で受け取るリスト内のイラストレーターのイラストの推薦配色・推薦色相・推薦トーンを保存する関数
 
     引数:
         illutrater_list: 推薦配色を生成させたいイラストレーターのリスト(文字列)
+        recommend_type: 推薦の種類(hue/tone/color/all)
         sort_type: ソートの種類(random/color_diff/...)
         lightness_diffs: 明度の差のリスト(例: [+20, -20, +40, -40])
     戻り値:
@@ -237,24 +238,27 @@ def save_recommendations_for_illustrators(illutrator_list, sort_type, lightness_
         output_file_path_tones = f"{output_dir_path_tones}/recommend_tones_{illustrator_name}.json"
         used_colors_data = read_file(input_file_path)
 
-        # 推薦配色群の生成
-        recommend_hues_data = generate_recommend_hues(used_colors_data, sort_type, illustrator_name)
-        recommend_colors_data = generate_recommend_colors(used_colors_data, sort_type, illustrator_name, lightness_diffs)
-        recommend_tones_data = generate_recommend_tones(used_colors_data, sort_type, illustrator_name, lightness_diffs)
+        # 推薦の生成と保存
+        if recommend_type == "hue":
+            recommend_hues_data = generate_recommend_hues(used_colors_data, sort_type, illustrator_name)
+            save_json_data(recommend_hues_data, output_dir_path_hues, output_file_path_hues)
 
-        # 推薦配色群の保存
-        save_json_data(recommend_hues_data, output_dir_path_hues, output_file_path_hues)
-        save_json_data(recommend_colors_data, output_dir_path_colors, output_file_path_colors)
-        save_json_data(recommend_tones_data, output_dir_path_tones, output_file_path_tones)
-        """
-        if not os.path.exists(os.path.dirname(output_file_path_colors)):
-            os.makedirs(output_dir_path)
-            print(f"{output_dir_path} ディレクトリが作成されました．")
+        elif recommend_type == "tone":
+            recommend_tones_data = generate_recommend_tones(used_colors_data, sort_type, illustrator_name, lightness_diffs)
+            save_json_data(recommend_tones_data, output_dir_path_tones, output_file_path_tones)
 
-        with open(output_file_path_colors, 'w', encoding='utf-8') as file:
-            json.dump(recommend_colors_data, file, ensure_ascii=False, indent=4)
-            print(f"{output_file_path_colors} が保存されました．(推薦配色群の生成)")
-        """
+        elif recommend_type == "color":
+            recommend_colors_data = generate_recommend_colors(used_colors_data, sort_type, illustrator_name, lightness_diffs)
+            save_json_data(recommend_colors_data, output_dir_path_colors, output_file_path_colors)
+        elif recommend_type == "all":
+            recommend_hues_data = generate_recommend_hues(used_colors_data, sort_type, illustrator_name)
+            save_json_data(recommend_hues_data, output_dir_path_hues, output_file_path_hues)
+            recommend_tones_data = generate_recommend_tones(used_colors_data, sort_type, illustrator_name, lightness_diffs)
+            save_json_data(recommend_tones_data, output_dir_path_tones, output_file_path_tones)
+            recommend_colors_data = generate_recommend_colors(used_colors_data, sort_type, illustrator_name, lightness_diffs)
+            save_json_data(recommend_colors_data, output_dir_path_colors, output_file_path_colors)
+        else:
+            print("recommend_typeの値が不正です")
 
 
 def main():
