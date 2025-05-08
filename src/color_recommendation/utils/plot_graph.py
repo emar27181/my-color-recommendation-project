@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from utils.helpers.json_utils import get_json_data, get_dir_list
 from utils.analyze_illustrator_statistics import get_statistics_by_illustrator
 from matplotlib import colormaps
+import matplotlib.ticker as ticker
 from mpl_toolkits.mplot3d import Axes3D
 import pandas as pd
 import seaborn as sns
@@ -108,9 +109,9 @@ def _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, s
     for illustrator_name in illustrator_list:
         IS_CONTAINED_NEXT_COLOR_FILE_PATH = f"{input_dir_path}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}.json"
         data = get_json_data(IS_CONTAINED_NEXT_COLOR_FILE_PATH)
-        recommnedations_count = _get_max_recommendations_count(data)
-        if (recommnedations_count > recommendations_count_max):
-            recommendations_count_max = recommnedations_count
+        recommendations_count = _get_max_recommendations_count(data)
+        if (recommendations_count > recommendations_count_max):
+            recommendations_count_max = recommendations_count
 
     print(f"recommendations_count_max = {recommendations_count_max}")
 
@@ -120,7 +121,7 @@ def _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, s
 
     for illustrator_name in illustrator_list:
         IS_CONTAINED_NEXT_COLOR_FILE_PATH = f"{input_dir_path}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}.json"
-        recalls = calculate_recall(IS_CONTAINED_NEXT_COLOR_FILE_PATH, recommnedations_count)
+        recalls = calculate_recall(IS_CONTAINED_NEXT_COLOR_FILE_PATH, recommendations_count)
 
         # マーカーサイズは適度なサイズに設定し、線種も適用
         plt.plot(recalls,
@@ -131,7 +132,8 @@ def _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, s
 
     plt.title(f"recall@k({check_subject}) sort_type={sort_type}")
     plt.ylim(0, 1)
-    plt.xlim(0, recommnedations_count)
+    plt.xlim(0, recommendations_count)
+    plt.gca().xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f"{int(x)}" if x == int(x) else ""))
     plt.xlabel('color_scheme')
     plt.ylabel('recall')
     plt.grid(True)
