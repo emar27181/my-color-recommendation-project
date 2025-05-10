@@ -169,6 +169,7 @@ def is_exist_same_color(color, colors, same_color_threshold):
     引数:
         color: 調べたい色 (R, G, B)
         colors: 調べる配列 (リスト)
+        same_color_threshold: 同じ色とみなす閾値(0-1(ex. 0.01))
     戻り値:
         True: 存在する
         False: 存在しない
@@ -468,6 +469,23 @@ def bring_element_to_front(list, target):
         list.remove(target)    # まずリストから削除
         list.insert(0, target)  # 先頭に挿入
     return list
+
+
+def exclude_duplicate_colors(color_scheme, is_same_color_threshold):
+    """引数で受け取った配色から重複した色を除外する関数
+    引数:
+        color_scheme: 配色のリスト
+        is_same_color_threshold: 同じ色とみなす閾値(0-1(ex. 0.01))
+
+    戻り値:
+        unique_colors: 重複を除いた色のリスト
+    """
+    unique_colors = []
+    for color in color_scheme:
+        # if color not in unique_colors:
+        if not is_exist_same_color(color, unique_colors, is_same_color_threshold):
+            unique_colors.append(color)
+    return unique_colors
 
 
 def extract_specific_range_of_hsl_from_color_scheme(color_scheme, hue_range, saturation_range, lightness_range):
