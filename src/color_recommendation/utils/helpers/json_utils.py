@@ -87,3 +87,8 @@ def get_dir_list(dir_path):
     """
     dir_list = [d for d in os.listdir(dir_path) if os.path.isdir(os.path.join(dir_path, d))]
     return dir_list
+
+def print_tmp(str):
+    """ デバッグ/開発中など)に一時的にprintする関数
+    """
+    print(f"[tmp]: {str}")
