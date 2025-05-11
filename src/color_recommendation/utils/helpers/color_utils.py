@@ -347,6 +347,16 @@ def print_color_scheme(color_scheme):
 def print_color_schemes(color_schemes):
     for color_scheme in color_schemes:
         print_color_scheme(color_scheme)
+        
+
+def print_color_schemes_info(color_schemes_rgb):
+    for i in range(len(color_schemes_rgb)):
+        print(f"[{i}]: ", end="")
+        for color_rgb in color_schemes_rgb[i]:
+            color_hsl = rgb_to_hsl(color_rgb)
+            print_colored_text("■", color_rgb)
+            print(f"  hsl{color_hsl}  rgb{color_rgb}", end="")
+        print("")
 
 
 def test_delta_e_cie2000(color1, color2):

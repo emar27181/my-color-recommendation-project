@@ -1,7 +1,7 @@
 import json
 from utils.generate_color_scheme_method import generate_all_color_schemes, remove_duplicated_color_from_color_schemes, remove_monochrome_color_from_color_schemes, generate_one_color_schemes, remove_empty_color_scheme_from_color_schemes
 from utils.add_variations_color_scheme import get_variations_for_color_schemes
-from utils.helpers.color_utils import print_colored_text, print_color_schemes, print_color_scheme
+from utils.helpers.color_utils import print_colored_text, print_color_schemes, print_color_scheme, print_color_schemes_info
 from utils.helpers.transform_color import hex_to_rgb, transform_color_schemes_rgb_to_hex
 from utils.helpers.json_utils import convert_color_schemes_to_color_data, save_json_data
 from utils.check_data_is_contained_next_color import check_data_is_contained_next
@@ -12,7 +12,7 @@ from utils.sort_color_scheme import sort_color_scheme_by_color_difference, shuff
 import os
 
 DEBUG = True
-DEBUG = False
+# DEBUG = False
 
 
 def read_file(file_path):
@@ -67,9 +67,7 @@ def generate_recommend_hues(data, sort_type, illustrator_name):
 
         # 確認用出力
         if (DEBUG):
-            for i in range(len(recommend_color_schemes_rgb)):
-                print(f"[{i}]: ", end="")
-                print_color_scheme(recommend_color_schemes_rgb[i])
+            print_color_schemes_info(recommend_color_schemes_rgb)
 
     return output_data
 
@@ -132,9 +130,7 @@ def generate_recommend_tones(data, sort_type, illustrator_name, diff_values):
 
         # 確認用出力
         if (DEBUG):
-            for i in range(len(recommend_color_schemes_rgb)):
-                print(f"[{i}]: ", end="")
-                print_color_scheme(recommend_color_schemes_rgb[i])
+            print_color_schemes_info(recommend_color_schemes_rgb)
 
         output_data.append(new_illust_data)
 
@@ -201,9 +197,7 @@ def generate_recommend_colors(data, sort_type, illustrator_name, diff_values):
 
         # 確認用出力
         if (DEBUG):
-            for i in range(len(recommend_color_schemes_rgb)):
-                print(f"[{i}]: ", end="")
-                print_color_scheme(recommend_color_schemes_rgb[i])
+            print_color_schemes_info(recommend_color_schemes_rgb)
 
         output_data.append(new_illust_data)
 
