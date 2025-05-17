@@ -12,6 +12,10 @@ def home():
 def about():
     return render_template("about.html")
 
+@app.route("/color_recommend")
+def color_recommend():
+    return render_template("color_recommend.html")
+
 
 if __name__ == "__main__":
     app.run(debug=True)
