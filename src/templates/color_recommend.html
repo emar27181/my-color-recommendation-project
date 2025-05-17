@@ -11,40 +11,11 @@
     <div class="max-w-xl mx-auto bg-white p-6 rounded shadow">
         <h1 class="text-xl font-bold mb-4">色推薦キャンバス</h1>
 
-        <!-- 色選択 -->
-        <div class="mb-4">
-            <label class="block font-semibold">色を選択：</label>
-            <input type="color" id="colorPicker" value="#ff0000" class="mt-1 border" />
-        </div>
-
-        <!-- キャンバス -->
-        <canvas id="drawingCanvas" width="400" height="400" class="border shadow-md"></canvas>
+        {% include "_color_picker.html" %}
+        {% include "_canvas.html" %}
     </div>
 
-    <script>
-        const canvas = document.getElementById("drawingCanvas");
-        const ctx = canvas.getContext("2d");
-        const colorPicker = document.getElementById("colorPicker");
-
-        let drawing = false;
-
-        canvas.addEventListener("mousedown", () => drawing = true);
-        canvas.addEventListener("mouseup", () => drawing = false);
-        canvas.addEventListener("mouseout", () => drawing = false);
-
-        canvas.addEventListener("mousemove", (e) => {
-            if (!drawing) return;
-
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-
-            ctx.fillStyle = colorPicker.value;
-            ctx.beginPath();
-            ctx.arc(x, y, 5, 0, 2 * Math.PI);
-            ctx.fill();
-        });
-    </script>
+    <script src="{{ url_for('static', filename='js/canvas.js') }}"></script>
 </body>
 
 </html>
