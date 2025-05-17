@@ -22,7 +22,7 @@ def read_file(file_path):
         return data
 
 
-def generate_recommend_hues(data, sort_type, illustrator_name):
+def generate_recommend_hues_by_illustrator(data, sort_type, illustrator_name):
 
     output_data = []
     for illust_data in data:
@@ -72,7 +72,7 @@ def generate_recommend_hues(data, sort_type, illustrator_name):
     return output_data
 
 
-def generate_recommend_tones(data, sort_type, illustrator_name, diff_values):
+def generate_recommend_tones_by_illustrator(data, sort_type, illustrator_name, diff_values):
 
     output_data = []
     for illust_data in data:
@@ -137,7 +137,7 @@ def generate_recommend_tones(data, sort_type, illustrator_name, diff_values):
     return output_data
 
 
-def generate_recommend_colors(data, sort_type, illustrator_name, diff_values):
+def generate_recommend_colors_by_illustrator(data, sort_type, illustrator_name, diff_values):
 
     output_data = []
     for illust_data in data:
@@ -234,22 +234,22 @@ def save_recommendations_for_illustrators(illutrator_list, recommend_type, sort_
 
         # 推薦の生成と保存
         if recommend_type == "hue":
-            recommend_hues_data = generate_recommend_hues(used_colors_data, sort_type, illustrator_name)
+            recommend_hues_data = generate_recommend_hues_by_illustrator(used_colors_data, sort_type, illustrator_name)
             save_json_data(recommend_hues_data, output_dir_path_hues, output_file_path_hues)
 
         elif recommend_type == "tone":
-            recommend_tones_data = generate_recommend_tones(used_colors_data, sort_type, illustrator_name, lightness_diffs)
+            recommend_tones_data = generate_recommend_tones_by_illustrator(used_colors_data, sort_type, illustrator_name, lightness_diffs)
             save_json_data(recommend_tones_data, output_dir_path_tones, output_file_path_tones)
 
         elif recommend_type == "color":
-            recommend_colors_data = generate_recommend_colors(used_colors_data, sort_type, illustrator_name, lightness_diffs)
+            recommend_colors_data = generate_recommend_colors_by_illustrator(used_colors_data, sort_type, illustrator_name, lightness_diffs)
             save_json_data(recommend_colors_data, output_dir_path_colors, output_file_path_colors)
         elif recommend_type == "all":
-            recommend_hues_data = generate_recommend_hues(used_colors_data, sort_type, illustrator_name)
+            recommend_hues_data = generate_recommend_hues_by_illustrator(used_colors_data, sort_type, illustrator_name)
             save_json_data(recommend_hues_data, output_dir_path_hues, output_file_path_hues)
-            recommend_tones_data = generate_recommend_tones(used_colors_data, sort_type, illustrator_name, lightness_diffs)
+            recommend_tones_data = generate_recommend_tones_by_illustrator(used_colors_data, sort_type, illustrator_name, lightness_diffs)
             save_json_data(recommend_tones_data, output_dir_path_tones, output_file_path_tones)
-            recommend_colors_data = generate_recommend_colors(used_colors_data, sort_type, illustrator_name, lightness_diffs)
+            recommend_colors_data = generate_recommend_colors_by_illustrator(used_colors_data, sort_type, illustrator_name, lightness_diffs)
             save_json_data(recommend_colors_data, output_dir_path_colors, output_file_path_colors)
         else:
             print("recommend_typeの値が不正です")
