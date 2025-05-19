@@ -65,6 +65,10 @@ def get_recommendations(used_color_scheme_rgb, recommend_type, sort_type, illust
     else:
         print("ソートの種類が間違っているため，推薦配色は並び替えられずに挿入されます．(ソートの種類:  'random', 'color_diff')")
         
+    # 確認用出力
+    if (DEBUG):
+        print_color_schemes_info(recommend_color_schemes_rgb)
+        
     return recommend_color_schemes_rgb
 
 def generate_recommend_hues_by_illustrator(data, sort_type, illustrator_name):
@@ -92,9 +96,7 @@ def generate_recommend_hues_by_illustrator(data, sort_type, illustrator_name):
 
         output_data.append(new_illust_data)
 
-        # 確認用出力
-        if (DEBUG):
-            print_color_schemes_info(recommend_color_schemes_rgb)
+
 
     return output_data
 
@@ -120,10 +122,6 @@ def generate_recommend_tones_by_illustrator(data, sort_type, illustrator_name, d
             "color_scheme": illust_data,
             "recommend_color_schemes": convert_color_schemes_to_color_data(transform_color_schemes_rgb_to_hex(recommend_color_schemes_rgb)),
         }
-
-        # 確認用出力
-        if (DEBUG):
-            print_color_schemes_info(recommend_color_schemes_rgb)
 
         output_data.append(new_illust_data)
 
