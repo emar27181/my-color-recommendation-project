@@ -21,9 +21,9 @@ def read_file(file_path):
         print(f"{file_path} が読み込まれました．")
         return data
 
-def get_recommend_recommendations(used_color_scheme_rgb, recommend_type, sort_type, illustrator_name, diff_values=[-40, -20, 20, 40]):
+def get_recommendations(used_color_scheme_rgb, recommend_type, sort_type, illustrator_name, diff_values=[-40, -20, 20, 40]):
     """
-    引数で受け取るデータを基に推薦群を生成する関数
+    引数で受け取るデータを基に推薦群を取得する関数
     """
     print(f"=== get_recommend_recommendations(~, {recommend_type}, {sort_type}, {illustrator_name}, {diff_values}) ===")
     base_color_rgb = used_color_scheme_rgb[0]  
@@ -82,7 +82,7 @@ def generate_recommend_hues_by_illustrator(data, sort_type, illustrator_name):
         for color_scheme_data in illust_data:
             used_color_scheme_rgb.append(hex_to_rgb(color_scheme_data['color']))
 
-        recommend_color_schemes_rgb =  get_recommend_recommendations(used_color_scheme_rgb, "hue", sort_type, illustrator_name)  # 使用配色の最初の色を基に推薦色相を生成
+        recommend_color_schemes_rgb =  get_recommendations(used_color_scheme_rgb, "hue", sort_type, illustrator_name)  # 使用配色の最初の色を基に推薦色相を生成
         
         new_illust_data = {
             "illust_name": illust_data[0]['illustName'],
@@ -113,7 +113,7 @@ def generate_recommend_tones_by_illustrator(data, sort_type, illustrator_name, d
         for color_scheme_data in illust_data:
             used_color_scheme_rgb.append(hex_to_rgb(color_scheme_data['color']))
 
-        recommend_color_schemes_rgb = get_recommend_recommendations(used_color_scheme_rgb, "tone", sort_type, illustrator_name, diff_values)  
+        recommend_color_schemes_rgb = get_recommendations(used_color_scheme_rgb, "tone", sort_type, illustrator_name, diff_values)  
 
         new_illust_data = {
             "illust_name": illust_data[0]['illustName'],
