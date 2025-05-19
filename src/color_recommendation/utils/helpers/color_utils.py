@@ -355,7 +355,11 @@ def print_color_schemes_info(color_schemes_rgb):
         for color_rgb in color_schemes_rgb[i]:
             color_hsl = rgb_to_hsl(color_rgb)
             print_colored_text("■", color_rgb)
-            print(f"  hsl{color_hsl}  rgb{color_rgb}", end="")
+        print(" ", end="")
+        
+        for color_rgb in color_schemes_rgb[i]:
+            color_hsl = rgb_to_hsl(color_rgb)
+            print(f"hsl{color_hsl}, ", end="")
         print("")
 
 
