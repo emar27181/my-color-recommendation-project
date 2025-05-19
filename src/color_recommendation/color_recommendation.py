@@ -3,7 +3,7 @@ from utils.generate_color_scheme_method import generate_all_color_schemes, remov
 from utils.add_variations_color_scheme import get_variations_for_color_schemes
 from utils.helpers.color_utils import print_colored_text, print_color_schemes, print_color_scheme, print_color_schemes_info
 from utils.helpers.transform_color import hex_to_rgb, transform_color_schemes_rgb_to_hex
-from utils.helpers.json_utils import convert_color_schemes_to_color_data, save_json_data
+from utils.helpers.json_utils import convert_color_schemes_to_color_data, save_json_data, print_tmp
 from utils.check_data_is_contained_next_color import check_data_is_contained_next
 
 from utils.estimate_used_color_scheme import generate_json_used_color_scheme, save_estimated_used_colors
@@ -21,6 +21,32 @@ def read_file(file_path):
         print(f"{file_path} が読み込まれました．")
         return data
 
+def get_recommend_recommendations(used_color_scheme_rgb, sort_type, illustrator_name):
+    """
+    引数で受け取るデータを基に推薦群を生成する関数
+    """
+    print("=== get_recommend_recommendations ===")
+    base_color_rgb = used_color_scheme_rgb[0]  
+    
+    recommend_color_schemes_rgb = generate_all_color_schemes(base_color_rgb)  # 17パターンの配色群を生成
+
+    # 推薦配色群の並び替え
+    if (sort_type == "color_diff"):
+        recommend_color_schemes_rgb = sort_color_scheme_by_color_difference(used_color_scheme_rgb, recommend_color_schemes_rgb)  # 使用配色との類似度順にソート
+    elif (sort_type == "random"):
+        recommend_color_schemes_rgb = shuffle_color_schemes(recommend_color_schemes_rgb)  # 推薦配色をランダムにシャッフル
+    elif (sort_type == "used_color_count"):
+        recommend_color_schemes_rgb = sort_color_scheme_by_used_color_count(recommend_color_schemes_rgb, illustrator_name)
+    elif (sort_type == "mean_resultant_length"):
+        recommend_color_schemes_rgb = sort_color_schemes_by_mean_resultant_length(recommend_color_schemes_rgb, illustrator_name)
+    elif (sort_type == "custom_v0"):
+        recommend_color_schemes_rgb = sort_color_scheme_by_custom_v0(used_color_scheme_rgb, recommend_color_schemes_rgb, illustrator_name)
+    elif (sort_type == "no_sort"):
+        pass
+    else:
+        print("ソートの種類が間違っているため，推薦配色は並び替えられずに挿入されます．(ソートの種類:  'random', 'color_diff')")
+        
+    return recommend_color_schemes_rgb
 
 def generate_recommend_hues_by_illustrator(data, sort_type, illustrator_name):
 
@@ -37,6 +63,9 @@ def generate_recommend_hues_by_illustrator(data, sort_type, illustrator_name):
         for color_scheme_data in illust_data:
             used_color_scheme_rgb.append(hex_to_rgb(color_scheme_data['color']))
 
+        recommend_color_schemes_rgb =  get_recommend_recommendations(used_color_scheme_rgb, sort_type, illustrator_name)  # 使用配色の最初の色を基に推薦色相を生成
+        
+        """
         # あるイラストに対して推薦配色群を生成
         base_color_rgb = hex_to_rgb(illust_data[0]['color'])  # 推薦配色の基となる色を取得
         recommend_color_schemes_rgb = generate_all_color_schemes(base_color_rgb)  # 17パターンの配色群を生成
@@ -57,6 +86,7 @@ def generate_recommend_hues_by_illustrator(data, sort_type, illustrator_name):
         else:
             print("ソートの種類が間違っているため，推薦配色は並び替えられずに挿入されます．(ソートの種類:  'random', 'color_diff')")
 
+        """
         new_illust_data = {
             "illust_name": illust_data[0]['illustName'],
             "color_scheme": illust_data,
