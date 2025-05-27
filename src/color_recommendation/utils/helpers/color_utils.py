@@ -90,6 +90,21 @@ def calculate_rgb_distance_by_euclidean(rgb1, rgb2):
     return distance / max_distance
 
 
+def calc_distance_diff(x1, y1, x2, y2):
+    """
+    2点間の距離を計算する関数
+    引数:
+        x1: 点1のx座標
+        y1: 点1のy座標
+        x2: 点2のx座標
+        y2: 点2のy座標
+    戻り値:
+        distance: 2点間の距離
+    """
+    distance = math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
+    return distance
+
+
 def transform_tuple_to_list(color_counts_tuple):
     """tuple型の色の数を保存するデータをlist型に変換する関数"""
     color_counts_list = []
@@ -138,11 +153,23 @@ def quantize_color_rgb(rgb, threshold):
     return tuple((value // threshold) * threshold if value % threshold < 3 else (value // threshold) * threshold + threshold for value in rgb)
 
 
+def is_valid_color(color):
+    """引数で受け取ったRGB値が有効な色かどうかを判定する関数
+    引数:
+        color: 色 (R, G, B)
+    戻り値:
+        True: 有効な色
+        False: 無効な色
+    """
+    return all(0 <= value <= 255 for value in color)
+
+
 def is_exist_same_color(color, colors, same_color_threshold):
     """引数で受け取った色が配列に存在するかどうかを調べる関数
     引数:
         color: 調べたい色 (R, G, B)
         colors: 調べる配列 (リスト)
+        same_color_threshold: 同じ色とみなす閾値(0-1(ex. 0.01))
     戻り値:
         True: 存在する
         False: 存在しない
@@ -320,6 +347,20 @@ def print_color_scheme(color_scheme):
 def print_color_schemes(color_schemes):
     for color_scheme in color_schemes:
         print_color_scheme(color_scheme)
+        
+
+def print_color_schemes_info(color_schemes_rgb):
+    for i in range(len(color_schemes_rgb)):
+        print(f"[{i}]: ", end="")
+        for color_rgb in color_schemes_rgb[i]:
+            color_hsl = rgb_to_hsl(color_rgb)
+            print_colored_text("■", color_rgb)
+        print(" ", end="")
+        
+        for color_rgb in color_schemes_rgb[i]:
+            color_hsl = rgb_to_hsl(color_rgb)
+            print(f"hsl{color_hsl}, ", end="")
+        print("")
 
 
 def test_delta_e_cie2000(color1, color2):
@@ -444,6 +485,23 @@ def bring_element_to_front(list, target):
     return list
 
 
+def exclude_duplicate_colors(color_scheme, is_same_color_threshold):
+    """引数で受け取った配色から重複した色を除外する関数
+    引数:
+        color_scheme: 配色のリスト
+        is_same_color_threshold: 同じ色とみなす閾値(0-1(ex. 0.01))
+
+    戻り値:
+        unique_colors: 重複を除いた色のリスト
+    """
+    unique_colors = []
+    for color in color_scheme:
+        # if color not in unique_colors:
+        if not is_exist_same_color(color, unique_colors, is_same_color_threshold):
+            unique_colors.append(color)
+    return unique_colors
+
+
 def extract_specific_range_of_hsl_from_color_scheme(color_scheme, hue_range, saturation_range, lightness_range):
     """引数で受け取った配色から指定した範囲の色を抽出する関数
     引数:
@@ -469,6 +527,47 @@ def extract_specific_range_of_hsl_from_color_scheme(color_scheme, hue_range, sat
             extracted_colors.append(color)
 
     return extracted_colors
+
+
+def calc_mean_resultant_length(angles_deg):
+    """
+    角度のリスト（度単位）から、平均結果長を計算して返す関数。
+    """
+
+    if len(angles_deg) == 0:
+        return 0
+
+    # 角度をラジアンに変換
+    angles_rad = [math.radians(angle) for angle in angles_deg]
+
+    # 各角度のcosとsinの合計を計算
+    sum_cos = sum(math.cos(angle) for angle in angles_rad)
+    sum_sin = sum(math.sin(angle) for angle in angles_rad)
+
+    n = len(angles_rad)
+    avg_cos = sum_cos / n
+    avg_sin = sum_sin / n
+
+    # 平均結果長の計算
+    R = math.sqrt(avg_cos**2 + avg_sin**2)
+    return R
+
+
+def calc_color_scheme_to_mean_resultant_length(color_scheme):
+    """引数で受け取った配色の平均色相を計算する関数
+    引数:
+        color_scheme: 配色のリスト
+
+    戻り値:
+        mean_resultant_length: 平均色相 (0-1)
+    """
+    # 色相を取得
+    color_hues = [rgb_to_hsl(color)[0] for color in color_scheme]
+
+    # 平均色相を計算
+    mean_resultant_length = calc_mean_resultant_length(color_hues)
+
+    return mean_resultant_length
 
 
 if __name__ == "__main__":

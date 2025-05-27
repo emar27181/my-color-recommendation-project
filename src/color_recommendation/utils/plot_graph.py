@@ -1,7 +1,9 @@
 import json
 import matplotlib.pyplot as plt
-from utils.helpers.json_utils import get_json_data
+from utils.helpers.json_utils import get_json_data, get_dir_list
+from utils.analyze_illustrator_statistics import get_statistics_by_illustrator
 from matplotlib import colormaps
+import matplotlib.ticker as ticker
 from mpl_toolkits.mplot3d import Axes3D
 import pandas as pd
 import seaborn as sns
@@ -34,6 +36,7 @@ def plot_graph_3d(data, clusters, output_file_path):
     ax.set_zlabel('Z-axis')
     plt.legend()
     plt.savefig(output_file_path)
+    plt.clf()
 
 
 def plot_graph(plot_data, graph_name, output_file_path):
@@ -48,6 +51,15 @@ def plot_graph(plot_data, graph_name, output_file_path):
 
     # ファイルに保存
     plt.savefig(output_file_path)
+    plt.clf()
+
+
+def _get_max_recommendations_count(data):
+    max = 0
+    for illust_data in data:
+        if (illust_data['recommendations_count'] > max):
+            max = illust_data['recommendations_count']
+    return max
 
 
 def calculate_recall(file_path, recommend_colors_count):
@@ -62,16 +74,11 @@ def calculate_recall(file_path, recommend_colors_count):
     with open(file_path, 'r') as f:
         data = json.load(f)
 
-    # print(len(data))
-
     for illust_data in data:
-        # print(illust_data['recall_at_k'])
 
         for illust_data_at_timing in illust_data['recall_at_k']:
             timing_count += 1
-            # print(illust_data_at_timing)
             if (illust_data_at_timing['is_contained_next_color']):
-                # print(illust_data_at_timing["k"])
                 for i in range(illust_data_at_timing["k"], len(recalls)):
                     recalls[i] += 1
 
@@ -82,23 +89,39 @@ def calculate_recall(file_path, recommend_colors_count):
     return recalls
 
 
-def _get_recommend_colors_count(illustrator_name, sort_type):
-    input_file_path = f"src/color_recommendation/data/output/recommend_colors/sort_by_{sort_type}/recommend_colors_{illustrator_name}.json"
-    data = get_json_data(input_file_path)
-    return len(data[0]['recommend_color_schemes'])
+def _get_recommendations_count(illustrator_name, sort_type, check_subject):
+    """
+    推薦したパターンの数(色の数/色相の数/トーンの数)を取得する関数
+    """
+    if (check_subject == "tone"):
+        # 本当はここでバリエーションの数を取得したいが固定値を返している
+        return 100
+    else:
+        input_file_path = f"src/color_recommendation/data/output/recommend_{check_subject}s/sort_by_{sort_type}/recommend_{check_subject}s_{illustrator_name}.json"
+        data = get_json_data(input_file_path)
+        return len(data[0]['recommend_color_schemes'])
 
 
-def save_plot_recall_at_k_for_illustrators(illustrator_list, sort_type):
+def _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, legend_location):
 
-    recommned_colors_count = _get_recommend_colors_count(illustrator_list[0], sort_type)
+    # 推薦したパターンの数を取得
+    recommendations_count_max = 0
+    for illustrator_name in illustrator_list:
+        IS_CONTAINED_NEXT_COLOR_FILE_PATH = f"{input_dir_path}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}.json"
+        data = get_json_data(IS_CONTAINED_NEXT_COLOR_FILE_PATH)
+        recommendations_count = _get_max_recommendations_count(data)
+        if (recommendations_count > recommendations_count_max):
+            recommendations_count_max = recommendations_count
+
+    print(f"recommendations_count_max = {recommendations_count_max}")
 
     # マーカーと線種の候補リスト
     markers = itertools.cycle(['o', 's', 'v', '^', 'd', '>', '<', 'p', '*', 'h'])
     linestyles = itertools.cycle(['-', '--', '-.', ':'])
 
     for illustrator_name in illustrator_list:
-        IS_CONTAINED_NEXT_COLOR_FILE_PATH = f"src/color_recommendation/data/output/is_contained_next_color/{sort_type}/is_contained_next_color_{illustrator_name}.json"
-        recalls = calculate_recall(IS_CONTAINED_NEXT_COLOR_FILE_PATH, recommned_colors_count)
+        IS_CONTAINED_NEXT_COLOR_FILE_PATH = f"{input_dir_path}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}.json"
+        recalls = calculate_recall(IS_CONTAINED_NEXT_COLOR_FILE_PATH, recommendations_count)
 
         # マーカーサイズは適度なサイズに設定し、線種も適用
         plt.plot(recalls,
@@ -107,19 +130,38 @@ def save_plot_recall_at_k_for_illustrators(illustrator_list, sort_type):
                  markersize=0,
                  linestyle=next(linestyles))
 
-    plt.title(f"recall@k sort_type={sort_type}")
+    plt.title(f"recall@k({check_subject}) sort_type={sort_type}")
     plt.ylim(0, 1)
-    plt.xlim(0, recommned_colors_count)
+    plt.xlim(0, recommendations_count)
+    plt.gca().xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f"{int(x)}" if x == int(x) else ""))
     plt.xlabel('color_scheme')
     plt.ylabel('recall')
     plt.grid(True)
 
     # 凡例はフォントサイズや位置も調整可能
-    plt.legend(title="Illustrators", fontsize=5, loc='upper left')
+    plt.legend(title="Illustrators", fontsize=5, loc=f'{legend_location}')
 
-    GRAPH_PATH = f'src/color_recommendation/data/output/recall_at_k_{sort_type}.png'
-    plt.savefig(GRAPH_PATH, bbox_inches="tight")  # bbox_inchesを指定するとレイアウトが崩れにくい
-    print(f"{GRAPH_PATH} が保存されました．(グラフの作成)")
+    # GRAPH_PATH = f'src/color_recommendation/data/output/{check_subject}_recall_at_k_{sort_type}.png'
+    plt.savefig(output_file_path, bbox_inches="tight")  # bbox_inchesを指定するとレイアウトが崩れにくい
+    plt.clf()
+    print(f"{output_file_path} が保存されました．(グラフの作成)")
+
+
+def save_plot_recall_at_k_for_illustrators(illustrator_list, sort_type, check_subject, legend_location):
+
+    if check_subject == "tone":
+        target_dir = f'src/color_recommendation/data/output/recommend_{check_subject}s/'  # 調べたいパスに変更
+        dir_names = get_dir_list(target_dir)
+        print(dir_names)
+        for dir_name in dir_names:
+            print(f"=== {dir_name} ===")
+            input_dir_path = f'src/color_recommendation/data/output/is_contained_next_{check_subject}/{dir_name}'
+            output_file_path = f'src/color_recommendation/data/output/{check_subject}_{dir_name}_recall_at_k_{sort_type}.png'
+            _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, legend_location)
+    else:
+        input_dir_path = f'src/color_recommendation/data/output/is_contained_next_{check_subject}'
+        output_file_path = f'src/color_recommendation/data/output/{check_subject}_recall_at_k_{sort_type}.png'
+        _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, legend_location)
 
 
 """
@@ -234,6 +276,7 @@ def save_plot_bar_from_used_achromatic_colors_average_rate_for_illustrators(illu
 
     output_file_path = 'src/color_recommendation/data/output/bar_from_used_achromatic_colors_average_rate.png'
     plt.savefig(output_file_path)
+    plt.clf()
     print(f"{output_file_path} が保存されました．")
 
 
@@ -289,6 +332,7 @@ def save_plot_violin_from_mean_resultant_length_count_for_illustrators(illustrat
 
     output_file_path = f'src/color_recommendation/data/output/violin_from_mean_resultant_length.png'
     plt.savefig(output_file_path)
+    plt.clf()
     print(f"{output_file_path} が保存されました．")
 
 
@@ -331,6 +375,7 @@ def save_plot_violin_from_used_hues_count_for_illustrators(illustrator_list):
 
     output_file_path = f'src/color_recommendation/data/output/violin_from_used_hues_count.png'
     plt.savefig(output_file_path)
+    plt.clf()
     print(f"{output_file_path} が保存されました．")
 
 
@@ -399,44 +444,22 @@ def save_plot_violin_from_used_pccs_distribution_for_illustrators():
     plt.tight_layout()
     output_file_path = 'src/color_recommendation/data/output/violin_from_used_pccs_count.png'
     plt.savefig(output_file_path)
+    plt.clf()
     print(f"{output_file_path} が保存されました．")
 
 
-def plot_scatter(illustrator_name):
+def _get_scatter_data_by_used_colors(data):
     """
-    引数で受け取るイラストレーターの使用色の散布図をプロットする関数
-
+    使用色データを基に明度と彩度を計算し、散布図用のデータを生成する関数
     引数:
-        illustrator_name: イラストレーター名
-
+        data: 使用色データ（JSON形式）
     戻り値:
-        None
+        lightness_list: 明度リスト
+        saturation_list: 彩度リスト
+        color_labels: 色ラベルリスト
+        sizes: サイズリスト
     """
-    print(f"=== {illustrator_name} ====================")
 
-    input_file_path = f"src/color_recommendation/data/input/used_colors_{illustrator_name}.json"
-
-    # ファイルの読み込み
-    try:
-        if not os.path.exists(input_file_path):
-            raise FileNotFoundError(f"File not found: {input_file_path}")
-            return
-
-        with open(input_file_path, 'r') as f:
-            data = json.load(f)
-            print(f"{input_file_path} が読み込まれました．")
-
-    except FileNotFoundError as e:
-        print(f"エラー: {e}")
-        return
-    except json.JSONDecodeError as e:
-        print(f"JSONデコードエラー: {e}. ファイルの内容を確認してください。")
-        return
-    except Exception as e:
-        print(f"予期しないエラーが発生しました: {e}")
-        return
-
-    # 明度と彩度を計算
     lightness_list = []
     saturation_list = []
     color_labels = []
@@ -465,6 +488,27 @@ def plot_scatter(illustrator_name):
             color_labels.append(hex_color)
             sizes.append(color_info["rate"] * 400)
 
+    return lightness_list, saturation_list, color_labels, sizes
+
+
+def plot_used_colors_scatter(illustrator_name):
+    """
+    引数で受け取るイラストレーターの使用色の散布図をプロットする関数
+
+    引数:
+        illustrator_name: イラストレーター名
+
+    戻り値:
+        None
+    """
+    print(f"=== {illustrator_name} ====================")
+
+    input_file_path = f"src/color_recommendation/data/input/used_colors/used_colors_{illustrator_name}.json"
+    data = get_json_data(input_file_path)
+
+    # 明度と彩度を計算
+    lightness_list, saturation_list, color_labels, sizes = _get_scatter_data_by_used_colors(data)
+
     # 散布図を作成
     plt.figure(figsize=(8, 6))
     plt.scatter(saturation_list, lightness_list, s=sizes, c=color_labels, edgecolor=None)
@@ -476,13 +520,39 @@ def plot_scatter(illustrator_name):
     plt.grid(True)
     # plt.show()
 
-    output_file_path = f'src/color_recommendation/data/output/scatter_plot_{illustrator_name}.png'
+    output_file_path = f'src/color_recommendation/data/output/scatter_graph/scatter_plot_{illustrator_name}.png'
 
     plt.savefig(output_file_path)
+    plt.clf()
     print(f"{output_file_path} が保存されました．")
     print(f"イラスト:  src/color_recommendation/data/input/illustration/{illustrator_name}")
 
     plt.close()
+
+
+def save_plot_scatter_for_illustrators(illustrater_list):
+    for illustrator in illustrater_list:
+        plot_used_colors_scatter(illustrator)
+
+
+def save_plot_heatmap(illustrator_name, data):
+
+    plt.figure(figsize=(6, 6))
+    plt.imshow(data, origin='lower')
+    plt.title("Heatmap of Provided Data")
+    plt.xlabel("Column Index")
+    plt.ylabel("Row Index")
+    plt.colorbar(label="Value")
+    output_file_path = f'src/color_recommendation/data/output/heatmap/heatmap_plot_{illustrator_name}.png'
+    plt.savefig(output_file_path)
+    plt.clf()
+    print(f"{output_file_path} が保存されました．")
+
+
+def save_plot_heatmap_for_illustrators(illustrator_list):
+    for illustrator in illustrator_list:
+        data = get_statistics_by_illustrator(illustrator, 'saturation_lightness_count_distribution')
+        save_plot_heatmap(illustrator, data)
 
 
 def main():

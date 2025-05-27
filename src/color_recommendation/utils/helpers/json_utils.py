@@ -80,3 +80,15 @@ def save_json_data(data, output_dir_path, output_file_path):
     with open(output_file_path, 'w', encoding='utf-8') as file:
         json.dump(data, file, ensure_ascii=False, indent=4)
         print(f"{output_file_path} が保存されました．")
+
+
+def get_dir_list(dir_path):
+    """ 引数で受け取るパスのディレクトリ下のディレクトリ名をリストで返す関数
+    """
+    dir_list = [d for d in os.listdir(dir_path) if os.path.isdir(os.path.join(dir_path, d))]
+    return dir_list
+
+def print_tmp(str):
+    """ デバッグ/開発中など)に一時的にprintする関数
+    """
+    print(f"[tmp]: {str}")

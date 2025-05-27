@@ -1,9 +1,12 @@
-from utils.helpers.json_utils import get_json_data
+from utils.helpers.json_utils import get_json_data, get_dir_list
+from utils.helpers.transform_color import hex_to_rgb, rgb_to_hsl
 import json
 import math
+import os
 
 DEBUG = True
 DEBUG = False
+DIVIDE_NUM = 5  # 明度と彩度をいくつで区切るか
 
 
 def _mean_resultant_length(angles_deg):
@@ -28,6 +31,37 @@ def _mean_resultant_length(angles_deg):
     # 平均結果長の計算
     R = math.sqrt(avg_cos**2 + avg_sin**2)
     return R
+
+
+def _get_saturation_lightness_count_distribution(illustrator_name, illust_name, index_num):
+    """_summary_
+
+    Args:
+        illustrator_name (_type_): _description_
+        illust_name (_type_): _description_
+        index_num (_type_): _description_
+
+    ## メモ
+    - 使用色相(used_hues~.json)と使用色(used_colors~.json)を別々で保存してるからややこしいことになってる(2025/04/27)
+        - それぞれのjsonで同じイラスト群を読み込んでいれば，読込んだイラストとそのインデックス番号が一致するためindex_numでused_colorsのインデックスを参照している
+    """
+
+    saturation_lightness_count_distribution = [[0 for _ in range(DIVIDE_NUM + 1)] for _ in range(DIVIDE_NUM + 1)]
+    input_file_path = f'src/color_recommendation/data/input/used_colors/used_colors_{illustrator_name}.json'
+    used_colors_data = get_json_data(input_file_path)
+
+    # print(f"{used_colors_data[index_num][0]['illustName']}") # これがillust_nameと一致していれば同画像を参照できている
+
+    used_colors_info = used_colors_data[index_num]
+    for used_color_info in used_colors_info:
+        used_color_hex = used_color_info['color']
+        used_color_rgb = hex_to_rgb(used_color_hex)
+        used_color_hsl = rgb_to_hsl(used_color_rgb)
+        saturation_index, lightness_index = round(used_color_hsl[1] / (100 / DIVIDE_NUM)), round(used_color_hsl[2] / (100 / DIVIDE_NUM))
+        saturation_lightness_count_distribution[lightness_index][saturation_index] += 1
+
+    # print(f"saturation_lightness_count_distribution = {saturation_lightness_count_distribution}")
+    return saturation_lightness_count_distribution
 
 
 def _extract_statistics_by_illustrator(illustrator_name):
@@ -55,6 +89,8 @@ def _extract_statistics_by_illustrator(illustrator_name):
     mean_resultant_length_sum = 0
     mean_resultant_length_sum_distribution = [0] * (DIV_NUMBER + 1)
     chromatic_colors_count_distribution = [0] * 20
+    saturation_lightness_count_distribution = [[0 for _ in range(DIVIDE_NUM + 1)] for _ in range(DIVIDE_NUM + 1)]
+    index_count = 0
 
     for illust_data in data:
         illust_name = illust_data["illust_name"]
@@ -108,6 +144,14 @@ def _extract_statistics_by_illustrator(illustrator_name):
             elif (used_hue_rate[0] == -11):  # 白の場合
                 achromatic_colors_rate_sum += used_hue_rate[1]
 
+        # 明度と彩度の分布を加算
+        new_saturation_lightness_count_distribution = _get_saturation_lightness_count_distribution(illustrator_name, illust_name, index_count)
+        for i in range(len(saturation_lightness_count_distribution)):
+            for j in range(len(saturation_lightness_count_distribution[i])):
+                saturation_lightness_count_distribution[i][j] += new_saturation_lightness_count_distribution[i][j]
+
+        index_count += 1
+
     mean_resultant_length_sum_distribution.reverse()  # 0~12(違う角度を使っている順) → 12~0(同じ角度を使っている順)に反転
 
     statistics = {
@@ -121,9 +165,28 @@ def _extract_statistics_by_illustrator(illustrator_name):
         "used_pccs_count_sum_distribution": used_pccs_count_sum_distribution,
         "mean_resultant_length_ave": mean_resultant_length_sum / count_one_or_more_colors_used,
         "mean_resultant_length_distribution": mean_resultant_length_sum_distribution,
+        "saturation_lightness_count_distribution": saturation_lightness_count_distribution,
     }
 
     return statistics
+
+
+def get_statistics_by_illustrator(illustrator_name, keyword):
+    """ 引数で受け取るイラストレーターのイラストのキーワードの統計データを取得する関数
+
+    引数:
+        illustrator_name: イラストレーター名(文字列)
+        keyword: 統計データのキーワード(文字列)
+
+    戻り値:
+        statistics: イラストレーターの統計データ
+    """
+    statistics = _extract_statistics_by_illustrator(illustrator_name)
+
+    if (keyword == "all"):
+        return statistics
+    else:
+        return statistics[keyword]
 
 
 def print_statistics_for_illustrators(illustrator_list, keyword):
@@ -176,9 +239,10 @@ def save_statistics_for_illustrators(illustrator_list):
         print(f"\n=== {illustrator_name} ========================")
         statistics = _extract_statistics_by_illustrator(illustrator_name)
 
-        print("~~~ statistics ~~~")
-        for data in statistics:
-            print(f"{data} = {statistics[data]}")
+        if (DEBUG):
+            print("~~~ statistics ~~~")
+            for data in statistics:
+                print(f"{data} = {statistics[data]}")
 
         statistics_data.append(statistics)
 
@@ -190,26 +254,100 @@ def save_statistics_for_illustrators(illustrator_list):
         print(f"{output_file_path} が保存されました．")
 
 
-def get_not_monochrome_illustrator_list():
+def get_not_monochrome_illustrator_list(illustrator_list):
     """モノクロイラストを除くイラストレーターのリストを取得する関数
+
+    引数:
+        illustrator_list: 推薦配色を生成させたいイラストレーターのリスト(文字列)
     """
     MONOCHROME_THRESHOLD = 0.5  # モノクロ率の閾値
 
     input_file_path = "src/color_recommendation/data/input/statistics_for_illustrators.json"
     data = get_json_data(input_file_path)
-    illustrater_list = []
+    not_monochrome_illustrator_list = []
 
-    for illustrator_data in data:
-        illustrator_name = illustrator_data["illustrator_name"]
-        print(f"=== {illustrator_name} ========================")
-        chromatic_colors_count_distribution = illustrator_data["chromatic_colors_count_distribution"]
-        # print(f"chromatic_colors_count_distribution = {chromatic_colors_count_distribution}")
-        monochrome_rate = chromatic_colors_count_distribution[0] / sum(chromatic_colors_count_distribution)
+    for illustrator_name in illustrator_list:
+        if (DEBUG):
+            print(f"=== {illustrator_name} ========================")
+        for illustrator_data in data:
+            illustrator_data_name = illustrator_data["illustrator_name"]
+            if (illustrator_name == illustrator_data_name):
 
-        if (monochrome_rate < MONOCHROME_THRESHOLD):
-            illustrater_list.append(illustrator_name)
-            print(f"モノクロ率 = {(round(monochrome_rate * 10000) / 100 )}%: モノクロイラストのイラストレーターではないため，リストに追加します．")
+                chromatic_colors_count_distribution = illustrator_data["chromatic_colors_count_distribution"]
+                # print(f"chromatic_colors_count_distribution = {chromatic_colors_count_distribution}")
+                monochrome_rate = chromatic_colors_count_distribution[0] / sum(chromatic_colors_count_distribution)
+                if (monochrome_rate < MONOCHROME_THRESHOLD):
+                    not_monochrome_illustrator_list.append(illustrator_name)
+                    if (DEBUG):
+                        print(f"モノクロ率 = {(round(monochrome_rate * 10000) / 100 )}%: モノクロイラストのイラストレーターではないため，リストに追加します．")
+                else:
+                    if (DEBUG):
+                        print(f"モノクロ率 = {(round(monochrome_rate * 10000) / 100 )}%: モノクロイラストのイラストレーターのため，リストに追加しません．")
+
+    print("モノクロイラストを含むイラストレーターが除外されました．")
+
+    return not_monochrome_illustrator_list
+
+
+def _get_illust_count_by_illustrator(illustrator_name):
+
+    input_dir_path = f"src/color_recommendation/data/input/illustration/{illustrator_name}"
+
+    count = 0
+    for filename in os.listdir(input_dir_path):
+        if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+            count += 1
+
+    if DEBUG:
+        print(f"イラストの枚数: {count:5d} ({illustrator_name})")
+
+    return count
+
+
+def get_excluded_small_number_illustrator_list(illustrator_list, threshold):
+    """ イラストの枚数が少ないイラストレーターを除外する関数
+    """
+
+    new_illustrator_list = []
+
+    for illustrator in illustrator_list:
+        illust_count = _get_illust_count_by_illustrator(illustrator)
+        if illust_count >= threshold:
+            new_illustrator_list.append(illustrator)
+
+    print(f"イラストの枚数が{threshold}枚未満のイラストレーターが除外されました．")
+
+    return new_illustrator_list
+
+
+def save_recall_at_k(input_file_path, output_file_path):
+    """ recall@kを保存する関数
+
+    Args:
+        input_file_path (str): 入力ファイルパス
+        output_file_path (str): 出力ファイルパス
+    """
+    data = get_json_data(input_file_path)
+    # print(f"data = {data}")
+
+
+def save_recall_at_k_for_illustrators(illustrator_list, sort_type, check_subject):
+    """ 引数で受け取るイラストレーターリストのrecall@kを保存する関数
+
+    Args:
+        illustrator_list (list): イラストレーターのリスト
+    """
+    recall_at_k_data = []
+
+    for illustrator_name in illustrator_list:
+        print(f"\n=== {illustrator_name} ========================")
+        if (check_subject == "tone"):
+            dir_name_list = get_dir_list(f"src/color_recommendation/data/output/is_contained_next_{check_subject}")
+            for dir_name in dir_name_list:
+                input_file_path = f"src/color_recommendation/data/output/is_contained_next_{check_subject}/{dir_name}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}.json"
+                output_file_path = f"src/color_recommendation/data/output/recall_at_k/recall_at_k_{check_subject}_{dir_name}_{illustrator_name}.json"
+                save_recall_at_k(input_file_path, output_file_path)
         else:
-            print(f"モノクロ率 = {(round(monochrome_rate * 10000) / 100 )}%: モノクロイラストのイラストレーターのため，リストに追加しません．")
-
-    return illustrater_list
+            input_file_path = f"src/color_recommendation/data/output/is_contained_next_{check_subject}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}.json"
+            output_file_path = f"src/color_recommendation/data/output/recall_at_k/recall_at_k_{check_subject}_{sort_type}_{illustrator_name}.json"
+            save_recall_at_k(input_file_path, output_file_path)

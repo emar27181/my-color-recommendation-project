@@ -1,25 +1,25 @@
-from utils.helpers.color_utils import calculate_color_difference_delta_e_cie2000, print_colored_text
-from utils.helpers.transform_color import hex_to_rgb
+from utils.helpers.color_utils import calculate_color_difference_delta_e_cie2000, print_colored_text, calc_angle_diff, calc_distance_diff
+from utils.helpers.transform_color import hex_to_rgb, rgb_to_hsl
+from utils.helpers.json_utils import save_json_data, get_json_data
 import json
 import os
 
-IS_PRINT_CONTAINED_NEXT_COLOR_INFO = False
+DEBUG = True
+DEBUG = False
 
 
 def is_contained_color(next_color, color_schemes):
     for i in range(len(color_schemes)):
-        # print(color_schemes[i])
 
-        if (IS_PRINT_CONTAINED_NEXT_COLOR_INFO):
+        if (DEBUG):
             print(f"--- {i+1} 配色目 -------------")
 
         for j in range(len(color_schemes[i])):
             recommend_color = color_schemes[i][j]["color"]
-            # print(recommend_color)
 
             diff = calculate_color_difference_delta_e_cie2000(hex_to_rgb(next_color), hex_to_rgb(recommend_color))
 
-            if (IS_PRINT_CONTAINED_NEXT_COLOR_INFO):
+            if (DEBUG):
                 print("next_color: ", end="")
                 print_colored_text("■ ", hex_to_rgb(next_color))
                 print(", recommend_color: ", end="")
@@ -32,13 +32,90 @@ def is_contained_color(next_color, color_schemes):
     return False, -1
 
 
-def save_data_is_contained_next_color_for_illustrators(illutrator_list, sort_type):
+def is_contained_hue(next_color, color_schemes):
+    """
+    次に塗ったとされる色相が推薦配色群に含まれているかどうかを調べる関数
+    """
+    for i in range(len(color_schemes)):
+
+        if (DEBUG):
+            print(f"--- {i+1} 番目の推薦配色 -------------")
+
+        for j in range(len(color_schemes[i])):
+            recommend_color = color_schemes[i][j]["color"]
+
+            next_color_rgb = hex_to_rgb(next_color)
+            recommend_color_rgb = hex_to_rgb(recommend_color)
+            next_color_hsl = rgb_to_hsl(next_color_rgb)
+            recommend_color_hsl = rgb_to_hsl(recommend_color_rgb)
+
+            # diff = calculate_color_difference_delta_e_cie2000(hex_to_rgb(next_color), hex_to_rgb(recommend_color))
+            hue_diff = calc_angle_diff(next_color_hsl[0], recommend_color_hsl[0])
+
+            if (DEBUG):
+                print(f"[{j}]", end="")
+                print("next_color: ", end="")
+                print_colored_text("■ ", next_color_rgb)
+                print(f"({next_color_hsl[0]}), recommend_color: ", end="")
+                print_colored_text("■", recommend_color_rgb)
+                print(f" ({recommend_color_hsl[0]}), diff = {hue_diff}")
+
+            if (hue_diff <= 15):
+                if (DEBUG):
+                    print(f"k = {i+1}")
+                return True, i
+
+    if (DEBUG):
+        print(f"k = -1")
+    return False, -1
+
+
+def is_contained_next_tone(next_color, color_schemes):
+    """
+    次に塗ったとされるトーンが推薦配色群に含まれているかどうかを調べる関数
+    """
+    for i in range(len(color_schemes)):
+
+        if (DEBUG):
+            print(f"--- {i+1} 番目の推薦配色 -------------")
+
+        for j in range(len(color_schemes[i])):
+            recommend_color = color_schemes[i][j]["color"]
+
+            next_color_rgb = hex_to_rgb(next_color)
+            recommend_color_rgb = hex_to_rgb(recommend_color)
+            next_color_hsl = rgb_to_hsl(next_color_rgb)
+            recommend_color_hsl = rgb_to_hsl(recommend_color_rgb)
+
+            tone_diff = calc_distance_diff(next_color_hsl[1], next_color_hsl[2], recommend_color_hsl[1], recommend_color_hsl[2])
+
+            if (DEBUG):
+                print(f"[{j}]", end="")
+                print("next_color: ", end="")
+                print_colored_text("■ ", next_color_rgb)
+                print(f"({next_color_hsl[0]}), recommend_color: ", end="")
+                print_colored_text("■", recommend_color_rgb)
+                print(f" ({recommend_color_hsl[0]}), diff = {tone_diff}")
+
+            if (tone_diff <= 15):
+                if (DEBUG):
+                    print(f"k = {i+1}")
+                return True, i
+
+    if (DEBUG):
+        print(f"k = -1")
+    return False, -1
+    pass
+
+
+def save_data_is_contained_next_for_illustrators(illutrator_list, sort_type, check_subject):
     """
     引数で受け取るリスト内のイラストレーターの推薦配色群に次に塗ったとされる色があるかを保存する関数
 
     引数:
         illutrater_list: 評価したいイラストレーターのリスト(文字列)
         sort_type: ソートの種類(random/color_diff)
+        check_subject: チェックされる対象(color/hue)
     戻り値:
         None
     """
@@ -46,28 +123,41 @@ def save_data_is_contained_next_color_for_illustrators(illutrator_list, sort_typ
     for illutrator_name in illutrator_list:
         print(f"=== {illutrator_name} ========================")
 
-        input_file_path = f"src/color_recommendation/data/output/recommend_colors/sort_by_{sort_type}/recommend_colors_{illutrator_name}.json"
+        # チェックするのがトーンの場合バリエーション毎にチェック
+        if (check_subject == "tone"):
+            target_dir = f'src/color_recommendation/data/output/recommend_{check_subject}s/'  # 調べたいパスに変更
+            dir_names = [d for d in os.listdir(target_dir) if os.path.isdir(os.path.join(target_dir, d))]
+            print(dir_names)
 
-        with open(input_file_path, 'r', encoding='utf-8') as file:
-            recommended_colors_data = json.load(file)
+            for dir_name in dir_names:
+                input_file_path = f"src/color_recommendation/data/output/recommend_{check_subject}s/{dir_name}/sort_by_{sort_type}/recommend_{check_subject}s_{illutrator_name}.json"
+                recommended_colors_data = get_json_data(input_file_path)
 
-        is_contained_next_color_data = check_data_is_contained_next_color(recommended_colors_data)
+                is_contained_next_color_data = check_data_is_contained_next(recommended_colors_data, check_subject)
+                output_dir_path = f"src/color_recommendation/data/output/is_contained_next_{check_subject}/{dir_name}/{sort_type}"
+                output_file_path = f"{output_dir_path}/is_contained_next_{check_subject}_{illutrator_name}.json"
+                save_json_data(is_contained_next_color_data, output_dir_path, output_file_path)
+        else:
+            input_file_path = f"src/color_recommendation/data/output/recommend_{check_subject}s/sort_by_{sort_type}/recommend_{check_subject}s_{illutrator_name}.json"
+            recommended_colors_data = get_json_data(input_file_path)
 
-        # print(f"{is_contained_next_color_data}")
-
-        output_file_path = f"src/color_recommendation/data/output/is_contained_next_color/{sort_type}/is_contained_next_color_{illutrator_name}.json"
-
-        if not os.path.exists(os.path.dirname(output_file_path)):
-            output_dir_path = f"src/color_recommendation/data/output/is_contained_next_color/{sort_type}"
-            os.makedirs(output_dir_path)
-            print(f"{output_dir_path} ディレクトリが作成されました．")
-
-        with open(output_file_path, 'w', encoding='utf-8') as file:
-            json.dump(is_contained_next_color_data, file, ensure_ascii=False, indent=4)
-            print(f"{output_file_path} が保存されました．(次の色が含まれているかどうかを保存するデータの作成)")
+            is_contained_next_color_data = check_data_is_contained_next(recommended_colors_data, check_subject)
+            output_dir_path = f"src/color_recommendation/data/output/is_contained_next_{check_subject}/{sort_type}"
+            output_file_path = f"{output_dir_path}/is_contained_next_{check_subject}_{illutrator_name}.json"
+            save_json_data(is_contained_next_color_data, output_dir_path, output_file_path)
 
 
-def check_data_is_contained_next_color(data):
+def check_data_is_contained_next(data, check_subject):
+    """ 引数で受け取る対象が次の色が含まれているかどうかを調べる関数
+
+    引数:
+        data (_type_): データ
+        check_subject (_type_): チェックされる対象(color/hue)
+
+    戻り値:
+        data_recall_at_k (_type_): 次の色が含まれているかどうかのデータ
+    """
+
     data_recall_at_k = []
 
     illust_count = 0
@@ -85,16 +175,22 @@ def check_data_is_contained_next_color(data):
         # 次の色が含まれているかどうかの判定
         for i in range(len(color_scheme) - 1):
 
-            if (IS_PRINT_CONTAINED_NEXT_COLOR_INFO):
-                print(f"\n=== {illust_count+1} 枚目のイラストの {i+1} 色目 ============")
+            if (DEBUG):
+                print(f"\n=== {illust_count+1} 枚目のイラストの {i+1} 番目の使用色  ============")
 
-            # corrent_color = color_scheme[i]["color"]
             next_color = color_scheme[i + 1]["color"]
 
-            # print(f"corrent_color: {corrent_color}, next_color: {next_color}")
-            is_contained, scheme_index = is_contained_color(next_color, recommend_color_schemes)
-            # print(f"is_contained: {is_contained}, scheme_index: {scheme_index}")
+            # 次の色が含まれているかどうかを判定
+            if (check_subject == "color"):
+                is_contained, scheme_index = is_contained_color(next_color, recommend_color_schemes)
+            elif (check_subject == "hue"):
+                is_contained, scheme_index = is_contained_hue(next_color, recommend_color_schemes)
+            elif (check_subject == "tone"):
+                is_contained, scheme_index = is_contained_next_tone(next_color, recommend_color_schemes)
+            else:
+                print("check_subjectの値が不正です")
 
+            # recall@kのデータの作成
             is_contained_data = {
                 "next_color_index": i + 1,
                 "k": scheme_index,
@@ -102,16 +198,13 @@ def check_data_is_contained_next_color(data):
             }
             recall_at_k_per_illust.append(is_contained_data)
 
-        # print(recall_at_k_per_illust)
-
         data_recall_at_k_per_illust = {
             "illust_name": illust_data["illust_name"],
+            "recommendations_count": len(recommend_color_schemes),
             "recall_at_k": recall_at_k_per_illust,
         }
         data_recall_at_k.append(data_recall_at_k_per_illust)
 
-        # print(illust_data)
         illust_count += 1
 
-    # print(data_recall_at_k)
     return data_recall_at_k

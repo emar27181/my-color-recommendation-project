@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}シンプルサイト{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
+
 <body>
     <nav>
         <ul>
             <li><a href="{{ url_for('home') }}">ホーム</a></li>
             <li><a href="{{ url_for('about') }}">About</a></li>
+            <li><a href="{{ url_for('color_recommend') }}">色の推薦</a></li>
         </ul>
     </nav>
 
@@ -18,4 +21,5 @@
         {% block content %}{% endblock %}
     </main>
 </body>
+
 </html>
