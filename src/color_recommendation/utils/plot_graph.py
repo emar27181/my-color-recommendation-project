@@ -113,7 +113,8 @@ def _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, s
         if (recommendations_count > recommendations_count_max):
             recommendations_count_max = recommendations_count
 
-    print(f"recommendations_count_max = {recommendations_count_max}")
+    if(DEBUG):
+        print(f"recommendations_count_max = {recommendations_count_max}")
 
     # マーカーと線種の候補リスト
     markers = itertools.cycle(['o', 's', 'v', '^', 'd', '>', '<', 'p', '*', 'h'])
