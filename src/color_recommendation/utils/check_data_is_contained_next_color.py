@@ -1,4 +1,4 @@
-from utils.helpers.color_utils import calculate_color_difference_delta_e_cie2000, print_colored_text, calc_angle_diff, calc_distance_diff
+from utils.helpers.color_utils import calculate_color_difference_delta_e_cie2000, print_colored_text, calc_angle_diff, calc_distance_diff, print_color_scheme, print_color_schemes
 from utils.helpers.transform_color import hex_to_rgb, rgb_to_hsl
 from utils.helpers.json_utils import save_json_data, get_json_data
 import json
@@ -27,22 +27,25 @@ def is_contained_color(next_color, color_schemes):
                 print(f", delta_e = {diff}")
 
             if (diff <= 10):
-                return True, i
+                return True, i + 1
 
     return False, -1
 
 
-def is_contained_hue(next_color, color_schemes):
+def is_contained_hue(next_color, color_schemes_data):
     """
     次に塗ったとされる色相が推薦配色群に含まれているかどうかを調べる関数
     """
-    for i in range(len(color_schemes)):
+    for i in range(len(color_schemes_data)):
 
         if (DEBUG):
-            print(f"--- {i+1} 番目の推薦配色 -------------")
+            print(f"--- {i+1} 番目の推薦配色 (", end="")
+            for color_data in color_schemes_data[i]:
+                print_colored_text("■", hex_to_rgb(color_data["color"]))
+            print(") -------------")
 
-        for j in range(len(color_schemes[i])):
-            recommend_color = color_schemes[i][j]["color"]
+        for j in range(len(color_schemes_data[i])):
+            recommend_color = color_schemes_data[i][j]["color"]
 
             next_color_rgb = hex_to_rgb(next_color)
             recommend_color_rgb = hex_to_rgb(recommend_color)
@@ -63,7 +66,7 @@ def is_contained_hue(next_color, color_schemes):
             if (hue_diff <= 15):
                 if (DEBUG):
                     print(f"k = {i+1}")
-                return True, i
+                return True, i + 1
 
     if (DEBUG):
         print(f"k = -1")
@@ -100,7 +103,7 @@ def is_contained_next_tone(next_color, color_schemes):
             if (tone_diff <= 15):
                 if (DEBUG):
                     print(f"k = {i+1}")
-                return True, i
+                return True, i + 1 
 
     if (DEBUG):
         print(f"k = -1")
@@ -167,18 +170,33 @@ def check_data_is_contained_next(data, check_subject):
         if not illust_data:
             continue
 
-        color_scheme = illust_data["color_scheme"]
+        used_color_scheme_data = illust_data["color_scheme"]
         recommend_color_schemes = illust_data["recommend_color_schemes"]
+        
+        if(DEBUG):
+            print("used color scheme: ", end="")
+            # print_color_scheme(color_scheme)
+            for used_color_data in used_color_scheme_data:
+                used_color_hex = used_color_data["color"]
+                used_color_rgb = hex_to_rgb(used_color_hex)
+                print_colored_text("■ ", used_color_rgb)
+            print("")
+            # print_color_schemes(recommend_color_schemes)
 
         recall_at_k_per_illust = []
 
         # 次の色が含まれているかどうかの判定
-        for i in range(len(color_scheme) - 1):
-
+        for i in range(1, len(used_color_scheme_data)):
+            
+            next_color = used_color_scheme_data[i]["color"]
+            
             if (DEBUG):
-                print(f"\n=== {illust_count+1} 枚目のイラストの {i+1} 番目の使用色  ============")
+                print(f"\n=== {illust_count+1} 枚目のイラストの {i+1} 番目の使用色 (", end="")
+                print_colored_text('■', hex_to_rgb(next_color))
+                print(") ============")
+                
 
-            next_color = color_scheme[i + 1]["color"]
+            
 
             # 次の色が含まれているかどうかを判定
             if (check_subject == "color"):
