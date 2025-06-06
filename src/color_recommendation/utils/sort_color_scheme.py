@@ -119,8 +119,9 @@ def _get_analysis_data(illustrator_name):
             chromatic_colors_count_distribution = illustrator_data["chromatic_colors_count_distribution"]
             used_pccs_count_sum_distribution = illustrator_data["used_pccs_count_sum_distribution"]
             mean_resultant_length_ave = illustrator_data["mean_resultant_length_ave"]
+            saturation_lightness_count_distribution = illustrator_data["saturation_lightness_count_distribution"]
 
-            return chromatic_colors_count_ave, achromatic_colors_count_ave, chromatic_colors_rate_ave, achromatic_colors_rate_ave, chromatic_colors_count_distribution, used_pccs_count_sum_distribution, mean_resultant_length_ave
+            return chromatic_colors_count_ave, achromatic_colors_count_ave, chromatic_colors_rate_ave, achromatic_colors_rate_ave, chromatic_colors_count_distribution, used_pccs_count_sum_distribution, mean_resultant_length_ave, saturation_lightness_count_distribution
 
     print(f"イラストレーター名: {illustrator_name} のデータが見つかりませんでした．")
     return None, None, None, None, None, None, None
@@ -231,9 +232,11 @@ def sort_color_schemes_by_used_tone(color_schemes, illustrator_name):
 
     print(f"=== {illustrator_name} ==================== ")
 
-    chromatic_colors_count_ave, achromatic_colors_count_ave, chromatic_colors_rate_ave, achromatic_colors_rate_ave, chromatic_colors_count_distribution, used_pccs_count_sum_distribution, mean_resultant_length_ave = _get_analysis_data(illustrator_name)
+    chromatic_colors_count_ave, achromatic_colors_count_ave, chromatic_colors_rate_ave, achromatic_colors_rate_ave, chromatic_colors_count_distribution, used_pccs_count_sum_distribution, mean_resultant_length_ave, saturation_lightness_count_distribution = _get_analysis_data(illustrator_name)
 
-    print(f"used_pccs_count_sum_distribution: {used_pccs_count_sum_distribution}")
+    print(f"saturation_lightness_count_distribution:")
+    for i in range(len(saturation_lightness_count_distribution)):
+        print(f"{i}: {saturation_lightness_count_distribution[i]}")
 
     # # 使用頻度順にトーン数を並べ替え
     # used_tone_count_list_sorted_by_used_times = sorted(

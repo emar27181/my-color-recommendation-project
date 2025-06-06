@@ -550,7 +550,7 @@ def save_plot_heatmap(illustrator_name, data):
     print(f"{output_file_path} が保存されました．")
 
 
-def save_plot_heatmap_for_illustrators(illustrator_list):
+def save_plot_tone_heatmap_for_illustrators(illustrator_list):
     for illustrator in illustrator_list:
         data = get_statistics_by_illustrator(illustrator, 'saturation_lightness_count_distribution')
         save_plot_heatmap(illustrator, data)
