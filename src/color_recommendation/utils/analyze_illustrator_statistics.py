@@ -1,4 +1,5 @@
 from utils.helpers.json_utils import get_json_data, get_dir_list
+from utils.helpers.color_utils import print_colored_text
 from utils.helpers.transform_color import hex_to_rgb, rgb_to_hsl
 import json
 import math
@@ -6,7 +7,7 @@ import os
 
 DEBUG = True
 DEBUG = False
-DIVIDE_NUM = 5  # 明度と彩度をいくつで区切るか
+DIVIDE_NUM = 10  # 明度と彩度をいくつで区切るか
 
 
 def _mean_resultant_length(angles_deg):
@@ -53,14 +54,28 @@ def _get_saturation_lightness_count_distribution(illustrator_name, illust_name, 
     # print(f"{used_colors_data[index_num][0]['illustName']}") # これがillust_nameと一致していれば同画像を参照できている
 
     used_colors_info = used_colors_data[index_num]
+    saturation_lightness_count_distribution2 = {} # 明度彩度をキーにして出現回数をカウントする辞書（仮実装）
+    
     for used_color_info in used_colors_info:
         used_color_hex = used_color_info['color']
         used_color_rgb = hex_to_rgb(used_color_hex)
         used_color_hsl = rgb_to_hsl(used_color_rgb)
+        
         saturation_index, lightness_index = round(used_color_hsl[1] / (100 / DIVIDE_NUM)), round(used_color_hsl[2] / (100 / DIVIDE_NUM))
         saturation_lightness_count_distribution[lightness_index][saturation_index] += 1
+        
+        key = f'{lightness_index},{saturation_index}'
+        if key not in saturation_lightness_count_distribution2:
+            saturation_lightness_count_distribution2[key] = 1  # 初期化
+
+        else:
+            saturation_lightness_count_distribution2[key] += 1
+        
+        # print_colored_text("■", used_color_rgb)
+        # print(f"hsl{used_color_hsl}, (s,l) = ({saturation_index}, {lightness_index})")  
 
     # print(f"saturation_lightness_count_distribution = {saturation_lightness_count_distribution}")
+    # print(f"saturation_lightness_count_distribution2 = {saturation_lightness_count_distribution2}")
     return saturation_lightness_count_distribution
 
 
