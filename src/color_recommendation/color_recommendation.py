@@ -8,11 +8,11 @@ from utils.check_data_is_contained_next_color import check_data_is_contained_nex
 
 from utils.estimate_used_color_scheme import generate_json_used_color_scheme, save_estimated_used_colors
 from utils.download_instagram_images import download_instagram_images
-from utils.sort_color_scheme import sort_color_schemes_by_color_difference, shuffle_color_schemes, sort_color_schemes_by_used_color_count, sort_color_schemes_by_mean_resultant_length, sort_color_schemes_by_custom_v0
+from utils.sort_color_scheme import sort_color_schemes_by_color_difference, shuffle_color_schemes, sort_color_schemes_by_used_color_count, sort_color_schemes_by_mean_resultant_length, sort_color_schemes_by_custom_v0, sort_color_schemes_by_used_tone
 import os
 
 DEBUG = True
-DEBUG = False
+# DEBUG = False
 
 
 def read_file(file_path):
@@ -60,6 +60,8 @@ def get_recommendations(used_color_scheme_rgb, recommend_type, sort_type, illust
         recommend_color_schemes_rgb = sort_color_schemes_by_mean_resultant_length(recommend_color_schemes_rgb, illustrator_name)
     elif (sort_type == "custom_v0"):
         recommend_color_schemes_rgb = sort_color_schemes_by_custom_v0(used_color_scheme_rgb, recommend_color_schemes_rgb, illustrator_name)
+    elif (sort_type == "used_tone"):
+        recommend_color_schemes_rgb = sort_color_schemes_by_used_tone(recommend_color_schemes_rgb, illustrator_name)
     elif (sort_type == "no_sort"):
         pass
     else:

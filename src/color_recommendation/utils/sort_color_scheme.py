@@ -219,6 +219,39 @@ def sort_color_schemes_by_custom_v0(used_color_scheme, rec_color_schemes, illust
 
     return sorted_rec_color_schemes
 
+def sort_color_schemes_by_used_tone(color_schemes, illustrator_name):
+    """引数で受け取った配色群をイラストレーターの使用トーン分布に基づいてソートする関数
+    引数:
+        color_schemes: ソートする配色群
+        illustrator_name: イラストレーター名
+
+    戻り値:
+        color_schemes: トーン分布に基づいてソートされた配色群
+    """
+
+    print(f"=== {illustrator_name} ==================== ")
+
+    chromatic_colors_count_ave, achromatic_colors_count_ave, chromatic_colors_rate_ave, achromatic_colors_rate_ave, chromatic_colors_count_distribution, used_pccs_count_sum_distribution, mean_resultant_length_ave = _get_analysis_data(illustrator_name)
+
+    print(f"used_pccs_count_sum_distribution: {used_pccs_count_sum_distribution}")
+
+    # # 使用頻度順にトーン数を並べ替え
+    # used_tone_count_list_sorted_by_used_times = sorted(
+    #     [i for i in range(len(used_pccs_count_sum_distribution))],
+    #     key=lambda i: used_pccs_count_sum_distribution[i],
+    #     reverse=True
+    # )  # used_tone_count_list_sorted_by_used_times: 使われた回数が多い順でトーン数を並べたリスト
+
+    # new_color_schemes = []
+
+    # # よく使われたトーン数の順で配色を追加
+    # for tone_count in used_tone_count_list_sorted_by_used_times:
+    #     for color_scheme in color_schemes:
+    #         if len(color_scheme) == tone_count:
+    #             new_color_schemes.append(color_scheme)
+                # color_schemes.remove(color_scheme)
+
+    return []
 
 def shuffle_color_schemes(color_schemes):
     """引数で受け取った配色群をランダムに並び替える関数"""
@@ -226,3 +259,4 @@ def shuffle_color_schemes(color_schemes):
     random.shuffle(color_schemes)
 
     return color_schemes
+
