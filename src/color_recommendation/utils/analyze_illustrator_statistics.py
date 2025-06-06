@@ -178,7 +178,7 @@ def _extract_statistics_by_illustrator(illustrator_name):
         "chromatic_colors_count_distribution": chromatic_colors_count_distribution,
         # "used_hues_rate_ave_distribution": [x / len(data) for x in used_hues_rate_sum_distribution], # 使っていないためコメントアウト(2025/04/06)
         "used_pccs_count_sum_distribution": used_pccs_count_sum_distribution,
-        "mean_resultant_length_ave": mean_resultant_length_sum / count_one_or_more_colors_used,
+        "mean_resultant_length_ave": mean_resultant_length_sum / count_one_or_more_colors_used if count_one_or_more_colors_used > 0 else -1,
         "mean_resultant_length_distribution": mean_resultant_length_sum_distribution,
         "saturation_lightness_count_distribution": saturation_lightness_count_distribution,
     }
