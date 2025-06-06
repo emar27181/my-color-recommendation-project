@@ -8,7 +8,7 @@ DEBUG = False
 # DEBUG = True
 
 
-def sort_color_scheme_by_color_difference(base_color_scheme, color_schemes):
+def sort_color_schemes_by_color_difference(base_color_scheme, color_schemes):
     """引数で受け取った配色群を基準の配色との色差の昇順にソートする関数
     引数:
         base_color_scheme: 基準の配色
@@ -126,7 +126,7 @@ def _get_analysis_data(illustrator_name):
     return None, None, None, None, None, None, None
 
 
-def sort_color_scheme_by_used_color_count(color_schemes, illustrator_name):
+def sort_color_schemes_by_used_color_count(color_schemes, illustrator_name):
     """引数で受け取った配色をイラストレーターの使用比率を基にソートする関数
     """
 
@@ -182,7 +182,7 @@ def _calc_rec_color_scheme_score(used_color_scheme, rec_color_scheme):
     return same_hue_score
 
 
-def sort_color_scheme_by_custom_v0(used_color_scheme, rec_color_schemes, illustrator_name):
+def sort_color_schemes_by_custom_v0(used_color_scheme, rec_color_schemes, illustrator_name):
     """ カスタムの順序で配色をソートする関数
 
     Args:
