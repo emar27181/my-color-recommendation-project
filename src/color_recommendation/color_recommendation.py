@@ -102,8 +102,8 @@ def generate_recommend_hues_by_illustrator(data, sort_type, illustrator_name):
 
     return output_data
 
-def generate_recommend_hues_exising_apps_by_illustrator(data, sort_type, illustrator_name):
-    """既存のカラーパレットアプリの配色を基に推薦色相を生成する関数(現時点ではclipstudioの配色を使用(2025/06/08))
+def generate_recommend_colors_exising_apps_by_illustrator(data, sort_type, illustrator_name):
+    """既存のカラーパレットアプリの配色を基に推薦配色を生成する関数(現時点ではclipstudioの配色を使用(2025/06/08))
 
     Args:
         data (_type_): _description_
@@ -293,7 +293,7 @@ def save_recommendations_for_illustrators(illutrator_list, recommend_type, sort_
             recommend_colors_data = generate_recommend_colors_by_illustrator(used_colors_data, sort_type, illustrator_name, lightness_diffs)
             save_json_data(recommend_colors_data, output_dir_path_colors, output_file_path_colors)
         elif (recommend_type == "hue_existing_apps") or (recommend_type == "tone_existing_apps") :
-            recommend_hues_existing_apps_data = generate_recommend_hues_exising_apps_by_illustrator(used_colors_data, sort_type, illustrator_name)
+            recommend_hues_existing_apps_data = generate_recommend_colors_exising_apps_by_illustrator(used_colors_data, sort_type, illustrator_name)
             
             output_dir_path = f"src/color_recommendation/data/output/recommend_{recommend_type}s/sort_by_{sort_type}"
             output_file_path = f"src/color_recommendation/data/output/recommend_{recommend_type}s/sort_by_{sort_type}/recommend_{recommend_type}s_{illustrator_name}.json"
