@@ -69,22 +69,20 @@ def calculate_recall(file_path, recommend_colors_count):
     """
 
     recalls = [0] * recommend_colors_count
-    timing_count = 0
+    sum_timing_count = 0 # タイミングごとの合計数(イラストごとの描画色数の合計(ex. 1枚目のイラストの配色が3色, 2枚目のイラストの配色が5色->推薦するタイミングの合計は8))
 
     with open(file_path, 'r') as f:
         data = json.load(f)
 
     for illust_data in data:
-
         for illust_data_at_timing in illust_data['recall_at_k']:
-            timing_count += 1
+            sum_timing_count += 1
             if (illust_data_at_timing['is_contained_next_color']):
                 for i in range(illust_data_at_timing["k"], len(recalls)):
                     recalls[i] += 1
 
-
     for i in range(len(recalls)):
-        recalls[i] =  recalls[i] / timing_count
+        recalls[i] =  recalls[i] / sum_timing_count
 
     return recalls
 
