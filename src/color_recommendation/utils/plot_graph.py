@@ -82,9 +82,9 @@ def calculate_recall(file_path, recommend_colors_count):
                 for i in range(illust_data_at_timing["k"], len(recalls)):
                     recalls[i] += 1
 
+
     for i in range(len(recalls)):
-        # print(recalls[i])
-        recalls[i] = round(100 * (recalls[i] / timing_count)) / 100
+        recalls[i] =  recalls[i] / timing_count
 
     return recalls
 
