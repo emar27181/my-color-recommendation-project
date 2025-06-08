@@ -7,7 +7,7 @@ import os
 
 DEBUG = True
 DEBUG = False
-DIVIDE_NUM = 10  # 明度と彩度をいくつで区切るか
+DIVIDE_NUM = 4  # 明度と彩度をいくつで区切るか
 
 
 def _mean_resultant_length(angles_deg):
