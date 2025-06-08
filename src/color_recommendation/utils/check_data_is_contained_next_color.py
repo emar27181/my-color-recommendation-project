@@ -205,10 +205,12 @@ def check_data_is_contained_next(data, check_subject):
                 is_contained, scheme_index = is_contained_hue(next_color, recommend_color_schemes)
             elif (check_subject == "hue_existing_apps"):
                 is_contained, scheme_index = is_contained_hue(next_color, recommend_color_schemes)
+            elif (check_subject == "tone_existing_apps"):
+                is_contained, scheme_index = is_contained_next_tone(next_color, recommend_color_schemes)
             elif (check_subject == "tone"):
                 is_contained, scheme_index = is_contained_next_tone(next_color, recommend_color_schemes)
             else:
-                print("check_subjectの値が不正です")
+                print(f"check_subjectの値が不正です. check_subject: {check_subject}")
 
             # recall@kのデータの作成
             is_contained_data = {

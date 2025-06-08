@@ -114,10 +114,10 @@ def generate_recommend_hues_exising_apps_by_illustrator(data, sort_type, illustr
         _type_: _description_
     """
     app_name = "clipstudio"  
-    app_name = "ibispaint"  
-    app_name = "medibang"
-    app_name = "pixivsketch"
-    app_name = "powerpoint"
+    # app_name = "ibispaint"  
+    # app_name = "medibang"
+    # app_name = "pixivsketch"
+    # app_name = "powerpoint"
 
     # 仮実装として，clipstudioの配色を使用
     input_file_path = f"src/color_recommendation/data/output/recommend_colors/sort_by_illust_app/recommend_colors_{app_name}.json"
@@ -292,7 +292,7 @@ def save_recommendations_for_illustrators(illutrator_list, recommend_type, sort_
             save_json_data(recommend_tones_data, output_dir_path_tones, output_file_path_tones)
             recommend_colors_data = generate_recommend_colors_by_illustrator(used_colors_data, sort_type, illustrator_name, lightness_diffs)
             save_json_data(recommend_colors_data, output_dir_path_colors, output_file_path_colors)
-        elif recommend_type == "hue_existing_apps":
+        elif (recommend_type == "hue_existing_apps") or (recommend_type == "tone_existing_apps") :
             recommend_hues_existing_apps_data = generate_recommend_hues_exising_apps_by_illustrator(used_colors_data, sort_type, illustrator_name)
             
             output_dir_path = f"src/color_recommendation/data/output/recommend_{recommend_type}s/sort_by_{sort_type}"
