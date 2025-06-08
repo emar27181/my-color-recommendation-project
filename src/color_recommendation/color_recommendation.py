@@ -296,7 +296,7 @@ def save_recommendations_for_illustrators(illutrator_list, recommend_type, sort_
             save_json_data(recommend_hues_existing_apps_data, output_dir_path, output_file_path)
 
         else:
-            print("recommend_typeの値が不正です")
+            print(f"recommend_typeの値が不正です (recommend_type: {recommend_type})")
 
 
 def main():
