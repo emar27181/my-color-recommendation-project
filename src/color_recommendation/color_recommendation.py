@@ -102,7 +102,7 @@ def generate_recommend_hues_by_illustrator(data, sort_type, illustrator_name):
 
     return output_data
 
-def generate_recommend_colors_exising_apps_by_illustrator(data, sort_type, illustrator_name, app_name):
+def generate_recommend_colors_exising_apps_by_illustrator(data, recommend_type,  sort_type, illustrator_name, app_name):
     """既存のカラーパレットアプリの配色を基に推薦配色を生成する関数(現時点ではclipstudioの配色を使用(2025/06/08))
 
     Args:
@@ -114,8 +114,7 @@ def generate_recommend_colors_exising_apps_by_illustrator(data, sort_type, illus
         _type_: _description_
     """
 
-    # 仮実装として，clipstudioの配色を使用
-    input_file_path = f"src/color_recommendation/data/output/recommend_colors/sort_by_illust_app/recommend_colors_{app_name}.json"
+    input_file_path = f"src/color_recommendation/data/output/recommendations_by_existing_apps/recommend_{recommend_type}s/recommend_{recommend_type}s_{app_name}.json"
     json_data = get_json_data(input_file_path)
     recommend_color_schemes_data = json_data[0]['recommend_color_schemes']
     # print(f"recommend_color_schemes_data_re: {recommend_color_schemes_data_re}")
@@ -288,7 +287,12 @@ def save_recommendations_for_illustrators(illutrator_list, recommend_type, sort_
             recommend_colors_data = generate_recommend_colors_by_illustrator(used_colors_data, sort_type, illustrator_name, lightness_diffs)
             save_json_data(recommend_colors_data, output_dir_path_colors, output_file_path_colors)
         elif (recommend_type == "hue_existing_apps") or (recommend_type == "tone_existing_apps") or (recommend_type == "color_existing_apps"):
-            recommend_hues_existing_apps_data = generate_recommend_colors_exising_apps_by_illustrator(used_colors_data, sort_type, illustrator_name, app_name)
+            if recommend_type == "hue_existing_apps":
+                recommend_hues_existing_apps_data = generate_recommend_colors_exising_apps_by_illustrator(used_colors_data, "hue", sort_type, illustrator_name, app_name)
+            elif recommend_type == "tone_existing_apps":
+                recommend_hues_existing_apps_data = generate_recommend_colors_exising_apps_by_illustrator(used_colors_data, "tone", sort_type, illustrator_name, app_name)
+            elif recommend_type == "color_existing_apps":
+                recommend_hues_existing_apps_data = generate_recommend_colors_exising_apps_by_illustrator(used_colors_data, "color", sort_type, illustrator_name, app_name)
             
             output_dir_path = f"src/color_recommendation/data/output/recommend_{recommend_type}s/sort_by_{sort_type}"
             output_file_path = f"src/color_recommendation/data/output/recommend_{recommend_type}s/sort_by_{sort_type}/recommend_{recommend_type}s_{illustrator_name}.json"
