@@ -7,7 +7,7 @@ import math
 from utils.helpers.transform_color import rgb_to_hsl, rgb_to_lab, hex_to_rgb
 
 DEBUG = False
-
+# DEBUG = True  # デバッグモードを有効にする
 
 def calc_weighted_average_rgb(rgb_a, rgb_b, weight_a, weight_b):
     """
@@ -175,7 +175,12 @@ def is_exist_same_color(color, colors, same_color_threshold):
         False: 存在しない
     """
     for c in colors:
-        # print(f"calculate_rgb_distance_by_euclidean({color}, {c}) = {calculate_rgb_distance_by_euclidean(color, c)}")
+        if(DEBUG):
+            print("(", end="")
+            print_colored_text("■", color)
+            print(", ", end="")
+            print_colored_text("■" , c)
+            print(f") {calculate_rgb_distance_by_euclidean(color, c)}")
         if calculate_rgb_distance_by_euclidean(color, c) <= same_color_threshold:
             return True
     return False
