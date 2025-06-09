@@ -100,12 +100,15 @@ def _get_recommendations_count(illustrator_name, sort_type, check_subject):
         return len(data[0]['recommend_color_schemes'])
 
 
-def _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, legend_location):
+def _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, app_name, legend_location,):
 
     # 推薦したパターンの数を取得
     recommendations_count_max = 0
     for illustrator_name in illustrator_list:
-        IS_CONTAINED_NEXT_COLOR_FILE_PATH = f"{input_dir_path}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}.json"
+        if(app_name is None):
+            IS_CONTAINED_NEXT_COLOR_FILE_PATH = f"{input_dir_path}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}.json"
+        else:
+            IS_CONTAINED_NEXT_COLOR_FILE_PATH = f"{input_dir_path}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}_{app_name}.json"
         data = get_json_data(IS_CONTAINED_NEXT_COLOR_FILE_PATH)
         recommendations_count = _get_max_recommendations_count(data)
         if (recommendations_count > recommendations_count_max):
@@ -146,7 +149,7 @@ def _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, s
     print(f"{output_file_path} が保存されました．(グラフの作成)")
 
 
-def save_plot_recall_at_k_for_illustrators(illustrator_list, sort_type, check_subject, legend_location):
+def save_plot_recall_at_k_for_illustrators(illustrator_list, sort_type, check_subject, app_name, legend_location):
 
     if check_subject == "tone":
         target_dir = f'src/color_recommendation/data/output/recommend_{check_subject}s/'  # 調べたいパスに変更
@@ -156,11 +159,15 @@ def save_plot_recall_at_k_for_illustrators(illustrator_list, sort_type, check_su
             print(f"=== {dir_name} ===")
             input_dir_path = f'src/color_recommendation/data/output/is_contained_next_{check_subject}/{dir_name}'
             output_file_path = f'src/color_recommendation/data/output/{check_subject}_{dir_name}_recall_at_k_{sort_type}.png'
-            _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, legend_location)
+            _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, app_name=None, legend_location=legend_location)
+    elif (check_subject == "hue_existing_apps") or (check_subject == "tone_existing_apps") or (check_subject == "color_existing_apps"):
+        input_dir_path = f'src/color_recommendation/data/output/is_contained_next_{check_subject}'
+        output_file_path = f'src/color_recommendation/data/output/{check_subject}_recall_at_k_{sort_type}_{app_name}.png'
+        _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, app_name, legend_location)
     else:
         input_dir_path = f'src/color_recommendation/data/output/is_contained_next_{check_subject}'
         output_file_path = f'src/color_recommendation/data/output/{check_subject}_recall_at_k_{sort_type}.png'
-        _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, legend_location)
+        _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, app_name=None, legend_location=legend_location)
 
 
 """

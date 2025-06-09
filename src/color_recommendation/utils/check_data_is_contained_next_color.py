@@ -111,7 +111,7 @@ def is_contained_next_tone(next_color, color_schemes):
     pass
 
 
-def save_data_is_contained_next_for_illustrators(illutrator_list, sort_type, check_subject):
+def save_data_is_contained_next_for_illustrators(illutrator_list, sort_type, check_subject, app_name):
     """
     引数で受け取るリスト内のイラストレーターの推薦配色群に次に塗ったとされる色があるかを保存する関数
 
@@ -140,6 +140,15 @@ def save_data_is_contained_next_for_illustrators(illutrator_list, sort_type, che
                 output_dir_path = f"src/color_recommendation/data/output/is_contained_next_{check_subject}/{dir_name}/{sort_type}"
                 output_file_path = f"{output_dir_path}/is_contained_next_{check_subject}_{illutrator_name}.json"
                 save_json_data(is_contained_next_color_data, output_dir_path, output_file_path)
+        
+        elif (check_subject == "hue_existing_apps") or (check_subject == "tone_existing_apps") or (check_subject == "color_existing_apps"):
+            input_file_path = f"src/color_recommendation/data/output/recommend_{check_subject}s/sort_by_{sort_type}/recommend_{check_subject}s_{illutrator_name}_{app_name}.json"
+            recommended_colors_data = get_json_data(input_file_path)
+
+            is_contained_next_color_data = check_data_is_contained_next(recommended_colors_data, check_subject)
+            output_dir_path = f"src/color_recommendation/data/output/is_contained_next_{check_subject}/{sort_type}"
+            output_file_path = f"{output_dir_path}/is_contained_next_{check_subject}_{illutrator_name}_{app_name}.json"
+            save_json_data(is_contained_next_color_data, output_dir_path, output_file_path)
         else:
             input_file_path = f"src/color_recommendation/data/output/recommend_{check_subject}s/sort_by_{sort_type}/recommend_{check_subject}s_{illutrator_name}.json"
             recommended_colors_data = get_json_data(input_file_path)

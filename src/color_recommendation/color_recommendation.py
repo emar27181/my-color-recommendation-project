@@ -295,7 +295,7 @@ def save_recommendations_for_illustrators(illutrator_list, recommend_type, sort_
                 recommend_hues_existing_apps_data = generate_recommend_colors_exising_apps_by_illustrator(used_colors_data, "color", sort_type, illustrator_name, app_name)
             
             output_dir_path = f"src/color_recommendation/data/output/recommend_{recommend_type}s/sort_by_{sort_type}"
-            output_file_path = f"src/color_recommendation/data/output/recommend_{recommend_type}s/sort_by_{sort_type}/recommend_{recommend_type}s_{illustrator_name}.json"
+            output_file_path = f"src/color_recommendation/data/output/recommend_{recommend_type}s/sort_by_{sort_type}/recommend_{recommend_type}s_{illustrator_name}_{app_name}.json"
             save_json_data(recommend_hues_existing_apps_data, output_dir_path, output_file_path)
 
         else:
