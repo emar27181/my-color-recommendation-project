@@ -106,10 +106,10 @@ def _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, s
     recommendations_count_max = 0
     for illustrator_name in illustrator_list:
         if(app_name is None):
-            IS_CONTAINED_NEXT_COLOR_FILE_PATH = f"{input_dir_path}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}.json"
+            input_file_path = f"{input_dir_path}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}.json"
         else:
-            IS_CONTAINED_NEXT_COLOR_FILE_PATH = f"{input_dir_path}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}_{app_name}.json"
-        data = get_json_data(IS_CONTAINED_NEXT_COLOR_FILE_PATH)
+            input_file_path = f"{input_dir_path}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}_{app_name}.json"
+        data = get_json_data(input_file_path)
         recommendations_count = _get_max_recommendations_count(data)
         if (recommendations_count > recommendations_count_max):
             recommendations_count_max = recommendations_count
@@ -122,8 +122,11 @@ def _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, s
     linestyles = itertools.cycle(['-', '--', '-.', ':'])
 
     for illustrator_name in illustrator_list:
-        IS_CONTAINED_NEXT_COLOR_FILE_PATH = f"{input_dir_path}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}.json"
-        recalls = calculate_recall(IS_CONTAINED_NEXT_COLOR_FILE_PATH, recommendations_count)
+        if(app_name is None):
+            input_file_path = f"{input_dir_path}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}.json"
+        else:
+            input_file_path = f"{input_dir_path}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}_{app_name}.json"
+        recalls = calculate_recall(input_file_path, recommendations_count)
 
         # マーカーサイズは適度なサイズに設定し、線種も適用
         plt.plot(recalls,
