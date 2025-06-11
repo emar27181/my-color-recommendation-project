@@ -1,6 +1,7 @@
 import json
 import matplotlib.pyplot as plt
 from utils.helpers.json_utils import get_json_data, get_dir_list
+from utils.helpers.color_utils import print_color_scheme
 from utils.analyze_illustrator_statistics import get_statistics_by_illustrator
 from matplotlib import colormaps
 import matplotlib.ticker as ticker
@@ -165,8 +166,23 @@ def _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, s
     plt.clf()
     print(f"{output_file_path} が保存されました．(エラーバー付きグラフの作成)")
 
-def _get_recommend_colors_count_ave():
-    return 2  # 仮の値。実際にはデータから取得する必要がある
+def _get_recommend_colors_count_ave(sort_type, check_subject, illustrator_list):
+    """
+    推薦配色の平均色数を取得する関数
+    """
+    
+    for illustrator in illustrator_list:
+        input_file_path = f"src/color_recommendation/data/output/recommend_{check_subject}s/sort_by_{sort_type}/recommend_{check_subject}s_{illustrator}.json"
+        data = get_json_data(input_file_path)
+        sum_recommend_colors_count = 0
+        sum_recommendations_count = 0
+        for data_by_illust in data:
+            recommend_color_schemes = data_by_illust['recommend_color_schemes']
+            for recommend_color_scheme in recommend_color_schemes:
+                sum_recommend_colors_count += (len(recommend_color_scheme))
+                sum_recommendations_count += 1
+    
+    return (sum_recommend_colors_count/ sum_recommendations_count)
 
 def _save_plot_recall_at_k_multiple_apps(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, app_names, legend_location, is_error_bar):
     """
@@ -205,7 +221,7 @@ def _save_plot_recall_at_k_multiple_apps(input_dir_path, output_file_path, illus
         plot_range = min(len(recall_mean), X_MAX)
         x_indices = list(range(0, plot_range, X_INTERVAL))
         if app_name == PROPOSED_METHOD:
-            x_positions = [x * _get_recommend_colors_count_ave() for x in x_indices]  # プロット位置だけ2倍
+            x_positions = [x * _get_recommend_colors_count_ave(sort_type, check_subject, illustrator_list) for x in x_indices]  # プロット位置だけ2倍
         else:
             x_positions = x_indices  # 既存アプリはそのままの位置
 
