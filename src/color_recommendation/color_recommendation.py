@@ -13,7 +13,7 @@ import os
 import random
 
 DEBUG = True
-DEBUG = False
+# DEBUG = False
 
 
 def read_file(file_path):
@@ -21,6 +21,31 @@ def read_file(file_path):
         data = json.load(f)
         print(f"{file_path} が読み込まれました．")
         return data
+
+def sort_recommend_color_schemes_rgb(recommend_color_schemes_rgb, used_color_scheme_rgb, sort_type,  illustrator_name):
+    """
+    引数で受け取る並び替えの種類に応じて，推薦配色群を並び替える関数
+    """
+    
+    # 推薦配色群の並び替え
+    if (sort_type == "color_diff"):
+        recommend_color_schemes_rgb = sort_color_schemes_by_color_difference(used_color_scheme_rgb, recommend_color_schemes_rgb)  # 使用配色との類似度順にソート
+    elif (sort_type == "random"):
+        recommend_color_schemes_rgb = shuffle_color_schemes(recommend_color_schemes_rgb)  # 推薦配色をランダムにシャッフル
+    elif (sort_type == "used_color_count"):
+        recommend_color_schemes_rgb = sort_color_schemes_by_used_color_count(recommend_color_schemes_rgb, illustrator_name)
+    elif (sort_type == "mean_resultant_length"):
+        recommend_color_schemes_rgb = sort_color_schemes_by_mean_resultant_length(recommend_color_schemes_rgb, illustrator_name)
+    elif (sort_type == "custom_v0"):
+        recommend_color_schemes_rgb = sort_color_schemes_by_custom_v0(used_color_scheme_rgb, recommend_color_schemes_rgb, illustrator_name)
+    elif (sort_type == "used_tone"):
+        recommend_color_schemes_rgb = sort_color_schemes_by_used_tone(recommend_color_schemes_rgb, illustrator_name)
+    elif (sort_type == "no_sort"):
+        pass
+    else:
+        print("ソートの種類が間違っているため，推薦配色は並び替えられずに挿入されます．(ソートの種類:  'random', 'color_diff')")
+    
+    return recommend_color_schemes_rgb
 
 def get_recommendations(used_color_scheme_rgb, recommend_type, sort_type, illustrator_name, diff_values):
     """
@@ -49,24 +74,10 @@ def get_recommendations(used_color_scheme_rgb, recommend_type, sort_type, illust
 
         # 彩度が0になったになった色を削除
         recommend_color_schemes_rgb = remove_monochrome_color_from_color_schemes(recommend_color_schemes_rgb)
+    
+    print(f"recommend_color_schemes_rgb: {recommend_color_schemes_rgb}")
+    recommend_color_schemes_rgb = sort_recommend_color_schemes_rgb(recommend_color_schemes_rgb, used_color_scheme_rgb, sort_type, illustrator_name)  # 推薦配色群の並び替え
 
-    # 推薦配色群の並び替え
-    if (sort_type == "color_diff"):
-        recommend_color_schemes_rgb = sort_color_schemes_by_color_difference(used_color_scheme_rgb, recommend_color_schemes_rgb)  # 使用配色との類似度順にソート
-    elif (sort_type == "random"):
-        recommend_color_schemes_rgb = shuffle_color_schemes(recommend_color_schemes_rgb)  # 推薦配色をランダムにシャッフル
-    elif (sort_type == "used_color_count"):
-        recommend_color_schemes_rgb = sort_color_schemes_by_used_color_count(recommend_color_schemes_rgb, illustrator_name)
-    elif (sort_type == "mean_resultant_length"):
-        recommend_color_schemes_rgb = sort_color_schemes_by_mean_resultant_length(recommend_color_schemes_rgb, illustrator_name)
-    elif (sort_type == "custom_v0"):
-        recommend_color_schemes_rgb = sort_color_schemes_by_custom_v0(used_color_scheme_rgb, recommend_color_schemes_rgb, illustrator_name)
-    elif (sort_type == "used_tone"):
-        recommend_color_schemes_rgb = sort_color_schemes_by_used_tone(recommend_color_schemes_rgb, illustrator_name)
-    elif (sort_type == "no_sort"):
-        pass
-    else:
-        print("ソートの種類が間違っているため，推薦配色は並び替えられずに挿入されます．(ソートの種類:  'random', 'color_diff')")
         
     # 確認用出力
     if (DEBUG):
@@ -118,7 +129,8 @@ def generate_recommendation_exising_apps_by_illustrator(data, recommend_type,  s
     input_file_path = f"src/color_recommendation/data/output/recommendations_by_existing_apps/recommend_{recommend_type}s/recommend_{recommend_type}s_{app_name}.json"
     json_data = get_json_data(input_file_path)
     recommend_color_schemes_data = json_data[0]['recommend_color_schemes']
-    random.shuffle(recommend_color_schemes_data)  # ランダムにシャッフル
+    # random.shuffle(recommend_color_schemes_data)  # ランダムにシャッフル
+    print(recommend_color_schemes_data)
 
 
     output_data = []
@@ -210,20 +222,7 @@ def generate_recommend_colors_by_illustrator(data, sort_type, illustrator_name, 
         recommend_color_schemes_rgb = remove_empty_color_scheme_from_color_schemes(recommend_color_schemes_rgb)
 
         # 推薦配色群の並び替え
-        if (sort_type == "color_diff"):
-            recommend_color_schemes_rgb = sort_color_schemes_by_color_difference(used_color_scheme_rgb, recommend_color_schemes_rgb)  # 使用配色との類似度順にソート
-        elif (sort_type == "random"):
-            recommend_color_schemes_rgb = shuffle_color_schemes(recommend_color_schemes_rgb)  # 推薦配色をランダムにシャッフル
-        elif (sort_type == "used_color_count"):
-            recommend_color_schemes_rgb = sort_color_schemes_by_used_color_count(recommend_color_schemes_rgb, illustrator_name)
-        elif (sort_type == "mean_resultant_length"):
-            recommend_color_schemes_rgb = sort_color_schemes_by_mean_resultant_length(recommend_color_schemes_rgb, illustrator_name)
-        elif (sort_type == "custom_v0"):
-            recommend_color_schemes_rgb = sort_color_schemes_by_custom_v0(used_color_scheme_rgb, recommend_color_schemes_rgb, illustrator_name)
-        elif (sort_type == "no_sort"):
-            pass
-        else:
-            print("ソートの種類が間違っているため，推薦配色は並び替えられずに挿入されます．(ソートの種類:  'random', 'color_diff')")
+        recommend_color_schemes_rgb = sort_recommend_color_schemes_rgb(recommend_color_schemes_rgb, used_color_scheme_rgb, sort_type, illustrator_name)  # 推薦配色群の並び替え
 
         new_illust_data = {
             "illust_name": illust_data[0]['illustName'],
