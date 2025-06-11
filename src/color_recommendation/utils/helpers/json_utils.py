@@ -1,6 +1,7 @@
 import json
 import os
 
+DEBUG = False 
 
 def convert_color_schemes_to_color_data(color_schemes):
     output_color_data = []
@@ -50,7 +51,8 @@ def get_json_data(file_path):
 
         with open(file_path, 'r') as f:
             data = json.load(f)
-            print(f"{file_path} が正常に読み込まれました．")
+            if(DEBUG):
+                print(f"{file_path} が正常に読み込まれました．")
             return data
     except FileNotFoundError as e:
         print(f"エラー: {e}")
