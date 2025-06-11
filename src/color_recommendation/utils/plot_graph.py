@@ -102,7 +102,7 @@ def _get_recommendations_count(illustrator_name, sort_type, check_subject):
 
 import numpy as np
 
-def _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, app_name, legend_location):
+def _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, app_name, legend_location, is_error_bar):
     """
     recall@k の折れ線グラフ（エラーバー付き）を保存する関数
     """
@@ -172,15 +172,15 @@ def save_plot_recall_at_k_for_illustrators(illustrator_list, sort_type, check_su
             print(f"=== {dir_name} ===")
             input_dir_path = f'src/color_recommendation/data/output/is_contained_next_{check_subject}/{dir_name}'
             output_file_path = f'src/color_recommendation/data/output/{check_subject}_{dir_name}_recall_at_k_{sort_type}.png'
-            _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, app_name=None, legend_location=legend_location)
+            _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, app_name=None, legend_location=legend_location, is_error_bar=False)
     elif (check_subject == "hue_existing_apps") or (check_subject == "tone_existing_apps") or (check_subject == "color_existing_apps"):
         input_dir_path = f'src/color_recommendation/data/output/is_contained_next_{check_subject}'
         output_file_path = f'src/color_recommendation/data/output/{check_subject}_recall_at_k_{sort_type}_{app_name}.png'
-        _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, app_name, legend_location)
+        _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, app_name, legend_location, is_error_bar=False)
     else:
         input_dir_path = f'src/color_recommendation/data/output/is_contained_next_{check_subject}'
         output_file_path = f'src/color_recommendation/data/output/{check_subject}_recall_at_k_{sort_type}.png'
-        _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, app_name=None, legend_location=legend_location)
+        _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, app_name=None, legend_location=legend_location, is_error_bar=False)
 
 
 
@@ -191,7 +191,7 @@ def save_plot_recall_at_k_with_eroor_bar_for_illustrators(illustrator_list, sort
     
     input_dir_path = f'src/color_recommendation/data/output/is_contained_next_{check_subject}'
     output_file_path = f'src/color_recommendation/data/output/{check_subject}_recall_at_k_with_error_bar_{sort_type}.png'
-    _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, app_name=None, legend_location=legend_location)
+    _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, app_name=None, legend_location=legend_location, is_error_bar=True)
     
     pass
 
