@@ -187,8 +187,6 @@ def _save_plot_recall_at_k_multiple_apps(input_dir_path, output_file_path, illus
         return max_count
 
     plt.figure()
-    
-    app_names.append(PROPOSED_METHOD)  # "提案手法用の要素"を追加
 
     for app_name in app_names:
         print(f"=== {app_name} ===")
