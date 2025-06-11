@@ -106,6 +106,9 @@ def _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, s
     """
     recall@k の折れ線グラフ（エラーバー付き）を保存する関数
     """
+    X_INTERVAL = 10  # エラーバーを表示させるx軸の間隔
+    X_MAX = 150  # x軸の最大値
+    
 
     def get_input_file_path(illustrator_name):
         suffix = f"_{app_name}" if app_name else ""
@@ -133,8 +136,8 @@ def _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, s
     all_recalls = np.array(all_recalls)
     recall_mean = np.mean(all_recalls, axis=0)
     recall_std = np.std(all_recalls, axis=0)
-    plot_range = min(len(recall_mean), 150)
-    x_indices = list(range(0, plot_range, 10))
+    plot_range = min(len(recall_mean), X_MAX)
+    x_indices = list(range(0, plot_range, X_INTERVAL))
 
     plt.errorbar(
         x=x_indices,
