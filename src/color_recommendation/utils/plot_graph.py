@@ -212,7 +212,6 @@ def _save_plot_recall_at_k_multiple_apps(input_dir_path, output_file_path, illus
                 yerr=recall_std[x_indices],
                 label=app_name,
                 fmt='-o',
-                ecolor='gray',
                 elinewidth=1,
                 capsize=3,
                 markersize=3
