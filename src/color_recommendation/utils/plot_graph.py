@@ -133,12 +133,12 @@ def _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, s
     all_recalls = np.array(all_recalls)
     recall_mean = np.mean(all_recalls, axis=0)
     recall_std = np.std(all_recalls, axis=0)
+    plot_range = min(len(recall_mean), 150)
 
-    # エラーバー付きでプロット
     plt.errorbar(
-        x=range(recommendations_count),
-        y=recall_mean,
-        yerr=recall_std,
+        x=range(plot_range),
+        y=recall_mean[:plot_range],
+        yerr=recall_std[:plot_range],
         label='Average Recall@k',
         fmt='-o',
         ecolor='gray',
@@ -149,7 +149,7 @@ def _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, s
 
     plt.title(f"recall@k({check_subject}) sort_type={sort_type}")
     plt.ylim(0, 1)
-    plt.xlim(0, recommendations_count)
+    plt.xlim(0, plot_range)
     plt.xlabel('color_scheme')
     plt.ylabel('recall')
     plt.grid(True)
