@@ -114,6 +114,19 @@ def generate_recommend_hues_by_illustrator(data, sort_type, illustrator_name):
 
     return output_data
 
+def _color_schemes_data_to_color_schemes_rgb(color_schemes_data):
+    color_schemes_rgb = []
+    
+    for color_scheme_data in color_schemes_data:
+        color_scheme_rgb = []
+        for color_data in color_scheme_data:
+            color_hex = color_data['color']
+            color_scheme_rgb.append(hex_to_rgb(color_hex))
+        color_schemes_rgb.append(color_scheme_rgb)
+    
+    return color_schemes_rgb
+
+
 def generate_recommendation_exising_apps_by_illustrator(data, recommend_type,  sort_type, illustrator_name, app_name):
     """既存のカラーパレットアプリの配色を基に推薦配色を生成する関数(現時点ではclipstudioの配色を使用(2025/06/08))
 
@@ -129,9 +142,12 @@ def generate_recommendation_exising_apps_by_illustrator(data, recommend_type,  s
     input_file_path = f"src/color_recommendation/data/output/recommendations_by_existing_apps/recommend_{recommend_type}s/recommend_{recommend_type}s_{app_name}.json"
     json_data = get_json_data(input_file_path)
     recommend_color_schemes_data = json_data[0]['recommend_color_schemes']
-    # random.shuffle(recommend_color_schemes_data)  # ランダムにシャッフル
-    print(recommend_color_schemes_data)
+    recommend_color_schemes_rgb = _color_schemes_data_to_color_schemes_rgb(recommend_color_schemes_data)
+    
+    # 並び替え
+    recommend_color_schemes_rgb = sort_recommend_color_schemes_rgb(recommend_color_schemes_rgb, [], sort_type, illustrator_name)  # 使用配色との類似度順にソート
 
+    print_color_schemes_info(recommend_color_schemes_rgb)
 
     output_data = []
     for illust_data in data:
@@ -149,7 +165,7 @@ def generate_recommendation_exising_apps_by_illustrator(data, recommend_type,  s
         new_illust_data = {
             "illust_name": illust_data[0]['illustName'],
             "color_scheme": illust_data,
-            "recommend_color_schemes": recommend_color_schemes_data
+            "recommend_color_schemes": convert_color_schemes_to_color_data(transform_color_schemes_rgb_to_hex(recommend_color_schemes_rgb))
         }
 
         output_data.append(new_illust_data)
