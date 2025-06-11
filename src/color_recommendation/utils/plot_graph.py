@@ -165,6 +165,9 @@ def _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, s
     plt.clf()
     print(f"{output_file_path} が保存されました．(エラーバー付きグラフの作成)")
 
+def _get_recommend_colors_count_ave():
+    return 2  # 仮の値。実際にはデータから取得する必要がある
+
 def _save_plot_recall_at_k_multiple_apps(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, app_names, legend_location, is_error_bar):
     """
     複数アプリの recall@k を同時に比較してプロット（エラーバー付き）する関数
@@ -201,11 +204,15 @@ def _save_plot_recall_at_k_multiple_apps(input_dir_path, output_file_path, illus
         recall_std = np.std(all_recalls, axis=0)
         plot_range = min(len(recall_mean), X_MAX)
         x_indices = list(range(0, plot_range, X_INTERVAL))
+        if app_name == PROPOSED_METHOD:
+            x_positions = [x * _get_recommend_colors_count_ave() for x in x_indices]  # プロット位置だけ2倍
+        else:
+            x_positions = x_indices  # 既存アプリはそのままの位置
 
         # プロット（is_error_barに応じて分岐）
         if is_error_bar:
             plt.errorbar(
-                x=x_indices,
+                x=x_positions,
                 y=recall_mean[x_indices],
                 yerr=recall_std[x_indices],
                 label=app_name,
