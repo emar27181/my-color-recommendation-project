@@ -1,6 +1,7 @@
 import json
 import matplotlib.pyplot as plt
 from utils.helpers.json_utils import get_json_data, get_dir_list
+from utils.helpers.color_utils import print_color_scheme
 from utils.analyze_illustrator_statistics import get_statistics_by_illustrator
 from matplotlib import colormaps
 import matplotlib.ticker as ticker
@@ -12,7 +13,8 @@ import colorsys
 import itertools
 
 DEBUG = False
-
+DEBUG = True  # デバッグモードを有効にする場合はTrueに設定
+PROPOSED_METHOD ="ours" # グラフなどに表示される提案手法の名前を指定
 
 def plot_graph_3d(data, clusters, output_file_path):
     """三次元のクラスターマップを作成する関数"""
@@ -69,22 +71,20 @@ def calculate_recall(file_path, recommend_colors_count):
     """
 
     recalls = [0] * recommend_colors_count
-    timing_count = 0
+    sum_timing_count = 0 # タイミングごとの合計数(イラストごとの描画色数の合計(ex. 1枚目のイラストの配色が3色, 2枚目のイラストの配色が5色->推薦するタイミングの合計は8))
 
     with open(file_path, 'r') as f:
         data = json.load(f)
 
     for illust_data in data:
-
         for illust_data_at_timing in illust_data['recall_at_k']:
-            timing_count += 1
+            sum_timing_count += 1
             if (illust_data_at_timing['is_contained_next_color']):
                 for i in range(illust_data_at_timing["k"], len(recalls)):
                     recalls[i] += 1
 
     for i in range(len(recalls)):
-        # print(recalls[i])
-        recalls[i] = round(100 * (recalls[i] / timing_count)) / 100
+        recalls[i] =  recalls[i] / sum_timing_count
 
     return recalls
 
@@ -102,52 +102,165 @@ def _get_recommendations_count(illustrator_name, sort_type, check_subject):
         return len(data[0]['recommend_color_schemes'])
 
 
-def _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, legend_location):
+import numpy as np
 
-    # 推薦したパターンの数を取得
-    recommendations_count_max = 0
-    for illustrator_name in illustrator_list:
-        IS_CONTAINED_NEXT_COLOR_FILE_PATH = f"{input_dir_path}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}.json"
-        data = get_json_data(IS_CONTAINED_NEXT_COLOR_FILE_PATH)
-        recommendations_count = _get_max_recommendations_count(data)
-        if (recommendations_count > recommendations_count_max):
-            recommendations_count_max = recommendations_count
+def _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, app_name, legend_location, is_error_bar):
+    """
+    recall@k の折れ線グラフ（エラーバー付き）を保存する関数
+    """
+    X_INTERVAL = 10  # エラーバーを表示させるx軸の間隔
+    X_MAX = 150  # x軸の最大値
+    
 
-    print(f"recommendations_count_max = {recommendations_count_max}")
+    def get_input_file_path(illustrator_name):
+        suffix = f"_{app_name}" if app_name else ""
+        return f"{input_dir_path}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}{suffix}.json"
 
-    # マーカーと線種の候補リスト
-    markers = itertools.cycle(['o', 's', 'v', '^', 'd', '>', '<', 'p', '*', 'h'])
-    linestyles = itertools.cycle(['-', '--', '-.', ':'])
+    def get_recommendations_count_max():
+        max_count = 0
+        for illustrator in illustrator_list:
+            data = get_json_data(get_input_file_path(illustrator))
+            count = _get_max_recommendations_count(data)
+            max_count = max(max_count, count)
+        return max_count
 
-    for illustrator_name in illustrator_list:
-        IS_CONTAINED_NEXT_COLOR_FILE_PATH = f"{input_dir_path}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}.json"
-        recalls = calculate_recall(IS_CONTAINED_NEXT_COLOR_FILE_PATH, recommendations_count)
+    recommendations_count = get_recommendations_count_max()
 
-        # マーカーサイズは適度なサイズに設定し、線種も適用
-        plt.plot(recalls,
-                 label=illustrator_name,
-                 marker=next(markers),
-                 markersize=0,
-                 linestyle=next(linestyles))
+    if DEBUG:
+        print(f"recommendations_count_max = {recommendations_count}")
+
+    # 各イラストレーターの recall@k を計算し、2次元配列に格納
+    all_recalls = []
+    for illustrator in illustrator_list:
+        recalls = calculate_recall(get_input_file_path(illustrator), recommendations_count)
+        all_recalls.append(recalls)
+
+    all_recalls = np.array(all_recalls)
+    recall_mean = np.mean(all_recalls, axis=0)
+    recall_std = np.std(all_recalls, axis=0)
+    plot_range = min(len(recall_mean), X_MAX)
+    x_indices = list(range(0, plot_range, X_INTERVAL))
+
+    plt.errorbar(
+        x=x_indices,
+        y=recall_mean[x_indices],
+        yerr=recall_std[x_indices],
+        label='Average Recall@k',
+        fmt='-o',
+        ecolor='gray',
+        elinewidth=1,
+        capsize=3,
+        markersize=3
+    )
 
     plt.title(f"recall@k({check_subject}) sort_type={sort_type}")
     plt.ylim(0, 1)
-    plt.xlim(0, recommendations_count)
-    plt.gca().xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f"{int(x)}" if x == int(x) else ""))
+    plt.xlim(0, plot_range)
     plt.xlabel('color_scheme')
     plt.ylabel('recall')
     plt.grid(True)
+    plt.gca().xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f"{int(x)}" if x == int(x) else ""))
 
-    # 凡例はフォントサイズや位置も調整可能
-    plt.legend(title="Illustrators", fontsize=5, loc=f'{legend_location}')
-
-    # GRAPH_PATH = f'src/color_recommendation/data/output/{check_subject}_recall_at_k_{sort_type}.png'
-    plt.savefig(output_file_path, bbox_inches="tight")  # bbox_inchesを指定するとレイアウトが崩れにくい
+    plt.legend(title="Illustrators (mean ± std)", fontsize=6, loc=legend_location)
+    plt.savefig(output_file_path, bbox_inches="tight")
     plt.clf()
-    print(f"{output_file_path} が保存されました．(グラフの作成)")
+    print(f"{output_file_path} が保存されました．(エラーバー付きグラフの作成)")
+
+def _get_recommend_colors_count_ave(sort_type, check_subject, illustrator_list):
+    """
+    推薦配色の平均色数を取得する関数
+    """
+    
+    for illustrator in illustrator_list:
+        input_file_path = f"src/color_recommendation/data/output/recommend_{check_subject}s/sort_by_{sort_type}/recommend_{check_subject}s_{illustrator}.json"
+        data = get_json_data(input_file_path)
+        sum_recommend_colors_count = 0
+        sum_recommendations_count = 0
+        for data_by_illust in data:
+            recommend_color_schemes = data_by_illust['recommend_color_schemes']
+            for recommend_color_scheme in recommend_color_schemes:
+                sum_recommend_colors_count += (len(recommend_color_scheme))
+                sum_recommendations_count += 1
+    
+    return (sum_recommend_colors_count/ sum_recommendations_count)
+
+def _save_plot_recall_at_k_multiple_apps(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, app_names, legend_location, is_error_bar):
+    """
+    複数アプリの recall@k を同時に比較してプロット（エラーバー付き）する関数
+    """
+    X_INTERVAL = 10
+    X_MAX = 150
+
+    def get_input_existing_app_file_path(illustrator_name, app_name):
+        if app_name == PROPOSED_METHOD:
+            return f"{input_dir_path}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}.json"
+        else:
+            return f"{input_dir_path}_existing_apps/{sort_type}/is_contained_next_{check_subject}_existing_apps_{illustrator_name}_{app_name}.json"
+
+    def get_recommendations_count_max(app_name):
+        max_count = 0
+        for illustrator in illustrator_list:
+            data = get_json_data(get_input_existing_app_file_path(illustrator, app_name))
+            count = _get_max_recommendations_count(data)
+            max_count = max(max_count, count)
+        return max_count
+
+    plt.figure()
+
+    for app_name in app_names:
+        print(f"=== {app_name} ===")
+        recommendations_count = get_recommendations_count_max(app_name)
+        all_recalls = []
+        for illustrator in illustrator_list:
+            recalls = calculate_recall(get_input_existing_app_file_path(illustrator, app_name), recommendations_count)
+            all_recalls.append(recalls)
+
+        all_recalls = np.array(all_recalls)
+        recall_mean = np.mean(all_recalls, axis=0)
+        recall_std = np.std(all_recalls, axis=0)
+        plot_range = min(len(recall_mean), X_MAX)
+        x_indices = list(range(0, plot_range, X_INTERVAL))
+        if app_name == PROPOSED_METHOD:
+            x_positions = [x * _get_recommend_colors_count_ave(sort_type, check_subject, illustrator_list) for x in x_indices]  # プロット位置だけ2倍
+        else:
+            x_positions = x_indices  # 既存アプリはそのままの位置
+
+        # プロット（is_error_barに応じて分岐）
+        if is_error_bar:
+            plt.errorbar(
+                x=x_positions,
+                y=recall_mean[x_indices],
+                yerr=recall_std[x_indices],
+                label=app_name,
+                fmt='-o',
+                elinewidth=1,
+                capsize=3,
+                markersize=3
+            )
+        else:
+            plt.plot(
+                x_indices,
+                recall_mean[x_indices],
+                label=app_name,
+                marker='o',
+                markersize=3
+            )
+
+    plt.title(f"recall@k({check_subject}) sort_type={sort_type}")
+    plt.ylim(0, 1)
+    plt.xlim(0, X_MAX)
+    plt.xlabel('color_count')
+    plt.ylabel('recall')
+    plt.grid(True)
+    plt.gca().xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f"{int(x)}" if x == int(x) else ""))
+    plt.legend(title="App", fontsize=8, loc=legend_location)
+    plt.savefig(output_file_path, bbox_inches="tight")
+    plt.clf()
+    print(f"{output_file_path} が保存されました．(複数アプリの比較グラフ)")
 
 
-def save_plot_recall_at_k_for_illustrators(illustrator_list, sort_type, check_subject, legend_location):
+
+def save_plot_recall_at_k_for_illustrators(illustrator_list, sort_type, check_subject, app_name, legend_location):
 
     if check_subject == "tone":
         target_dir = f'src/color_recommendation/data/output/recommend_{check_subject}s/'  # 調べたいパスに変更
@@ -157,12 +270,29 @@ def save_plot_recall_at_k_for_illustrators(illustrator_list, sort_type, check_su
             print(f"=== {dir_name} ===")
             input_dir_path = f'src/color_recommendation/data/output/is_contained_next_{check_subject}/{dir_name}'
             output_file_path = f'src/color_recommendation/data/output/{check_subject}_{dir_name}_recall_at_k_{sort_type}.png'
-            _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, legend_location)
+            _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, app_name=None, legend_location=legend_location, is_error_bar=False)
+    elif (check_subject == "hue_existing_apps") or (check_subject == "tone_existing_apps") or (check_subject == "color_existing_apps"):
+        input_dir_path = f'src/color_recommendation/data/output/is_contained_next_{check_subject}'
+        output_file_path = f'src/color_recommendation/data/output/{check_subject}_recall_at_k_{sort_type}_{app_name}.png'
+        _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, app_name, legend_location, is_error_bar=False)
     else:
         input_dir_path = f'src/color_recommendation/data/output/is_contained_next_{check_subject}'
         output_file_path = f'src/color_recommendation/data/output/{check_subject}_recall_at_k_{sort_type}.png'
-        _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, legend_location)
+        _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, app_name=None, legend_location=legend_location, is_error_bar=False)
 
+
+
+def save_plot_recall_at_k_with_eroor_bar_for_illustrators(illustrator_list, sort_type, check_subject, app_names, legend_location):
+    """
+    エラーバー付きのリコール@kグラフを作成する関数
+    """
+    
+    input_dir_path = f'src/color_recommendation/data/output/is_contained_next_{check_subject}'
+    output_file_path = f'src/color_recommendation/data/output/{check_subject}_recall_at_k_with_error_bar_{sort_type}.png'
+    # _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, app_name=None, legend_location=legend_location, is_error_bar=True)
+    _save_plot_recall_at_k_multiple_apps(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, app_names, legend_location, is_error_bar=True)
+    
+    pass
 
 """
 def plot_recall_at_k(input_file_path, output_file_path):
@@ -549,7 +679,7 @@ def save_plot_heatmap(illustrator_name, data):
     print(f"{output_file_path} が保存されました．")
 
 
-def save_plot_heatmap_for_illustrators(illustrator_list):
+def save_plot_tone_heatmap_for_illustrators(illustrator_list):
     for illustrator in illustrator_list:
         data = get_statistics_by_illustrator(illustrator, 'saturation_lightness_count_distribution')
         save_plot_heatmap(illustrator, data)

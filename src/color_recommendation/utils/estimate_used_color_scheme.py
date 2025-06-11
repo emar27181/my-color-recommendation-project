@@ -70,7 +70,7 @@ def estimate_used_color_scheme(image_path):
 
 def estimate_used_color_scheme_re(image_path):
     color_palette = estimate_used_colors_by_colorthief(image_path, 30)
-    color_palette = merge_same_color_palette(color_palette)
+    color_palette = merge_same_color_palette(color_palette, 10)
     color_palette, color_palette_rate = color_count_by_color_palette(color_palette, image_path)
 
     used_color_schemes = []
@@ -93,7 +93,7 @@ def estimate_used_colors_by_colorthief(image_path, color_count):
     return palette
 
 
-def merge_same_color_palette(palette):
+def merge_same_color_palette(palette, threshold):
     """
     カラーパレットの色のうち同じ色を結合する関数
     """
@@ -107,7 +107,7 @@ def merge_same_color_palette(palette):
         palette = palette[1:]
 
         for i in range(len(palette) - 1, -1, -1):
-            if calculate_color_difference_delta_e_cie2000(base_color, palette[i]) < 10:
+            if calculate_color_difference_delta_e_cie2000(base_color, palette[i]) < threshold:
                 to_merge_colors.append(palette[i])
                 palette.pop(i)
 

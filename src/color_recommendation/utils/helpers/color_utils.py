@@ -4,10 +4,11 @@ from colormath.color_diff import delta_e_cie2000
 from PIL import Image
 import numpy as np
 import math
-from utils.helpers.transform_color import rgb_to_hsl, rgb_to_lab, hex_to_rgb
+from utils.helpers.transform_color import rgb_to_hsl, rgb_to_lab, hex_to_rgb, hsl_to_rgb
+from utils.helpers.json_utils import get_json_data
 
 DEBUG = False
-
+# DEBUG = True  # デバッグモードを有効にする
 
 def calc_weighted_average_rgb(rgb_a, rgb_b, weight_a, weight_b):
     """
@@ -175,7 +176,12 @@ def is_exist_same_color(color, colors, same_color_threshold):
         False: 存在しない
     """
     for c in colors:
-        # print(f"calculate_rgb_distance_by_euclidean({color}, {c}) = {calculate_rgb_distance_by_euclidean(color, c)}")
+        if(False):
+            print("(", end="")
+            print_colored_text("■", color)
+            print(", ", end="")
+            print_colored_text("■" , c)
+            print(f") {calculate_rgb_distance_by_euclidean(color, c)}")
         if calculate_rgb_distance_by_euclidean(color, c) <= same_color_threshold:
             return True
     return False
@@ -501,6 +507,45 @@ def exclude_duplicate_colors(color_scheme, is_same_color_threshold):
             unique_colors.append(color)
     return unique_colors
 
+
+def extract_hue_or_tone_color_scheme_from_existing_app_palette(input_file_path, check_subject, threshold):
+    """ 既存のアプリのパレットから色相またはトーンの色を抽出する関数
+
+    Args:
+        input_file_path (_type_): _description_
+        check_subject (_type_): _description_
+        threshold (_type_): _description_
+
+    Returns:
+        _type_: 抽出された色相またはトーンのリスト
+    """
+    if(DEBUG):
+        print(f"~~~ check_subject = {check_subject}, threshold = {threshold} ~~~")
+    
+    json_data = get_json_data(input_file_path)
+    color_schemes_data = json_data[0]["recommend_color_schemes"]
+    only_hue_or_tone_color_scheme_data = []
+    
+    for color_scheme_data in color_schemes_data:
+        color_hex = color_scheme_data[0]['color']
+        color_rgb = hex_to_rgb(color_hex)
+        color_hsl = rgb_to_hsl(color_rgb)
+        if (check_subject == "hue"):
+            add_color_rgb = hsl_to_rgb(color_hsl[0], 100, 50)  # 色相を100%にして明度を50%にする
+        elif (check_subject == "tone"):
+            add_color_rgb = hsl_to_rgb(0, color_hsl[1], color_hsl[2])  # 色相を0にして彩度と明度をそのままにする
+        
+        if(not (is_exist_same_color(add_color_rgb, only_hue_or_tone_color_scheme_data, threshold))):
+            only_hue_or_tone_color_scheme_data.append(add_color_rgb)
+        
+        if(DEBUG):
+            print_colored_text("■", color_rgb)
+        
+    if(DEBUG):
+        print("\n   ↓↓↓")
+        print_color_scheme(only_hue_or_tone_color_scheme_data)
+    
+    return only_hue_or_tone_color_scheme_data
 
 def extract_specific_range_of_hsl_from_color_scheme(color_scheme, hue_range, saturation_range, lightness_range):
     """引数で受け取った配色から指定した範囲の色を抽出する関数
