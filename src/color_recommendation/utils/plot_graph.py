@@ -100,56 +100,66 @@ def _get_recommendations_count(illustrator_name, sort_type, check_subject):
         return len(data[0]['recommend_color_schemes'])
 
 
-def _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, app_name, legend_location,):
+import numpy as np
 
-    # 推薦したパターンの数を取得
-    recommendations_count_max = 0
-    for illustrator_name in illustrator_list:
-        if(app_name is None):
-            input_file_path = f"{input_dir_path}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}.json"
-        else:
-            input_file_path = f"{input_dir_path}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}_{app_name}.json"
-        data = get_json_data(input_file_path)
-        recommendations_count = _get_max_recommendations_count(data)
-        if (recommendations_count > recommendations_count_max):
-            recommendations_count_max = recommendations_count
+def _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, app_name, legend_location):
+    """
+    recall@k の折れ線グラフ（エラーバー付き）を保存する関数
+    """
 
-    if(DEBUG):
-        print(f"recommendations_count_max = {recommendations_count_max}")
+    def get_input_file_path(illustrator_name):
+        suffix = f"_{app_name}" if app_name else ""
+        return f"{input_dir_path}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}{suffix}.json"
 
-    # マーカーと線種の候補リスト
-    markers = itertools.cycle(['o', 's', 'v', '^', 'd', '>', '<', 'p', '*', 'h'])
-    linestyles = itertools.cycle(['-', '--', '-.', ':'])
+    def get_recommendations_count_max():
+        max_count = 0
+        for illustrator in illustrator_list:
+            data = get_json_data(get_input_file_path(illustrator))
+            count = _get_max_recommendations_count(data)
+            max_count = max(max_count, count)
+        return max_count
 
-    for illustrator_name in illustrator_list:
-        if(app_name is None):
-            input_file_path = f"{input_dir_path}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}.json"
-        else:
-            input_file_path = f"{input_dir_path}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}_{app_name}.json"
-        recalls = calculate_recall(input_file_path, recommendations_count)
+    recommendations_count = get_recommendations_count_max()
 
-        # マーカーサイズは適度なサイズに設定し、線種も適用
-        plt.plot(recalls,
-                 label=illustrator_name,
-                 marker=next(markers),
-                 markersize=0,
-                 linestyle=next(linestyles))
+    if DEBUG:
+        print(f"recommendations_count_max = {recommendations_count}")
+
+    # 各イラストレーターの recall@k を計算し、2次元配列に格納
+    all_recalls = []
+    for illustrator in illustrator_list:
+        recalls = calculate_recall(get_input_file_path(illustrator), recommendations_count)
+        all_recalls.append(recalls)
+
+    all_recalls = np.array(all_recalls)
+    recall_mean = np.mean(all_recalls, axis=0)
+    recall_std = np.std(all_recalls, axis=0)
+
+    # エラーバー付きでプロット
+    plt.errorbar(
+        x=range(recommendations_count),
+        y=recall_mean,
+        yerr=recall_std,
+        label='Average Recall@k',
+        fmt='-o',
+        ecolor='gray',
+        elinewidth=1,
+        capsize=3,
+        markersize=3
+    )
 
     plt.title(f"recall@k({check_subject}) sort_type={sort_type}")
     plt.ylim(0, 1)
     plt.xlim(0, recommendations_count)
-    plt.gca().xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f"{int(x)}" if x == int(x) else ""))
     plt.xlabel('color_scheme')
     plt.ylabel('recall')
     plt.grid(True)
+    plt.gca().xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f"{int(x)}" if x == int(x) else ""))
 
-    # 凡例はフォントサイズや位置も調整可能
-    plt.legend(title="Illustrators", fontsize=5, loc=f'{legend_location}')
-
-    # GRAPH_PATH = f'src/color_recommendation/data/output/{check_subject}_recall_at_k_{sort_type}.png'
-    plt.savefig(output_file_path, bbox_inches="tight")  # bbox_inchesを指定するとレイアウトが崩れにくい
+    plt.legend(title="Illustrators (mean ± std)", fontsize=6, loc=legend_location)
+    plt.savefig(output_file_path, bbox_inches="tight")
     plt.clf()
-    print(f"{output_file_path} が保存されました．(グラフの作成)")
+    print(f"{output_file_path} が保存されました．(エラーバー付きグラフの作成)")
+
 
 
 def save_plot_recall_at_k_for_illustrators(illustrator_list, sort_type, check_subject, app_name, legend_location):
@@ -172,6 +182,18 @@ def save_plot_recall_at_k_for_illustrators(illustrator_list, sort_type, check_su
         output_file_path = f'src/color_recommendation/data/output/{check_subject}_recall_at_k_{sort_type}.png'
         _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, app_name=None, legend_location=legend_location)
 
+
+
+def save_plot_recall_at_k_with_eroor_bar_for_illustrators(illustrator_list, sort_type, check_subject, app_name, legend_location):
+    """
+    エラーバー付きのリコール@kグラフを作成する関数
+    """
+    
+    input_dir_path = f'src/color_recommendation/data/output/is_contained_next_{check_subject}'
+    output_file_path = f'src/color_recommendation/data/output/{check_subject}_recall_at_k_with_error_bar_{sort_type}.png'
+    _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, app_name=None, legend_location=legend_location)
+    
+    pass
 
 """
 def plot_recall_at_k(input_file_path, output_file_path):
