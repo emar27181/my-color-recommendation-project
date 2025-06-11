@@ -249,7 +249,7 @@ def _save_plot_recall_at_k_multiple_apps(input_dir_path, output_file_path, illus
     plt.title(f"recall@k({check_subject}) sort_type={sort_type}")
     plt.ylim(0, 1)
     plt.xlim(0, X_MAX)
-    plt.xlabel('color_scheme')
+    plt.xlabel('color_count')
     plt.ylabel('recall')
     plt.grid(True)
     plt.gca().xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f"{int(x)}" if x == int(x) else ""))
