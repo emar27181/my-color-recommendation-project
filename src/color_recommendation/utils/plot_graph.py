@@ -12,7 +12,7 @@ import colorsys
 import itertools
 
 DEBUG = False
-
+DEBUG = True  # デバッグモードを有効にする場合はTrueに設定
 
 def plot_graph_3d(data, clusters, output_file_path):
     """三次元のクラスターマップを作成する関数"""
@@ -164,6 +164,74 @@ def _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, s
     plt.clf()
     print(f"{output_file_path} が保存されました．(エラーバー付きグラフの作成)")
 
+def _save_plot_recall_at_k_multiple_apps(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, app_names, legend_location, is_error_bar):
+    """
+    複数アプリの recall@k を同時に比較してプロット（エラーバー付き）する関数
+    """
+    X_INTERVAL = 10
+    X_MAX = 150
+
+    def get_input_file_path(illustrator_name, app_name):
+        return f"{input_dir_path}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}_{app_name}.json"
+
+    def get_recommendations_count_max(app_name):
+        max_count = 0
+        for illustrator in illustrator_list:
+            data = get_json_data(get_input_file_path(illustrator, app_name))
+            count = _get_max_recommendations_count(data)
+            max_count = max(max_count, count)
+        return max_count
+
+    plt.figure()
+
+    for app_name in app_names:
+        print(f"=== {app_name} ===")
+        recommendations_count = get_recommendations_count_max(app_name)
+        all_recalls = []
+        for illustrator in illustrator_list:
+            recalls = calculate_recall(get_input_file_path(illustrator, app_name), recommendations_count)
+            all_recalls.append(recalls)
+
+        all_recalls = np.array(all_recalls)
+        recall_mean = np.mean(all_recalls, axis=0)
+        recall_std = np.std(all_recalls, axis=0)
+        plot_range = min(len(recall_mean), X_MAX)
+        x_indices = list(range(0, plot_range, X_INTERVAL))
+
+        # プロット（is_error_barに応じて分岐）
+        if is_error_bar:
+            plt.errorbar(
+                x=x_indices,
+                y=recall_mean[x_indices],
+                yerr=recall_std[x_indices],
+                label=app_name,
+                fmt='-o',
+                ecolor='gray',
+                elinewidth=1,
+                capsize=3,
+                markersize=3
+            )
+        else:
+            plt.plot(
+                x_indices,
+                recall_mean[x_indices],
+                label=app_name,
+                marker='o',
+                markersize=3
+            )
+
+    plt.title(f"recall@k({check_subject}) sort_type={sort_type}")
+    plt.ylim(0, 1)
+    plt.xlim(0, X_MAX)
+    plt.xlabel('color_scheme')
+    plt.ylabel('recall')
+    plt.grid(True)
+    plt.gca().xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f"{int(x)}" if x == int(x) else ""))
+    plt.legend(title="App", fontsize=8, loc=legend_location)
+    plt.savefig(output_file_path, bbox_inches="tight")
+    plt.clf()
+    print(f"{output_file_path} が保存されました．(複数アプリの比較グラフ)")
+
 
 
 def save_plot_recall_at_k_for_illustrators(illustrator_list, sort_type, check_subject, app_name, legend_location):
@@ -188,14 +256,15 @@ def save_plot_recall_at_k_for_illustrators(illustrator_list, sort_type, check_su
 
 
 
-def save_plot_recall_at_k_with_eroor_bar_for_illustrators(illustrator_list, sort_type, check_subject, app_name, legend_location):
+def save_plot_recall_at_k_with_eroor_bar_for_illustrators(illustrator_list, sort_type, check_subject, app_names, legend_location):
     """
     エラーバー付きのリコール@kグラフを作成する関数
     """
     
     input_dir_path = f'src/color_recommendation/data/output/is_contained_next_{check_subject}'
     output_file_path = f'src/color_recommendation/data/output/{check_subject}_recall_at_k_with_error_bar_{sort_type}.png'
-    _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, app_name=None, legend_location=legend_location, is_error_bar=True)
+    # _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, app_name=None, legend_location=legend_location, is_error_bar=True)
+    _save_plot_recall_at_k_multiple_apps(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, app_names, legend_location, is_error_bar=True)
     
     pass
 
