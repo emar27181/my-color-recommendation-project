@@ -8,7 +8,7 @@ from utils.helpers.transform_color import rgb_to_hsl, rgb_to_lab, hex_to_rgb, hs
 from utils.helpers.json_utils import get_json_data
 
 DEBUG = False
-DEBUG = True  # デバッグモードを有効にする
+# DEBUG = True  # デバッグモードを有効にする
 
 def calc_weighted_average_rgb(rgb_a, rgb_b, weight_a, weight_b):
     """

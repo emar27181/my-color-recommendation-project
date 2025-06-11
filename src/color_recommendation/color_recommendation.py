@@ -13,7 +13,7 @@ import os
 import random
 
 DEBUG = True
-# DEBUG = False
+DEBUG = False
 
 
 def read_file(file_path):
@@ -127,7 +127,7 @@ def _color_schemes_data_to_color_schemes_rgb(color_schemes_data):
     return color_schemes_rgb
 
 
-def generate_recommendation_exising_apps_by_illustrator(data, recommend_type,  sort_type, illustrator_name, app_name):
+def generate_recommendation_exising_apps_by_illustrator(used_color_data, recommend_type,  sort_type, illustrator_name, app_name):
     """既存のカラーパレットアプリの配色を基に推薦配色を生成する関数(現時点ではclipstudioの配色を使用(2025/06/08))
 
     Args:
@@ -141,16 +141,10 @@ def generate_recommendation_exising_apps_by_illustrator(data, recommend_type,  s
 
     input_file_path = f"src/color_recommendation/data/output/recommendations_by_existing_apps/recommend_{recommend_type}s/recommend_{recommend_type}s_{app_name}.json"
     json_data = get_json_data(input_file_path)
-    recommend_color_schemes_data = json_data[0]['recommend_color_schemes']
-    recommend_color_schemes_rgb = _color_schemes_data_to_color_schemes_rgb(recommend_color_schemes_data)
     
-    # 並び替え
-    recommend_color_schemes_rgb = sort_recommend_color_schemes_rgb(recommend_color_schemes_rgb, [], sort_type, illustrator_name)  # 使用配色との類似度順にソート
-
-    print_color_schemes_info(recommend_color_schemes_rgb)
 
     output_data = []
-    for illust_data in data:
+    for illust_data in used_color_data:
 
         # 空のデータを読み飛ばし
         if not illust_data:
@@ -161,6 +155,16 @@ def generate_recommendation_exising_apps_by_illustrator(data, recommend_type,  s
         used_color_scheme_rgb = []
         for color_scheme_data in illust_data:
             used_color_scheme_rgb.append(hex_to_rgb(color_scheme_data['color']))
+        
+        # 既存のカラーパレットのデータから推薦配色群を取得
+        recommend_color_schemes_data = json_data[0]['recommend_color_schemes']
+        recommend_color_schemes_rgb = _color_schemes_data_to_color_schemes_rgb(recommend_color_schemes_data)
+        
+        # 推薦配色群の並び替え
+        recommend_color_schemes_rgb = sort_recommend_color_schemes_rgb(recommend_color_schemes_rgb, used_color_scheme_rgb, sort_type, illustrator_name)  # 使用配色との類似度順にソート
+
+        if(DEBUG):
+            print_color_schemes_info(recommend_color_schemes_rgb)
         
         new_illust_data = {
             "illust_name": illust_data[0]['illustName'],
