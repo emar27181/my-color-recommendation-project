@@ -134,11 +134,12 @@ def _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, s
     recall_mean = np.mean(all_recalls, axis=0)
     recall_std = np.std(all_recalls, axis=0)
     plot_range = min(len(recall_mean), 150)
+    x_indices = list(range(0, plot_range, 10))
 
     plt.errorbar(
-        x=range(plot_range),
-        y=recall_mean[:plot_range],
-        yerr=recall_std[:plot_range],
+        x=x_indices,
+        y=recall_mean[x_indices],
+        yerr=recall_std[x_indices],
         label='Average Recall@k',
         fmt='-o',
         ecolor='gray',
