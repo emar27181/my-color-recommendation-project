@@ -22,7 +22,7 @@ def read_file(file_path):
         print(f"{file_path} が読み込まれました．")
         return data
 
-def get_recommendations(used_color_scheme_rgb, recommend_type, sort_type, illustrator_name, diff_values=[-40, -20, 20, 40]):
+def get_recommendations(used_color_scheme_rgb, recommend_type, sort_type, illustrator_name, diff_values):
     """
     引数で受け取るデータを基に推薦群を取得する関数
     """
