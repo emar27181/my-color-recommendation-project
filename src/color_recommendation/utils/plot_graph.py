@@ -13,6 +13,7 @@ import itertools
 
 DEBUG = False
 DEBUG = True  # デバッグモードを有効にする場合はTrueに設定
+PROPOSED_METHOD ="ours" # グラフなどに表示される提案手法の名前を指定
 
 def plot_graph_3d(data, clusters, output_file_path):
     """三次元のクラスターマップを作成する関数"""
@@ -171,25 +172,30 @@ def _save_plot_recall_at_k_multiple_apps(input_dir_path, output_file_path, illus
     X_INTERVAL = 10
     X_MAX = 150
 
-    def get_input_file_path(illustrator_name, app_name):
-        return f"{input_dir_path}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}_{app_name}.json"
+    def get_input_existing_app_file_path(illustrator_name, app_name):
+        if app_name == PROPOSED_METHOD:
+            return f"{input_dir_path}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}.json"
+        else:
+            return f"{input_dir_path}_existing_apps/{sort_type}/is_contained_next_{check_subject}_existing_apps_{illustrator_name}_{app_name}.json"
 
     def get_recommendations_count_max(app_name):
         max_count = 0
         for illustrator in illustrator_list:
-            data = get_json_data(get_input_file_path(illustrator, app_name))
+            data = get_json_data(get_input_existing_app_file_path(illustrator, app_name))
             count = _get_max_recommendations_count(data)
             max_count = max(max_count, count)
         return max_count
 
     plt.figure()
+    
+    app_names.append(PROPOSED_METHOD)  # "提案手法用の要素"を追加
 
     for app_name in app_names:
         print(f"=== {app_name} ===")
         recommendations_count = get_recommendations_count_max(app_name)
         all_recalls = []
         for illustrator in illustrator_list:
-            recalls = calculate_recall(get_input_file_path(illustrator, app_name), recommendations_count)
+            recalls = calculate_recall(get_input_existing_app_file_path(illustrator, app_name), recommendations_count)
             all_recalls.append(recalls)
 
         all_recalls = np.array(all_recalls)
