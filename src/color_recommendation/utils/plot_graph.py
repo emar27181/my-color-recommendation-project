@@ -179,7 +179,7 @@ def _get_recommend_colors_count_ave(sort_type, check_subject, illustrator_list):
         for data_by_illust in data:
             recommend_color_schemes = data_by_illust['recommend_color_schemes']
             for recommend_color_scheme in recommend_color_schemes:
-                sum_recommend_colors_count += (len(recommend_color_scheme))
+                sum_recommend_colors_count += (len(recommend_color_scheme) - 1) # 先頭の色は重複して推薦しているため除外(最も使用率の高い使用色を基に推薦配色を生成するため)
                 sum_recommendations_count += 1
     
     return (sum_recommend_colors_count/ sum_recommendations_count)
