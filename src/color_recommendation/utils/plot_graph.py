@@ -430,6 +430,73 @@ def plot_recall_at_k(input_file_path, output_file_path):
 """
 
 
+
+def save_plot_recall_at_k_sort_types_fixed_subjects(illustrator_list, sort_type, legend_location):
+    """
+    提案手法におけるhue, tone, color の3種類 を比較し recall@k をプロット（エラーバー付き）する関数
+    """
+    X_INTERVAL = 5
+    X_MAX = 150
+    DIFF_VALUES = "[20,-20,40,-40,60,-60,80,-80]"
+    check_subjects = ["hue", "tone", "color"]
+
+    def get_input_file_path(illustrator_name, check_subject):
+        # ダミーのファイルパス（中身の読み取りは get_json_data 側で適切に処理することを想定）
+        if( check_subject == "tone"):
+            return f"src/color_recommendation/data/output/is_contained_next_tone/{DIFF_VALUES}/{sort_type}/is_contained_next_tone_{illustrator_name}.json"
+        else:
+            return f"src/color_recommendation/data/output/is_contained_next_{check_subject}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}.json"
+
+    def get_recommendations_count_max(check_subject):
+        max_count = 0
+        for illustrator in illustrator_list:
+            data = get_json_data(get_input_file_path(illustrator, check_subject))
+            count = _get_max_recommendations_count(data)
+            max_count = max(max_count, count)
+        return max_count
+
+    plt.figure()
+
+    for check_subject in check_subjects:
+        print(f"=== check_subject: {check_subject} ===")
+        recommendations_count = get_recommendations_count_max(check_subject)
+        all_recalls = []
+        for illustrator in illustrator_list:
+            recalls = calculate_recall(get_input_file_path(illustrator, check_subject), recommendations_count)
+            all_recalls.append(recalls)
+
+        all_recalls = np.array(all_recalls)
+        recall_mean = np.mean(all_recalls, axis=0)
+        recall_std = np.std(all_recalls, axis=0)
+        plot_range = min(len(recall_mean), X_MAX)
+        x_indices = list(range(0, plot_range, X_INTERVAL))
+        # x_positions = [x * _get_recommend_colors_count_ave(sort_type, check_subject, illustrator_list) for x in x_indices]
+
+        plt.errorbar(
+            x=x_indices,
+            y=recall_mean[x_indices],
+            yerr=recall_std[x_indices],
+            label=check_subject,
+            fmt='-o',
+            elinewidth=1,
+            capsize=3,
+            markersize=3
+        )
+
+    plt.title(f"recall@k ({sort_type})")
+    plt.ylim(0, 1)
+    plt.xlabel('color_count')
+    plt.ylabel('recall')
+    plt.grid(True)
+    plt.gca().xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f"{int(x)}" if x == int(x) else ""))
+    plt.legend(title="recommend_type", fontsize=8, loc=legend_location)
+    output_file_path = f'src/color_recommendation/data/output/recall_at_k_error_bar_recommend_type_diff_{sort_type}.png'
+    plt.savefig(output_file_path, bbox_inches="tight")
+    plt.clf()
+    print(f"{output_file_path} が保存されました．(check_subjectの比較グラフ)")
+
+
+
 def _extract_used_hues_count_from_json(illustrator_name):
     """
     引数で受け取るイラストレーターの使用色相(有彩色)の数の分布を抽出する関数
