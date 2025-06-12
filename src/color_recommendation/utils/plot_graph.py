@@ -339,6 +339,73 @@ def save_plot_recall_at_k_for_illustrators(illustrator_list, sort_type, check_su
         output_file_path = f'src/color_recommendation/data/output/{check_subject}_recall_at_k_{sort_type}.png'
         _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, sort_type, check_subject, app_name=None, legend_location=legend_location, is_error_bar=False)
 
+def save_plot_recall_at_k_diff_values(
+    illustrator_list, 
+    sort_type,
+    diff_values_list, 
+    legend_location
+):
+    """
+    トーン推薦の明度・彩度のバリエーションごとの推薦結果を比較して recall@k をプロット（エラーバー付き）する関数
+    """
+    X_INTERVAL = 2
+    X_MAX = 150
+
+    def get_input_file_path(illustrator_name, diff_values):
+        diff_values = str(diff_values)
+        diff_values = diff_values.replace(" ", "")  # スペースを削除
+        file_path = f"src/color_recommendation/data/output/is_contained_next_tone/{diff_values}/{sort_type}/is_contained_next_tone_{illustrator_name}.json"
+        
+        return file_path
+
+    def get_recommendations_count_max(diff_values):
+        max_count = 0
+        for illustrator in illustrator_list:
+            data = get_json_data(get_input_file_path(illustrator, diff_values))
+            count = _get_max_recommendations_count(data)
+            max_count = max(max_count, count)
+        return max_count
+
+    plt.figure()
+
+    for diff_values in diff_values_list:
+        print(f"=== diff_values: {diff_values} ===")
+        recommendations_count = get_recommendations_count_max(diff_values)
+        all_recalls = []
+        for illustrator in illustrator_list:
+            recalls = calculate_recall(get_input_file_path(illustrator, diff_values), recommendations_count)
+            all_recalls.append(recalls)
+
+        all_recalls = np.array(all_recalls)
+        recall_mean = np.mean(all_recalls, axis=0)
+        recall_std = np.std(all_recalls, axis=0)
+        plot_range = min(len(recall_mean), X_MAX)
+        x_indices = list(range(0, plot_range, X_INTERVAL))
+        
+        legend_label = ",".join(str(v) for v in diff_values)
+        plt.errorbar(
+            x=x_indices,
+            y=recall_mean[x_indices],
+            yerr=recall_std[x_indices],
+            label=f"diff: [{legend_label}]",
+            fmt='-o',
+            elinewidth=1,
+            capsize=3,
+            markersize=3
+        )
+
+    plt.title(f"recall@k(tone) sort_type={sort_type}")
+    plt.ylim(0, 1)
+    plt.xlabel('color_count')
+    plt.ylabel('recall')
+    plt.grid(True)
+    plt.gca().xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f"{int(x)}" if x == int(x) else ""))
+    plt.legend(title="diff_values", fontsize=8, loc=legend_location)
+
+    output_file_path = f'src/color_recommendation/data/output/tone_recall_at_k_error_bar_diff_values_{sort_type}.png'
+    plt.savefig(output_file_path, bbox_inches="tight")
+    plt.clf()
+    print(f"{output_file_path} が保存されました．(diff_valuesごとの比較グラフ)")
 
 
 def save_plot_recall_at_k_with_eroor_bar_for_illustrators(illustrator_list, sort_type, check_subject, app_names, legend_location):
