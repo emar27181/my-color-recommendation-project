@@ -260,6 +260,65 @@ def _save_plot_recall_at_k_multiple_apps(input_dir_path, output_file_path, illus
 
 
 
+def save_plot_recall_at_k_sort_types(illustrator_list, sort_types, check_subject, legend_location):
+    """
+    提案手法における複数の sort_type を比較して recall@k をプロット（エラーバー付き）する関数
+    """
+    X_INTERVAL = 2
+    X_MAX = 150
+
+    def get_input_file_path(illustrator_name, sort_type):
+        return f"src/color_recommendation/data/output/is_contained_next_{check_subject}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}.json"
+
+    def get_recommendations_count_max(sort_type):
+        max_count = 0
+        for illustrator in illustrator_list:
+            data = get_json_data(get_input_file_path(illustrator, sort_type))
+            count = _get_max_recommendations_count(data)
+            max_count = max(max_count, count)
+        return max_count
+
+    plt.figure()
+
+    for sort_type in sort_types:
+        print(f"=== sort_type: {sort_type} ===")
+        recommendations_count = get_recommendations_count_max(sort_type)
+        all_recalls = []
+        for illustrator in illustrator_list:
+            recalls = calculate_recall(get_input_file_path(illustrator, sort_type), recommendations_count)
+            all_recalls.append(recalls)
+
+        all_recalls = np.array(all_recalls)
+        recall_mean = np.mean(all_recalls, axis=0)
+        recall_std = np.std(all_recalls, axis=0)
+        plot_range = min(len(recall_mean), X_MAX)
+        x_indices = list(range(0, plot_range, X_INTERVAL))
+        x_positions = [x * _get_recommend_colors_count_ave(sort_type, check_subject, illustrator_list) for x in x_indices]
+
+        plt.errorbar(
+            x=x_positions,
+            y=recall_mean[x_indices],
+            yerr=recall_std[x_indices],
+            label=sort_type,
+            fmt='-o',
+            elinewidth=1,
+            capsize=3,
+            markersize=3
+        )
+
+    plt.title(f"recall@k({check_subject})")
+    plt.ylim(0, 1)
+    # plt.xlim(0, X_MAX)
+    plt.xlabel('color_count')
+    plt.ylabel('recall')
+    plt.grid(True)
+    plt.gca().xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f"{int(x)}" if x == int(x) else ""))
+    plt.legend(title="sort_type", fontsize=8, loc=legend_location)
+    output_file_path = f'src/color_recommendation/data/output/{check_subject}_recall_at_k_error_bar_sort_types.png'
+    plt.savefig(output_file_path, bbox_inches="tight")
+    plt.clf()
+    print(f"{output_file_path} が保存されました．(提案手法における sort_type の比較グラフ)")
+
 def save_plot_recall_at_k_for_illustrators(illustrator_list, sort_type, check_subject, app_name, legend_location):
 
     if check_subject == "tone":
