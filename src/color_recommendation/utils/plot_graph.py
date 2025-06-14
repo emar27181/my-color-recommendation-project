@@ -309,7 +309,7 @@ def save_plot_recall_at_k_sort_types(illustrator_list, sort_types, check_subject
     plt.title(f"recall@k({check_subject})")
     plt.ylim(0, 1)
     # plt.xlim(0, X_MAX)
-    plt.xlabel('color_count')
+    plt.xlabel('color_scheme')
     plt.ylabel('recall')
     plt.grid(True)
     plt.gca().xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f"{int(x)}" if x == int(x) else ""))
