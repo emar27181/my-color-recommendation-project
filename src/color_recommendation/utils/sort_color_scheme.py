@@ -66,7 +66,7 @@ def _is_included_pccs_diff_in_color_scheme(color_scheme, pccs_diff):
 
 
 def sort_color_schemes_by_mean_resultant_length(color_schemes, illustrator_name):
-    """引数で受け取った配色群を平均結果長にソートする関数
+    """引数で受け取った配色群を平均結果長（色相環距離）にソートする関数
     引数:
         color_schemes: ソートする配色群
 
