@@ -8,3 +8,6 @@ tmp/
 *memo.md
 .env
 *.code-workspace
+
+# Claude Code settings
+.claude/
