@@ -608,6 +608,156 @@ my-color-recommendation-project/
 
 ---
 
+## 🔬 論文用固定値・アルゴリズム調査結果
+
+> 色推薦システムの論文執筆用に、コード内の固定値とアルゴリズムを体系的に整理
+> 
+> 最終更新: 2025-08-15  
+> 調査対象: `/src/color_recommendation/` 配下の全モジュール
+
+### 📊 1. 使用色抽出機能（Color Extraction）
+
+**アルゴリズム概要**: ColorThief + ΔE類似色統合 + 有彩色フィルタリング
+
+**🔧 固定パラメータ**
+
+- **抽出閾値**:
+  ```python
+  # src/color_recommendation/utils/estimate_used_color_scheme.py
+  出現率閾値 = 0.3%        # Line 37: if (rate >= 0.3)
+  ColorThief品質 = 10      # Line 86: quality=10
+  ColorThief色数 = 30      # Line 72: color_count=30
+  ```
+
+- **色差統合閾値**:
+  ```python
+  ΔE統合閾値_使用色 = 5     # Line 48: threshold=5 in merge_similar_color()
+  ΔE統合閾値_パレット = 10  # Line 110: threshold < 10 in merge_same_color_palette()
+  ユークリッド距離閾値 = 0.1 # Line 176: distance < 0.1 in color_count_by_color_palette()
+  ```
+
+- **有彩色判定基準**:
+  ```python
+  # src/color_recommendation/utils/config/constants_dev.py
+  SATURATION_LOWER_LIMIT = 10   # Line 5: 彩度下限（%）
+  LIGHTNESS_LOWER_LIMIT = 10    # Line 7: 明度下限（%）
+  LIGHTNESS_UPPER_LIMIT = 90    # Line 6: 明度上限（%）
+  ```
+
+**📋 処理フロー**:
+1. ColorThief抽出: `get_palette(color_count=30, quality=10)`
+2. 類似色統合: ΔE ≤ 10で統合 (`merge_same_color_palette()`)
+3. ピクセル分類: ユークリッド距離 < 0.1で再分類
+4. 有彩色フィルタ: S≥10, 10≤L≤90の範囲で抽出
+5. 最終統合: ΔE ≤ 5で類似色を統合 (`merge_similar_color()`)
+
+### 🎨 2. 色相推薦機能（Hue Recommendation）
+
+**アルゴリズム概要**: 17種配色技法による組織的配色生成 + 統計ベース並び替え
+
+**🔧 配色技法固定角度**
+
+- **2色配色技法**:
+  ```python
+  # src/color_recommendation/utils/generate_color_scheme_method.py
+  アナロジー配色 = [+30°, -30°]     # Line 73-74
+  中間色配色 = [+90°, -90°]         # Line 79-80
+  補色配色 = [180°]                  # Line 85
+  対立色配色 = [+150°, -150°]       # Line 90-91
+  ```
+
+- **3色配色技法**:
+  ```python
+  ドミナント配色 = {
+      パターン1: [+30°, +60°],      # Line 97
+      パターン2: [-30°, +30°],      # Line 98
+      パターン3: [-60°, -30°]       # Line 99
+  }
+  スプリット補色 = [+150°, -150°]   # Line 103-104
+  トライアド配色 = [+120°, +240°]   # Line 107-108
+  ```
+
+- **多色配色技法**:
+  ```python
+  テトラード配色 = [+90°, +180°, +270°]  # Line 111-112
+  ペンタード配色 = [+72°, +144°, +216°, +288°]  # Line 115-116
+  ヘキサード配色 = [+60°, +120°, +180°, +240°, +300°]  # Line 119-120
+  ```
+
+**📊 並び替えアルゴリズム**:
+- **色差順ソート**: `calc_color_scheme_difference_delta_e_cie2000()` (ΔE昇順)
+- **統計ベースソート**: 
+  - 使用色数順: `chromatic_colors_count_distribution` (使用頻度降順)
+  - 平均結果長順: `mean_resultant_length_distribution` (使用頻度降順)
+
+### 🌈 3. トーン推薦機能（Tone Recommendation）
+
+**アルゴリズム概要**: 単色ベース + HSL空間での明度彩度バリエーション生成
+
+**🔧 バリエーション生成パラメータ**:
+- **基本設定**:
+  ```python
+  # src/color_recommendation/color_recommendation.py
+  基本配色 = 単色配色（1色のみ）        # Line 61: generate_one_color_schemes()
+  バリエーション軸 = "saturation_and_lightness"  # Line 70
+  ```
+
+- **差分値設定**:
+  ```python
+  # 一般的な使用例（sandbox.pyより）
+  diff_values = [-40, -20, 0, +20, +40]  # 明度・彩度の差分値（%）
+  # 処理ロジック: 全組み合わせでバリエーション生成（5×5=25パターン）
+  ```
+
+**📋 生成手順**:
+1. 基本色のHSL値取得: `rgb_to_hsl(color_rgb)`
+2. 差分適用: `hsl_to_rgb(H, S+saturation_diff, L+lightness_diff)`
+3. 有効性検証: `is_valid_color(new_color)`
+4. 無効色除外: RGB値が範囲外の場合は配色から除外
+
+### ⚖️ 4. 評価・判定閾値（Evaluation Thresholds）
+
+**🎯 同一色判定閾値**
+
+- **ΔE（CIE2000）ベース閾値**:
+  ```python
+  使用色統合閾値 = 5     # merge_similar_color(): threshold <= 5
+  パレット統合閾値 = 10  # merge_same_color_palette(): threshold < 10
+  同一色判定基準 = 可変  # 関数引数依存
+  デフォルト閾値 = 0.01  # generate_color_scheme_method.py:142
+  ```
+
+- **ユークリッド距離ベース閾値**:
+  ```python
+  RGB正規化距離閾値 = 0.01    # color_utils.py:185
+  最大距離正規化 = √(255²×3)   # Line 89: max_distance計算
+  ピクセル分類閾値 = 0.1      # estimate_used_color_scheme.py:176
+  ```
+
+**🔍 クラスタリング閾値（DBSCAN）**:
+```python
+# src/color_recommendation/utils/clustering.py
+EPS = 可変              # 近傍半径（ΔEベース距離）
+MIN_SAMPLES = 可変      # クラスタ最小サンプル数  
+距離関数 = calculate_color_difference_delta_e_cie2000
+```
+
+### 📚 論文記述用要約
+
+**数値的設定の学術的根拠**:
+1. **ΔE閾値5**: 人間の視覚で識別困難とされる色差範囲（JIS Z 8730準拠）
+2. **色相角度**: 色彩理論の標準的配色技法に基づく（伊達千代『配色アイデア手帖』等）
+3. **彩度・明度範囲10-90%**: 実用的な色域を確保しつつ極端な色を排除
+4. **出現率0.3%**: ノイズ除去と主要色抽出のバランス点
+
+**アルゴリズムの新規性**:
+1. **17種配色技法の組織的適用**: 従来研究では個別技法のみ
+2. **統計ベース並び替え**: 個人の色彩傾向を反映した推薦順位付け
+3. **3段階色抽出プロセス**: ColorThief + ΔE統合 + 有彩色フィルタの組み合わせ
+4. **トーン推薦のバリエーション生成**: HSL空間での組織的明度彩度変化
+
+---
+
 ## 📁 コーディング・構成ルール
 
 - **エラー状態でのコミットは禁止**  
