@@ -1,4 +1,5 @@
 from utils.helpers.color_utils import print_color_scheme, calc_color_scheme_difference_delta_e_cie2000, print_color_schemes, calc_pccs_color_diff
+from utils.helpers.transform_color import hex_to_rgb, rgb_to_hsl
 import random
 from utils.helpers.json_utils import get_json_data
 from utils.analyze_illustrator_statistics import get_statistics_by_illustrator
@@ -66,7 +67,7 @@ def _is_included_pccs_diff_in_color_scheme(color_scheme, pccs_diff):
 
 
 def sort_color_schemes_by_mean_resultant_length(color_schemes, illustrator_name):
-    """引数で受け取った配色群を平均結果長にソートする関数
+    """引数で受け取った配色群を平均結果長（色相環距離）にソートする関数
     引数:
         color_schemes: ソートする配色群
 
@@ -124,7 +125,7 @@ def _get_analysis_data(illustrator_name):
             return chromatic_colors_count_ave, achromatic_colors_count_ave, chromatic_colors_rate_ave, achromatic_colors_rate_ave, chromatic_colors_count_distribution, used_pccs_count_sum_distribution, mean_resultant_length_ave, saturation_lightness_count_distribution
 
     print(f"イラストレーター名: {illustrator_name} のデータが見つかりませんでした．")
-    return None, None, None, None, None, None, None
+    return None, None, None, None, None, None, None, None
 
 
 def sort_color_schemes_by_used_color_count(color_schemes, illustrator_name):
@@ -234,27 +235,76 @@ def sort_color_schemes_by_used_tone(color_schemes, illustrator_name):
 
     chromatic_colors_count_ave, achromatic_colors_count_ave, chromatic_colors_rate_ave, achromatic_colors_rate_ave, chromatic_colors_count_distribution, used_pccs_count_sum_distribution, mean_resultant_length_ave, saturation_lightness_count_distribution = _get_analysis_data(illustrator_name)
 
-    print(f"saturation_lightness_count_distribution:")
-    for i in range(len(saturation_lightness_count_distribution)):
-        print(f"{i}: {saturation_lightness_count_distribution[i]}")
+    if DEBUG:
+        print(f"saturation_lightness_count_distribution:")
+        for i in range(len(saturation_lightness_count_distribution)):
+            print(f"{i}: {saturation_lightness_count_distribution[i]}")
 
-    # # 使用頻度順にトーン数を並べ替え
-    # used_tone_count_list_sorted_by_used_times = sorted(
-    #     [i for i in range(len(used_pccs_count_sum_distribution))],
-    #     key=lambda i: used_pccs_count_sum_distribution[i],
-    #     reverse=True
-    # )  # used_tone_count_list_sorted_by_used_times: 使われた回数が多い順でトーン数を並べたリスト
+    # saturation_lightness_count_distributionをフラット化して使用頻度順にソート
+    tone_usage_with_index = []
+    for i, row in enumerate(saturation_lightness_count_distribution):
+        for j, count in enumerate(row):
+            if count > 0:  # 使用されているトーンのみ
+                tone_usage_with_index.append((count, i, j))  # (使用回数, 明度インデックス, 彩度インデックス)
+    
+    # 使用頻度の降順でソート
+    tone_usage_sorted = sorted(tone_usage_with_index, key=lambda x: x[0], reverse=True)
+    
+    if DEBUG:
+        print(f"Top 5 used tones: {tone_usage_sorted[:5]}")
 
-    # new_color_schemes = []
+    # 各配色のトーン使用頻度スコアを計算
+    color_schemes_with_score = []
+    
+    for color_scheme in color_schemes:
+        tone_score = _calc_color_scheme_tone_score(color_scheme, saturation_lightness_count_distribution)
+        color_schemes_with_score.append((tone_score, color_scheme))
+        
+        if DEBUG:
+            print(f"Color scheme tone score: {tone_score}")
+    
+    # スコアの降順でソート（使用頻度が高いトーンほど上位）
+    color_schemes_with_score.sort(key=lambda x: x[0], reverse=True)
+    
+    # ソート済み配色リストを作成
+    sorted_color_schemes = [color_scheme for _, color_scheme in color_schemes_with_score]
+    
+    if DEBUG:
+        print(f"Returning {len(sorted_color_schemes)} tone-sorted color schemes")
 
-    # # よく使われたトーン数の順で配色を追加
-    # for tone_count in used_tone_count_list_sorted_by_used_times:
-    #     for color_scheme in color_schemes:
-    #         if len(color_scheme) == tone_count:
-    #             new_color_schemes.append(color_scheme)
-                # color_schemes.remove(color_scheme)
+    return sorted_color_schemes
 
-    return []
+
+def _calc_color_scheme_tone_score(color_scheme, saturation_lightness_count_distribution):
+    """配色のトーン使用頻度スコアを計算する関数
+    引数:
+        color_scheme: 配色（hex色のリスト）
+        saturation_lightness_count_distribution: トーン分布マトリックス
+    戻り値:
+        tone_score: トーン使用頻度スコア
+    """
+    total_score = 0
+    
+    for hex_color in color_scheme:
+        # hex -> RGB -> HSL変換
+        rgb_color = hex_to_rgb(hex_color)
+        h, s, l = rgb_to_hsl(rgb_color)
+        
+        # HSL値をマトリックス座標に変換（簡単な5分割）
+        saturation_index = min(4, s // 20)  # 0-100を0-4にマッピング
+        lightness_index = min(4, l // 20)   # 0-100を0-4にマッピング
+        
+        # トーン使用頻度を取得
+        if (lightness_index < len(saturation_lightness_count_distribution) and 
+            saturation_index < len(saturation_lightness_count_distribution[lightness_index])):
+            tone_usage = saturation_lightness_count_distribution[lightness_index][saturation_index]
+            total_score += tone_usage
+        
+        if DEBUG:
+            print(f"Color {hex_color}: HSL({h},{s},{l}) -> Index({lightness_index},{saturation_index}) -> Usage: {tone_usage if 'tone_usage' in locals() else 0}")
+    
+    # 配色内の平均スコアを返す
+    return total_score / len(color_scheme) if color_scheme else 0
 
 def shuffle_color_schemes(color_schemes):
     """引数で受け取った配色群をランダムに並び替える関数"""
