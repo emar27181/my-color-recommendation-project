@@ -60,16 +60,17 @@ def _get_saturation_lightness_count_distribution(illustrator_name, illust_name, 
         used_color_hex = used_color_info['color']
         used_color_rgb = hex_to_rgb(used_color_hex)
         used_color_hsl = rgb_to_hsl(used_color_rgb)
+        used_color_rate = used_color_info['rate']  # 出現率を取得
         
         saturation_index, lightness_index = round(used_color_hsl[1] / (100 / DIVIDE_NUM)), round(used_color_hsl[2] / (100 / DIVIDE_NUM))
-        saturation_lightness_count_distribution[lightness_index][saturation_index] += 1
+        saturation_lightness_count_distribution[lightness_index][saturation_index] += used_color_rate  # 出現率で重み付け
         
         key = f'{lightness_index},{saturation_index}'
         if key not in saturation_lightness_count_distribution2:
-            saturation_lightness_count_distribution2[key] = 1  # 初期化
+            saturation_lightness_count_distribution2[key] = used_color_rate  # 初期化
 
         else:
-            saturation_lightness_count_distribution2[key] += 1
+            saturation_lightness_count_distribution2[key] += used_color_rate
         
         # print_colored_text("■", used_color_rgb)
         # print(f"hsl{used_color_hsl}, (s,l) = ({saturation_index}, {lightness_index})")  
