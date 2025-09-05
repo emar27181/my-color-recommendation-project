@@ -170,6 +170,13 @@ def _extract_statistics_by_illustrator(illustrator_name):
 
     mean_resultant_length_sum_distribution.reverse()  # 0~12(違う角度を使っている順) → 12~0(同じ角度を使っている順)に反転
 
+    # 明度彩度分布の正規化（合計を1にする）
+    total_saturation_lightness_count = sum(sum(row) for row in saturation_lightness_count_distribution)
+    if total_saturation_lightness_count > 0:
+        for i in range(len(saturation_lightness_count_distribution)):
+            for j in range(len(saturation_lightness_count_distribution[i])):
+                saturation_lightness_count_distribution[i][j] /= total_saturation_lightness_count
+
     statistics = {
         "illustrator_name": illustrator_name,
         "chromatic_colors_count_ave": chromatic_colors_count_sum / len(data),
