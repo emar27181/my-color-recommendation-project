@@ -101,6 +101,7 @@ my-color-recommendation-project/
    - イラストレーター別の色使用傾向分析
    - 色相・トーン・明度分布の統計生成
    - `saturation_lightness_count_distribution`による5×5トーンマトリックス作成
+   - **出現率考慮集計**（2025-09-05改善）：色の使用頻度を重み付けした統計データ
 
 ### 🎨 配色推薦フェーズ
 4. **配色生成** (`generate_color_scheme_method.py`)
@@ -143,9 +144,34 @@ my-color-recommendation-project/
 - **ΔE2000色差**: 知覚的色差による類似度評価
 - **平均結果長**: 色相環での調和度評価
 
-## 🚀 最新機能（2025-06-22実装）
+## 📊 統計データ機能
 
-### 🎨 トーン使用頻度順ソート機能
+### 🔍 イラストレーター統計分析システム
+各イラストレーターの色使用傾向を定量化し、個人化推薦の基盤となる統計データを生成：
+
+**📈 収集データ種類**:
+- **色数統計**: 有彩色・無彩色の使用数分布
+- **色相統計**: PCCS色相環（24色相）での使用頻度
+- **トーン統計**: 明度×彩度（5×5マトリックス）分布
+- **平均結果長**: 色相の集中度・分散度指標
+- **出現率統計**: 各色の画像内占有率を考慮した重み付け
+
+**🔄 統計データの活用**:
+```python
+# 統計データ生成（要：sandbox2.py有効化）
+save_statistics_for_illustrators(['amao_1015', 'mika_pikazo_mpz'])
+
+# データ活用例
+sort_color_schemes_by_used_color_count()    # 色数傾向順ソート
+sort_color_schemes_by_used_tone()          # トーン使用頻度順ソート  
+sort_color_schemes_by_mean_resultant_length()  # 平均結果長順ソート
+```
+
+**📁 出力ファイル**: `data/input/statistics_for_illustrators.json`
+
+## 🚀 最新機能・改善
+
+### 🎨 トーン使用頻度順ソート機能（2025-06-22実装）
 イラストレーターの過去作品から抽出した**5×5トーン分布マトリックス**に基づく高精度ソート機能を新実装：
 
 - **HSL色空間変換**: hex → RGB → HSL → トーン座標
@@ -156,6 +182,16 @@ my-color-recommendation-project/
 # 実装場所: src/color_recommendation/utils/sort_color_scheme.py
 sort_color_schemes_by_used_tone(color_schemes, illustrator_name)
 ```
+
+### 🔧 出現率考慮統計集計（2025-09-05改善）
+従来の単純カウント方式から**色の出現率（占有率）を考慮**した重み付き統計集計に改善：
+
+**改善内容**:
+- **従来**: 背景色も装飾色も同じ重み（1）でカウント
+- **改善後**: 実際の出現率で重み付け（背景色44% → 0.44、装飾色1.6% → 0.016）
+- **効果**: より正確な色使用傾向を反映した推薦順位付け
+
+**修正ファイル**: `utils/analyze_illustrator_statistics.py`
 
 ## 🚀 クイックスタート
 

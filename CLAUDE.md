@@ -175,6 +175,9 @@
 
 - **`utils/analyze_illustrator_statistics.py`**: イラストレーター統計分析
   - `get_statistics_by_illustrator()`: イラストレーター統計取得
+  - `save_statistics_for_illustrators()`: 統計データ一括保存
+  - `_extract_statistics_by_illustrator()`: 個別統計データ抽出
+  - `_get_saturation_lightness_count_distribution()`: 明度彩度分布集計（**2025-09-05修正：出現率考慮**）
   - 色使用傾向分析・統計データ生成
 
 #### **色変換・計算系** (`utils/helpers/`)
@@ -275,6 +278,101 @@ INSTAGRAM_PASS = "xxxxxxxxx"    # ⚠️要環境変数化
 - **新イラストレーター追加**: `sandbox2.py`または`sandbox3.py`のリスト更新
 - **設定値調整**: `utils/config/constants_dev.py`
 
+### 📊 統計データ取得・集計システム（詳細実装）
+
+#### **統計データ生成フロー**
+1. **データソース**: `data/input/used_hues/*.json` + `data/input/used_colors/*.json`
+2. **集計処理**: `_extract_statistics_by_illustrator(illustrator_name)`
+3. **保存**: `save_statistics_for_illustrators(illustrator_list)` → `statistics_for_illustrators.json`
+
+#### **統計データの種類と取得方法**
+
+**🎨 色数統計**:
+```python
+# 有彩色・無彩色の平均使用数
+chromatic_colors_count_ave = chromatic_colors_count_sum / len(data)
+achromatic_colors_count_ave = achromatic_colors_count_sum / len(data)
+
+# 有彩色・無彩色の使用率
+chromatic_colors_rate_ave = 1 - (achromatic_colors_rate_sum / len(data))
+achromatic_colors_rate_ave = achromatic_colors_rate_sum / len(data)
+
+# 有彩色使用数分布（0色〜19色の頻度）
+chromatic_colors_count_distribution[chromatic_colors_count] += 1
+```
+
+**🌈 色相統計**:
+```python
+# PCCS色相番号使用頻度分布（24色相）
+used_pccs_count_sum_distribution[pccs] += 1
+
+# 使用色相の出現率分布（360度）
+used_hues_rate_sum_distribution[used_hue_rate[0] % 360] += used_hue_rate[1]
+```
+
+**📐 平均結果長統計**:
+```python
+# 平均結果長計算（色相の集中度指標）
+mean_resultant_length_sum += _mean_resultant_length(used_chromatic_hues)
+
+# 平均結果長の分布（12段階）
+mean_resultant_index = round(_mean_resultant_length(used_chromatic_hues) * DIV_NUMBER)
+mean_resultant_length_sum_distribution[mean_resultant_index] += 1
+```
+
+**🎯 明度彩度分布統計**（**2025-09-05修正版**）:
+```python
+# 出現率考慮の明度彩度分布集計
+def _get_saturation_lightness_count_distribution(illustrator_name, illust_name, index_num):
+    # 5×5マトリックス（DIVIDE_NUM=4）
+    saturation_lightness_count_distribution = [[0 for _ in range(DIVIDE_NUM + 1)] for _ in range(DIVIDE_NUM + 1)]
+    
+    for used_color_info in used_colors_info:
+        used_color_rate = used_color_info['rate']  # 🆕出現率取得
+        used_color_hsl = rgb_to_hsl(hex_to_rgb(used_color_info['color']))
+        
+        # インデックス計算（0-4）
+        saturation_index = round(used_color_hsl[1] / (100 / DIVIDE_NUM))
+        lightness_index = round(used_color_hsl[2] / (100 / DIVIDE_NUM))
+        
+        # 🆕出現率で重み付けカウント
+        saturation_lightness_count_distribution[lightness_index][saturation_index] += used_color_rate
+```
+
+#### **統計データの活用方法**
+
+**🔄 推薦配色並び替え**:
+```python
+# 使用色数順ソート
+sort_color_schemes_by_used_color_count(color_schemes, chromatic_colors_count_distribution)
+
+# 平均結果長順ソート  
+sort_color_schemes_by_mean_resultant_length(color_schemes, mean_resultant_length_distribution)
+
+# トーン使用頻度順ソート
+sort_color_schemes_by_used_tone(color_schemes, saturation_lightness_count_distribution)
+```
+
+#### **データ実行・保存方法**
+
+**手動実行**:
+```python
+# sandbox2.py の136行目のコメントを外す
+save_statistics_for_illustrators(illustrator_list)
+
+# または直接実行
+from utils.analyze_illustrator_statistics import save_statistics_for_illustrators
+illustrator_list = ['amao_1015', 'mika_pikazo_mpz']
+save_statistics_for_illustrators(illustrator_list)
+```
+
+**データアクセス**:
+```python
+# 個別統計データ取得
+stats = get_statistics_by_illustrator('amao_1015', 'all')
+tone_dist = get_statistics_by_illustrator('amao_1015', 'saturation_lightness_count_distribution')
+```
+
 ### 🆕 最新追加機能（2025-06-22）
 
 #### **トーン推薦並び替え機能**
@@ -283,6 +381,14 @@ INSTAGRAM_PASS = "xxxxxxxxx"    # ⚠️要環境変数化
 - **機能**: イラストレーターの過去トーン使用頻度に基づく配色並び替え
 - **使用データ**: `saturation_lightness_count_distribution`（5×5トーン分布マトリックス）
 - **アルゴリズム**: HSL変換 → トーン座標変換 → 使用頻度スコア計算 → 降順ソート
+
+### 🔧 最新修正（2025-09-05）
+
+#### **明度彩度分布集計の出現率考慮修正**
+- **問題**: 従来は色の種類数のみカウント（背景色も装飾色も同じ重み）
+- **修正**: 色の出現率（rate）を考慮した重み付きカウントに変更
+- **影響**: より正確な色使用傾向の統計データを生成
+- **修正ファイル**: `utils/analyze_illustrator_statistics.py:63-66, 70-73`
 
 ---
 
