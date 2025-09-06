@@ -3,12 +3,16 @@ Flask GUI for sandbox2.py functionality
 色推薦システムの機能をWebインターフェースで操作できるGUIアプリケーション
 """
 
-from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, send_from_directory
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, send_from_directory, Response
+from flask_socketio import SocketIO, emit
 import os
 import sys
 import json
 from datetime import datetime
 import traceback
+import threading
+import queue
+import time
 
 # プロジェクトのルートディレクトリをPythonパスに追加
 current_dir = os.path.dirname(__file__)
@@ -28,6 +32,16 @@ from utils.plot_graph import save_plot_recall_at_k_for_illustrators
 
 app = Flask(__name__)
 app.secret_key = 'sandbox-gui-secret-key-2025'
+socketio = SocketIO(app, cors_allowed_origins="*")
+
+# 進捗情報を管理するグローバル変数
+progress_info = {
+    'current_task': '',
+    'progress': 0,
+    'status': 'idle',  # idle, running, completed, error
+    'message': '',
+    'output_files': []
+}
 
 # デフォルトのイラストレーターリスト（sandbox2.pyから）
 DEFAULT_ILLUSTRATOR_LIST = [
@@ -55,6 +69,55 @@ def index():
                          app_names=APP_NAMES,
                          legend_locations=LEGEND_LOCATIONS)
 
+def update_progress(task_name, progress, message, output_file=None):
+    """進捗情報を更新してクライアントに送信"""
+    global progress_info
+    progress_info['current_task'] = task_name
+    progress_info['progress'] = progress
+    progress_info['message'] = message
+    progress_info['status'] = 'running' if progress < 100 else 'completed'
+    
+    if output_file:
+        progress_info['output_files'].append(output_file)
+    
+    socketio.emit('progress_update', progress_info)
+
+def run_task_with_progress(func, task_name, *args, **kwargs):
+    """バックグラウンドでタスクを実行し、進捗を更新"""
+    global progress_info
+    try:
+        progress_info['status'] = 'running'
+        progress_info['current_task'] = task_name
+        progress_info['progress'] = 0
+        progress_info['output_files'] = []
+        
+        update_progress(task_name, 10, f"{task_name}を開始しています...")
+        time.sleep(0.5)
+        
+        update_progress(task_name, 30, f"{task_name}を実行中...")
+        result = func(*args, **kwargs)
+        
+        update_progress(task_name, 80, f"{task_name}の結果を保存中...")
+        time.sleep(0.5)
+        
+        # 出力ファイルのパスを検索
+        output_dir = os.path.join(os.path.dirname(__file__), 'color_recommendation', 'data', 'output')
+        if os.path.exists(output_dir):
+            for root, dirs, files in os.walk(output_dir):
+                for file in files:
+                    if file.endswith(('.json', '.png')):
+                        file_path = os.path.join(root, file)
+                        if time.time() - os.path.getmtime(file_path) < 60:  # 1分以内に更新されたファイル
+                            rel_path = os.path.relpath(file_path, output_dir)
+                            update_progress(task_name, 90, f"ファイルが保存されました: {rel_path}", rel_path)
+        
+        update_progress(task_name, 100, f"{task_name}が完了しました")
+        progress_info['status'] = 'completed'
+        
+    except Exception as e:
+        progress_info['status'] = 'error'
+        update_progress(task_name, 0, f"エラーが発生しました: {str(e)}")
+
 @app.route('/run_statistics', methods=['POST'])
 def run_statistics():
     """統計データの生成"""
@@ -64,22 +127,24 @@ def run_statistics():
         min_count = int(request.form.get('min_count', 10))
         
         if not selected_illustrators:
-            flash('イラストレーターを選択してください', 'error')
-            return redirect(url_for('index'))
+            return jsonify({'error': 'イラストレーターを選択してください'})
         
         # フィルタリング処理
         filtered_illustrators = get_not_monochrome_illustrator_list(selected_illustrators)
         filtered_illustrators = get_excluded_small_number_illustrator_list(filtered_illustrators, min_count)
         
-        # 統計データ生成実行
-        save_statistics_for_illustrators(filtered_illustrators)
+        # バックグラウンドでタスク実行
+        thread = threading.Thread(
+            target=run_task_with_progress,
+            args=(save_statistics_for_illustrators, "統計データ生成", filtered_illustrators)
+        )
+        thread.daemon = True
+        thread.start()
         
-        flash(f'統計データが生成されました（{len(filtered_illustrators)}名）', 'success')
-        return redirect(url_for('index'))
+        return jsonify({'success': True, 'message': f'統計データ生成を開始しました（{len(filtered_illustrators)}名）'})
         
     except Exception as e:
-        flash(f'エラーが発生しました: {str(e)}', 'error')
-        return redirect(url_for('index'))
+        return jsonify({'error': f'エラーが発生しました: {str(e)}'})
 
 @app.route('/run_recommendations', methods=['POST'])
 def run_recommendations():
@@ -93,8 +158,7 @@ def run_recommendations():
         diff_values_str = request.form.get('diff_values', '20, -20, 40, -40, 60, -60, 80, -80')
         
         if not selected_illustrators:
-            flash('イラストレーターを選択してください', 'error')
-            return redirect(url_for('index'))
+            return jsonify({'error': 'イラストレーターを選択してください'})
         
         # 明度差分値の解析
         try:
@@ -107,21 +171,19 @@ def run_recommendations():
         filtered_illustrators = get_not_monochrome_illustrator_list(selected_illustrators)
         filtered_illustrators = get_excluded_small_number_illustrator_list(filtered_illustrators, min_count)
         
-        # 推薦配色生成実行
-        save_recommendations_for_illustrators(
-            filtered_illustrators, 
-            recommend_type, 
-            sort_type, 
-            diff_values, 
-            app_name
+        # バックグラウンドでタスク実行
+        thread = threading.Thread(
+            target=run_task_with_progress,
+            args=(save_recommendations_for_illustrators, "推薦配色生成", 
+                  filtered_illustrators, recommend_type, sort_type, diff_values, app_name)
         )
+        thread.daemon = True
+        thread.start()
         
-        flash(f'推薦配色が生成されました（{len(filtered_illustrators)}名, {recommend_type}, {sort_type}）', 'success')
-        return redirect(url_for('index'))
+        return jsonify({'success': True, 'message': f'推薦配色生成を開始しました（{len(filtered_illustrators)}名, {recommend_type}, {sort_type}）'})
         
     except Exception as e:
-        flash(f'エラーが発生しました: {str(e)}', 'error')
-        return redirect(url_for('index'))
+        return jsonify({'error': f'エラーが発生しました: {str(e)}'})
 
 @app.route('/run_evaluation', methods=['POST'])
 def run_evaluation():
@@ -134,28 +196,26 @@ def run_evaluation():
         app_name = request.form.get('app_name', '')
         
         if not selected_illustrators:
-            flash('イラストレーターを選択してください', 'error')
-            return redirect(url_for('index'))
+            return jsonify({'error': 'イラストレーターを選択してください'})
         
         # フィルタリング処理
         min_count = int(request.form.get('min_count', 10))
         filtered_illustrators = get_not_monochrome_illustrator_list(selected_illustrators)
         filtered_illustrators = get_excluded_small_number_illustrator_list(filtered_illustrators, min_count)
         
-        # 評価データ生成実行
-        save_data_is_contained_next_for_illustrators(
-            filtered_illustrators, 
-            sort_type, 
-            recommend_type, 
-            app_name
+        # バックグラウンドでタスク実行
+        thread = threading.Thread(
+            target=run_task_with_progress,
+            args=(save_data_is_contained_next_for_illustrators, "評価データ生成",
+                  filtered_illustrators, sort_type, recommend_type, app_name)
         )
+        thread.daemon = True
+        thread.start()
         
-        flash(f'評価データが生成されました（{len(filtered_illustrators)}名）', 'success')
-        return redirect(url_for('index'))
+        return jsonify({'success': True, 'message': f'評価データ生成を開始しました（{len(filtered_illustrators)}名）'})
         
     except Exception as e:
-        flash(f'エラーが発生しました: {str(e)}', 'error')
-        return redirect(url_for('index'))
+        return jsonify({'error': f'エラーが発生しました: {str(e)}'})
 
 @app.route('/run_visualization', methods=['POST'])
 def run_visualization():
@@ -169,29 +229,26 @@ def run_visualization():
         legend_location = request.form.get('legend_location', 'lower right')
         
         if not selected_illustrators:
-            flash('イラストレーターを選択してください', 'error')
-            return redirect(url_for('index'))
+            return jsonify({'error': 'イラストレーターを選択してください'})
         
         # フィルタリング処理
         min_count = int(request.form.get('min_count', 10))
         filtered_illustrators = get_not_monochrome_illustrator_list(selected_illustrators)
         filtered_illustrators = get_excluded_small_number_illustrator_list(filtered_illustrators, min_count)
         
-        # グラフ生成実行
-        save_plot_recall_at_k_for_illustrators(
-            filtered_illustrators, 
-            sort_type, 
-            recommend_type, 
-            app_name, 
-            legend_location
+        # バックグラウンドでタスク実行
+        thread = threading.Thread(
+            target=run_task_with_progress,
+            args=(save_plot_recall_at_k_for_illustrators, "グラフ・可視化生成",
+                  filtered_illustrators, sort_type, recommend_type, app_name, legend_location)
         )
+        thread.daemon = True
+        thread.start()
         
-        flash(f'グラフが生成されました（{len(filtered_illustrators)}名）', 'success')
-        return redirect(url_for('index'))
+        return jsonify({'success': True, 'message': f'グラフ生成を開始しました（{len(filtered_illustrators)}名）'})
         
     except Exception as e:
-        flash(f'エラーが発生しました: {str(e)}', 'error')
-        return redirect(url_for('index'))
+        return jsonify({'error': f'エラーが発生しました: {str(e)}'})
 
 @app.route('/get_illustrator_stats')
 def get_illustrator_stats():
@@ -259,10 +316,20 @@ def download_file(filename):
         flash(f'ファイルダウンロードでエラーが発生しました: {str(e)}', 'error')
         return redirect(url_for('output_files'))
 
+@app.route('/progress')
+def get_progress():
+    """現在の進捗状況を取得"""
+    return jsonify(progress_info)
+
+@socketio.on('connect')
+def handle_connect():
+    """WebSocket接続時の処理"""
+    emit('progress_update', progress_info)
+
 if __name__ == '__main__':
     # テンプレートディレクトリの作成
     template_dir = os.path.join(os.path.dirname(__file__), 'templates')
     if not os.path.exists(template_dir):
         os.makedirs(template_dir)
     
-    app.run(debug=True, host='127.0.0.1', port=5000)
+    socketio.run(app, debug=True, host='127.0.0.1', port=5000, allow_unsafe_werkzeug=True)

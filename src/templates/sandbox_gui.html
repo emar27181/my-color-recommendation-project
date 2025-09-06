@@ -2,6 +2,10 @@
 
 {% block title %}sandbox2.py 機能管理 GUI{% endblock %}
 
+{% block head_extra %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+{% endblock %}
+
 {% block content %}
 <div class="row">
     <div class="col-12">
@@ -11,6 +15,39 @@
         <p class="text-muted mb-4">
             色推薦システムの各種処理を Web インターフェースから実行できます。
         </p>
+    </div>
+</div>
+
+<!-- 進捗表示セクション -->
+<div class="row mb-4" id="progress-section" style="display: none;">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-tasks"></i> 進捗状況
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-2">
+                    <strong id="current-task">待機中</strong>
+                    <span class="badge bg-info ms-2" id="task-status">待機</span>
+                </div>
+                <div class="progress mb-2" style="height: 25px;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                         role="progressbar" 
+                         style="width: 0%;" 
+                         id="progress-bar"
+                         aria-valuenow="0" 
+                         aria-valuemin="0" 
+                         aria-valuemax="100">0%</div>
+                </div>
+                <div class="small text-muted" id="progress-message">処理を待機中...</div>
+                <div id="output-files" style="display: none;">
+                    <h6 class="mt-3"><i class="fas fa-file-alt"></i> 生成されたファイル:</h6>
+                    <ul id="output-files-list" class="list-unstyled"></ul>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -75,7 +112,7 @@
                 <form method="POST" action="{{ url_for('run_statistics') }}">
                     <div id="selected-illustrators-1"></div>
                     <input type="hidden" id="min-count-1" name="min_count">
-                    <button type="submit" class="btn btn-primary w-100">
+                    <button type="submit" class="btn btn-primary w-100" onclick="submitForm(event, this, '/run_statistics')">
                         <i class="fas fa-play"></i> 統計データ生成
                     </button>
                 </form>
@@ -130,7 +167,7 @@
                         <input type="text" class="form-control form-control-sm" name="diff_values" value="20, -20, 40, -40, 60, -60, 80, -80" placeholder="20, -20, 40, -40">
                     </div>
                     
-                    <button type="submit" class="btn btn-success w-100">
+                    <button type="submit" class="btn btn-success w-100" onclick="submitForm(event, this, '/run_recommendations')">
                         <i class="fas fa-play"></i> 推薦配色生成
                     </button>
                 </form>
@@ -180,7 +217,7 @@
                         </select>
                     </div>
                     
-                    <button type="submit" class="btn btn-warning w-100">
+                    <button type="submit" class="btn btn-warning w-100" onclick="submitForm(event, this, '/run_evaluation')">
                         <i class="fas fa-play"></i> 評価データ生成
                     </button>
                 </form>
@@ -239,7 +276,7 @@
                         </select>
                     </div>
                     
-                    <button type="submit" class="btn btn-info w-100">
+                    <button type="submit" class="btn btn-info w-100" onclick="submitForm(event, this, '/run_visualization')">
                         <i class="fas fa-play"></i> グラフ生成
                     </button>
                 </form>
@@ -286,6 +323,114 @@
 
 {% block scripts %}
 <script>
+// WebSocket接続
+const socket = io();
+
+// 進捗更新を受信
+socket.on('progress_update', function(data) {
+    updateProgressDisplay(data);
+});
+
+// 進捗表示を更新
+function updateProgressDisplay(data) {
+    const progressSection = document.getElementById('progress-section');
+    const currentTask = document.getElementById('current-task');
+    const taskStatus = document.getElementById('task-status');
+    const progressBar = document.getElementById('progress-bar');
+    const progressMessage = document.getElementById('progress-message');
+    const outputFiles = document.getElementById('output-files');
+    const outputFilesList = document.getElementById('output-files-list');
+    
+    if (data.status !== 'idle') {
+        progressSection.style.display = 'block';
+    }
+    
+    currentTask.textContent = data.current_task || '待機中';
+    progressMessage.textContent = data.message || '処理を待機中...';
+    
+    // ステータス表示
+    taskStatus.className = 'badge ms-2';
+    switch(data.status) {
+        case 'running':
+            taskStatus.className += ' bg-warning';
+            taskStatus.textContent = '実行中';
+            break;
+        case 'completed':
+            taskStatus.className += ' bg-success';
+            taskStatus.textContent = '完了';
+            break;
+        case 'error':
+            taskStatus.className += ' bg-danger';
+            taskStatus.textContent = 'エラー';
+            break;
+        default:
+            taskStatus.className += ' bg-info';
+            taskStatus.textContent = '待機';
+    }
+    
+    // プログレスバー更新
+    progressBar.style.width = data.progress + '%';
+    progressBar.textContent = data.progress + '%';
+    progressBar.setAttribute('aria-valuenow', data.progress);
+    
+    // プログレスバーの色
+    progressBar.className = 'progress-bar progress-bar-striped';
+    if (data.status === 'running') {
+        progressBar.className += ' progress-bar-animated bg-info';
+    } else if (data.status === 'completed') {
+        progressBar.className += ' bg-success';
+    } else if (data.status === 'error') {
+        progressBar.className += ' bg-danger';
+    }
+    
+    // 出力ファイル表示
+    if (data.output_files && data.output_files.length > 0) {
+        outputFiles.style.display = 'block';
+        outputFilesList.innerHTML = '';
+        data.output_files.forEach(file => {
+            const li = document.createElement('li');
+            li.innerHTML = `<i class="fas fa-file"></i> <code>${file}</code>`;
+            outputFilesList.appendChild(li);
+        });
+    }
+}
+
+// フォーム送信処理
+function submitForm(event, button, url) {
+    event.preventDefault();
+    
+    const form = button.closest('form');
+    const formData = new FormData(form);
+    
+    // ボタンを無効化
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 実行中...';
+    
+    fetch(url, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert('エラー: ' + data.error);
+        } else {
+            console.log('Success:', data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('通信エラーが発生しました');
+    })
+    .finally(() => {
+        // ボタンを有効化
+        button.disabled = false;
+        const icon = button.querySelector('i').className.replace('fa-spinner fa-spin', 'fa-play');
+        button.innerHTML = button.innerHTML.replace('<i class="fas fa-spinner fa-spin"></i> 実行中...', 
+                                                   `<i class="${icon}"></i> ${button.textContent.replace('実行中...', '').trim()}`);
+    });
+}
+
 // 選択されたイラストレーターと設定を各フォームに同期
 function syncFormData() {
     const checked = document.querySelectorAll('input[name="illustrators"]:checked');
