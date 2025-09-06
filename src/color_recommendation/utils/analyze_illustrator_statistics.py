@@ -306,7 +306,12 @@ def save_statistics_for_illustrators(illustrator_list):
 
     # print(f"statistics_data = {statistics_data}")
 
-    output_file_path = "src/color_recommendation/data/input/statistics_for_illustrators.json"
+    # 現在の作業ディレクトリに応じてパスを調整
+    import os
+    if os.path.basename(os.getcwd()) == 'src':
+        output_file_path = "color_recommendation/data/input/statistics_for_illustrators.json"
+    else:
+        output_file_path = "src/color_recommendation/data/input/statistics_for_illustrators.json"
     with open(output_file_path, 'w', encoding='utf-8') as file:
         json.dump(statistics_data, file, ensure_ascii=False, indent=4)
         print(f"{output_file_path} が保存されました．")
@@ -320,7 +325,12 @@ def get_not_monochrome_illustrator_list(illustrator_list):
     """
     MONOCHROME_THRESHOLD = 0.5  # モノクロ率の閾値
 
-    input_file_path = "src/color_recommendation/data/input/statistics_for_illustrators.json"
+    # 現在の作業ディレクトリに応じてパスを調整
+    import os
+    if os.path.basename(os.getcwd()) == 'src':
+        input_file_path = "color_recommendation/data/input/statistics_for_illustrators.json"
+    else:
+        input_file_path = "src/color_recommendation/data/input/statistics_for_illustrators.json"
     data = get_json_data(input_file_path)
     not_monochrome_illustrator_list = []
 

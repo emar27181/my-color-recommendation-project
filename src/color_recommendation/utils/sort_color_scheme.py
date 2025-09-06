@@ -109,7 +109,13 @@ def _get_analysis_data(illustrator_name):
         illustrator_data: イラストレーターの統計データ
     """
 
-    data = get_json_data("src/color_recommendation/data/input/statistics_for_illustrators.json")
+    # 現在の作業ディレクトリに応じてパスを調整
+    import os
+    if os.path.basename(os.getcwd()) == 'src':
+        statistics_file_path = "color_recommendation/data/input/statistics_for_illustrators.json"
+    else:
+        statistics_file_path = "src/color_recommendation/data/input/statistics_for_illustrators.json"
+    data = get_json_data(statistics_file_path)
 
     for illustrator_data in data:
         if illustrator_data["illustrator_name"] == illustrator_name:
