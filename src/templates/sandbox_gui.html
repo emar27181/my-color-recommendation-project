@@ -18,38 +18,7 @@
     </div>
 </div>
 
-<!-- 進捗表示セクション -->
-<div class="row mb-4" id="progress-section" style="display: none;">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-tasks"></i> 進捗状況
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="d-flex align-items-center mb-2">
-                    <strong id="current-task">待機中</strong>
-                    <span class="badge bg-info ms-2" id="task-status">待機</span>
-                </div>
-                <div class="progress mb-2" style="height: 25px;">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
-                         role="progressbar" 
-                         style="width: 0%;" 
-                         id="progress-bar"
-                         aria-valuenow="0" 
-                         aria-valuemin="0" 
-                         aria-valuemax="100">0%</div>
-                </div>
-                <div class="small text-muted" id="progress-message">処理を待機中...</div>
-                <div id="output-files" style="display: none;">
-                    <h6 class="mt-3"><i class="fas fa-file-alt"></i> 生成されたファイル:</h6>
-                    <ul id="output-files-list" class="list-unstyled"></ul>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<!-- 進捗表示セクションを削除 - 固定プログレスバーとToast通知で代替 -->
 
 <!-- 共通設定セクション -->
 <div class="row mb-4">
@@ -333,68 +302,10 @@ socket.on('progress_update', function(data) {
     updateToastAndFixedBar(data);
 });
 
-// 進捗表示を更新
+// 進捗表示を更新（簡素化 - 固定バーとToastのみ使用）
 function updateProgressDisplay(data) {
-    const progressSection = document.getElementById('progress-section');
-    const currentTask = document.getElementById('current-task');
-    const taskStatus = document.getElementById('task-status');
-    const progressBar = document.getElementById('progress-bar');
-    const progressMessage = document.getElementById('progress-message');
-    const outputFiles = document.getElementById('output-files');
-    const outputFilesList = document.getElementById('output-files-list');
-    
-    if (data.status !== 'idle') {
-        progressSection.style.display = 'block';
-    }
-    
-    currentTask.textContent = data.current_task || '待機中';
-    progressMessage.textContent = data.message || '処理を待機中...';
-    
-    // ステータス表示
-    taskStatus.className = 'badge ms-2';
-    switch(data.status) {
-        case 'running':
-            taskStatus.className += ' bg-warning';
-            taskStatus.textContent = '実行中';
-            break;
-        case 'completed':
-            taskStatus.className += ' bg-success';
-            taskStatus.textContent = '完了';
-            break;
-        case 'error':
-            taskStatus.className += ' bg-danger';
-            taskStatus.textContent = 'エラー';
-            break;
-        default:
-            taskStatus.className += ' bg-info';
-            taskStatus.textContent = '待機';
-    }
-    
-    // プログレスバー更新
-    progressBar.style.width = data.progress + '%';
-    progressBar.textContent = data.progress + '%';
-    progressBar.setAttribute('aria-valuenow', data.progress);
-    
-    // プログレスバーの色
-    progressBar.className = 'progress-bar progress-bar-striped';
-    if (data.status === 'running') {
-        progressBar.className += ' progress-bar-animated bg-info';
-    } else if (data.status === 'completed') {
-        progressBar.className += ' bg-success';
-    } else if (data.status === 'error') {
-        progressBar.className += ' bg-danger';
-    }
-    
-    // 出力ファイル表示
-    if (data.output_files && data.output_files.length > 0) {
-        outputFiles.style.display = 'block';
-        outputFilesList.innerHTML = '';
-        data.output_files.forEach(file => {
-            const li = document.createElement('li');
-            li.innerHTML = `<i class="fas fa-file"></i> <code>${file}</code>`;
-            outputFilesList.appendChild(li);
-        });
-    }
+    // この関数は固定プログレスバーとToast通知で代替するため簡素化
+    console.log('Progress update:', data);
 }
 
 // Toast通知と固定バー更新
@@ -489,7 +400,7 @@ function submitForm(event, button, url) {
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('通信エラーが発生しました');
+        showToast('通信エラーが発生しました', 'error');
     })
     .finally(() => {
         // ボタンを有効化
