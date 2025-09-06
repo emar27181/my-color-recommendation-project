@@ -1,0 +1,135 @@
+{% extends "sandbox_base.html" %}
+
+{% block title %}出力ファイル管理{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-download"></i> 出力ファイル管理
+        </h1>
+        <p class="text-muted mb-4">
+            色推薦システムで生成された出力ファイルを確認・ダウンロードできます。
+        </p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-file-alt"></i> 出力ファイル一覧
+                    <span class="badge bg-secondary ms-2">{{ files|length }} ファイル</span>
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if files %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-file"></i> ファイル名</th>
+                                <th><i class="fas fa-folder"></i> パス</th>
+                                <th><i class="fas fa-weight-hanging"></i> サイズ</th>
+                                <th><i class="fas fa-clock"></i> 更新日時</th>
+                                <th><i class="fas fa-download"></i> アクション</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for file in files %}
+                            <tr>
+                                <td>
+                                    <i class="fas fa-{% if file.name.endswith('.png') %}image{% elif file.name.endswith('.json') %}code{% else %}file{% endif %}"></i>
+                                    {{ file.name }}
+                                </td>
+                                <td>
+                                    <code class="small">{{ file.path }}</code>
+                                </td>
+                                <td>
+                                    <span class="small">
+                                        {% if file.size < 1024 %}
+                                            {{ file.size }} B
+                                        {% elif file.size < 1024*1024 %}
+                                            {{ "%.1f"|format(file.size/1024) }} KB
+                                        {% else %}
+                                            {{ "%.1f"|format(file.size/(1024*1024)) }} MB
+                                        {% endif %}
+                                    </span>
+                                </td>
+                                <td>
+                                    <small class="text-muted">{{ file.modified }}</small>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('download_file', filename=file.path) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-download"></i> ダウンロード
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">出力ファイルがありません</h5>
+                    <p class="text-muted">色推薦システムを実行すると、ここに結果ファイルが表示されます。</p>
+                    <a href="{{ url_for('index') }}" class="btn btn-primary">
+                        <i class="fas fa-arrow-left"></i> メイン画面に戻る
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if files %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-info-circle"></i> ファイルタイプ説明
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-image text-success"></i> PNG ファイル</h6>
+                        <ul class="list-unstyled small">
+                            <li><strong>recall_at_k_*.png</strong> - Recall@K評価グラフ</li>
+                            <li><strong>heatmap_*.png</strong> - ヒートマップ可視化</li>
+                            <li><strong>scatter_*.png</strong> - 散布図</li>
+                            <li><strong>violin_*.png</strong> - バイオリンプロット</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-code text-info"></i> JSON ファイル</h6>
+                        <ul class="list-unstyled small">
+                            <li><strong>recommend_colors_*.json</strong> - 推薦配色データ</li>
+                            <li><strong>recommend_hues_*.json</strong> - 推薦色相データ</li>
+                            <li><strong>recommend_tones_*.json</strong> - 推薦トーンデータ</li>
+                            <li><strong>is_contained_next_color_*.json</strong> - 評価データ</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ファイルサイズ情報をツールチップで表示
+    const sizeElements = document.querySelectorAll('.table td:nth-child(3)');
+    sizeElements.forEach(element => {
+        element.setAttribute('title', 'ファイルサイズ: ' + element.textContent.trim());
+    });
+});
+</script>
+{% endblock %}

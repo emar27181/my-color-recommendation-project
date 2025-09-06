@@ -1,0 +1,341 @@
+{% extends "sandbox_base.html" %}
+
+{% block title %}sandbox2.py 機能管理 GUI{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-flask"></i> sandbox2.py 機能管理 GUI
+        </h1>
+        <p class="text-muted mb-4">
+            色推薦システムの各種処理を Web インターフェースから実行できます。
+        </p>
+    </div>
+</div>
+
+<!-- 共通設定セクション -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-cog"></i> 共通設定
+                </h5>
+            </div>
+            <div class="card-body">
+                <!-- イラストレーター選択 -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">イラストレーター選択</label>
+                        <div class="mb-2">
+                            <button type="button" class="btn btn-sm btn-outline-primary me-2" onclick="toggleAllIllustrators(true)">全選択</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleAllIllustrators(false)">全解除</button>
+                            <span class="badge bg-info ms-3">選択中: <span id="selected-count">0</span>名</span>
+                            <span class="badge bg-success">フィルタ後: <span id="filtered-count">0</span>名</span>
+                        </div>
+                        <div class="illustrator-grid">
+                            <div class="row">
+                                {% for illustrator in illustrators %}
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="illustrators" value="{{ illustrator }}" id="ill_{{ loop.index }}">
+                                        <label class="form-check-label" for="ill_{{ loop.index }}">
+                                            {{ illustrator }}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="min_count" class="form-label">最小データ数</label>
+                        <input type="number" class="form-control" id="min_count" name="min_count" value="10" min="1" max="100">
+                        <div class="form-text">指定した数以下のデータ数のイラストレーターを除外します。</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 処理ステップセクション -->
+<div class="row">
+    <!-- ステップ1: 統計データ生成 -->
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-chart-bar"></i> ステップ1: 統計データ生成
+                </h6>
+            </div>
+            <div class="card-body">
+                <p class="card-text small">イラストレーターの色使用統計を生成します。</p>
+                <form method="POST" action="{{ url_for('run_statistics') }}">
+                    <div id="selected-illustrators-1"></div>
+                    <input type="hidden" id="min-count-1" name="min_count">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-play"></i> 統計データ生成
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ステップ2: 推薦配色生成 -->
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-success text-white">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-palette"></i> ステップ2: 推薦配色生成
+                </h6>
+            </div>
+            <div class="card-body">
+                <p class="card-text small">推薦配色データを生成します。</p>
+                <form method="POST" action="{{ url_for('run_recommendations') }}">
+                    <div id="selected-illustrators-2"></div>
+                    <input type="hidden" id="min-count-2" name="min_count">
+                    
+                    <div class="mb-2">
+                        <label class="form-label small">推薦タイプ</label>
+                        <select class="form-select form-select-sm" name="recommend_type">
+                            {% for type in recommend_types %}
+                            <option value="{{ type }}" {% if type == 'color' %}selected{% endif %}>{{ type }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <label class="form-label small">並び替えタイプ</label>
+                        <select class="form-select form-select-sm" name="sort_type">
+                            {% for type in sort_types %}
+                            <option value="{{ type }}" {% if type == 'random' %}selected{% endif %}>{{ type }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label small">アプリ名（オプション）</label>
+                        <select class="form-select form-select-sm" name="app_name">
+                            <option value="">選択しない</option>
+                            {% for app in app_names %}
+                            <option value="{{ app }}">{{ app }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label small">明度差分値</label>
+                        <input type="text" class="form-control form-control-sm" name="diff_values" value="20, -20, 40, -40, 60, -60, 80, -80" placeholder="20, -20, 40, -40">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="fas fa-play"></i> 推薦配色生成
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ステップ3: 評価データ生成 -->
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-warning text-dark">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-calculator"></i> ステップ3: 評価データ生成
+                </h6>
+            </div>
+            <div class="card-body">
+                <p class="card-text small">次の色が含まれているかどうかの評価データを生成します。</p>
+                <form method="POST" action="{{ url_for('run_evaluation') }}">
+                    <div id="selected-illustrators-3"></div>
+                    <input type="hidden" id="min-count-3" name="min_count">
+                    
+                    <div class="mb-2">
+                        <label class="form-label small">推薦タイプ</label>
+                        <select class="form-select form-select-sm" name="recommend_type">
+                            {% for type in recommend_types %}
+                            <option value="{{ type }}" {% if type == 'color' %}selected{% endif %}>{{ type }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <label class="form-label small">並び替えタイプ</label>
+                        <select class="form-select form-select-sm" name="sort_type">
+                            {% for type in sort_types %}
+                            <option value="{{ type }}" {% if type == 'random' %}selected{% endif %}>{{ type }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label small">アプリ名（オプション）</label>
+                        <select class="form-select form-select-sm" name="app_name">
+                            <option value="">選択しない</option>
+                            {% for app in app_names %}
+                            <option value="{{ app }}">{{ app }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-warning w-100">
+                        <i class="fas fa-play"></i> 評価データ生成
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ステップ4: グラフ・可視化 -->
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-info text-white">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-chart-line"></i> ステップ4: グラフ・可視化
+                </h6>
+            </div>
+            <div class="card-body">
+                <p class="card-text small">recall@kグラフなどの可視化を生成します。</p>
+                <form method="POST" action="{{ url_for('run_visualization') }}">
+                    <div id="selected-illustrators-4"></div>
+                    <input type="hidden" id="min-count-4" name="min_count">
+                    
+                    <div class="mb-2">
+                        <label class="form-label small">推薦タイプ</label>
+                        <select class="form-select form-select-sm" name="recommend_type">
+                            {% for type in recommend_types %}
+                            <option value="{{ type }}" {% if type == 'color' %}selected{% endif %}>{{ type }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <label class="form-label small">並び替えタイプ</label>
+                        <select class="form-select form-select-sm" name="sort_type">
+                            {% for type in sort_types %}
+                            <option value="{{ type }}" {% if type == 'random' %}selected{% endif %}>{{ type }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label small">アプリ名（オプション）</label>
+                        <select class="form-select form-select-sm" name="app_name">
+                            <option value="">選択しない</option>
+                            {% for app in app_names %}
+                            <option value="{{ app }}">{{ app }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label small">凡例位置</label>
+                        <select class="form-select form-select-sm" name="legend_location">
+                            {% for location in legend_locations %}
+                            <option value="{{ location }}" {% if location == 'lower right' %}selected{% endif %}>{{ location }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-info w-100">
+                        <i class="fas fa-play"></i> グラフ生成
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 使用方法セクション -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-info-circle"></i> 使用方法
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="process-step">
+                    <h6><i class="fas fa-step-forward"></i> 処理の流れ</h6>
+                    <ol class="small">
+                        <li><strong>イラストレーターを選択</strong> - 処理対象のイラストレーターをチェックボックスで選択</li>
+                        <li><strong>統計データ生成</strong> - まず最初に統計データを生成（時間がかかります）</li>
+                        <li><strong>推薦配色生成</strong> - 統計データに基づいて推薦配色を生成</li>
+                        <li><strong>評価データ生成</strong> - 推薦配色の評価データを生成</li>
+                        <li><strong>グラフ・可視化</strong> - 評価結果をグラフ化して可視化</li>
+                    </ol>
+                </div>
+                <div class="alert alert-info">
+                    <i class="fas fa-lightbulb"></i> 
+                    <strong>ヒント:</strong> 
+                    統計データは一度生成すると再利用されます。2回目以降の実行では統計生成をスキップできます。
+                </div>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i> 
+                    <strong>注意:</strong> 
+                    大量のイラストレーターを選択すると処理時間が長くなります。最初は少数で試してください。
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// 選択されたイラストレーターと設定を各フォームに同期
+function syncFormData() {
+    const checked = document.querySelectorAll('input[name="illustrators"]:checked');
+    const minCount = document.getElementById('min_count').value;
+    
+    // 各ステップのフォームにイラストレーター情報を同期
+    for (let i = 1; i <= 4; i++) {
+        const container = document.getElementById(`selected-illustrators-${i}`);
+        const minCountInput = document.getElementById(`min-count-${i}`);
+        
+        // 既存のinput要素をクリア
+        container.innerHTML = '';
+        
+        // 選択されたイラストレーターのhidden inputを追加
+        checked.forEach(checkbox => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'illustrators';
+            input.value = checkbox.value;
+            container.appendChild(input);
+        });
+        
+        // 最小データ数を同期
+        minCountInput.value = minCount;
+    }
+}
+
+// 既存の関数を拡張してフォーム同期も行う
+const originalUpdateSelectedCount = updateSelectedCount;
+const originalUpdateFilteredCount = updateFilteredCount;
+
+updateSelectedCount = function() {
+    originalUpdateSelectedCount();
+    syncFormData();
+};
+
+updateFilteredCount = function() {
+    originalUpdateFilteredCount();
+    syncFormData();
+};
+
+// 最小データ数変更時の同期
+document.getElementById('min_count').addEventListener('change', function() {
+    updateFilteredCount();
+    syncFormData();
+});
+
+// 初期同期
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(syncFormData, 100);
+});
+</script>
+{% endblock %}
