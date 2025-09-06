@@ -189,6 +189,41 @@ def _extract_statistics_by_illustrator(illustrator_name):
         "mean_resultant_length_ave": mean_resultant_length_sum / count_one_or_more_colors_used if count_one_or_more_colors_used > 0 else -1,
         "mean_resultant_length_distribution": mean_resultant_length_sum_distribution,
         "saturation_lightness_count_distribution": saturation_lightness_count_distribution,
+        "saturation_lightness_distribution_comment": {
+            "description": "明度彩度分布の5×5マトリックス形式データの読み方",
+            "matrix_structure": "saturation_lightness_count_distribution[lightness_index][saturation_index]",
+            "axes": {
+                "rows": "明度軸 (lightness_index) - 第1次元",
+                "columns": "彩度軸 (saturation_index) - 第2次元"
+            },
+            "index_meaning": {
+                "lightness_index": {
+                    "0": "低明度 (0-25%)",
+                    "1": "中低明度 (25-50%)",
+                    "2": "中明度 (50-75%)",
+                    "3": "中高明度 (75-100%)",
+                    "4": "高明度 (100%)"
+                },
+                "saturation_index": {
+                    "0": "低彩度 (0-25%)",
+                    "1": "中低彩度 (25-50%)",
+                    "2": "中彩度 (50-75%)",
+                    "3": "中高彩度 (75-100%)",
+                    "4": "高彩度 (100%)"
+                }
+            },
+            "examples": {
+                "[0][0]": "低明度×低彩度の出現率",
+                "[0][4]": "低明度×高彩度の出現率",
+                "[4][0]": "高明度×低彩度の出現率",
+                "[4][4]": "高明度×高彩度の出現率"
+            },
+            "reading_direction": {
+                "rows": "上から下へ明度が低→高",
+                "columns": "左から右へ彩度が低→高"
+            },
+            "note": "各値は正規化された出現率（合計=1.0）を表す"
+        },
     }
 
     return statistics
