@@ -43,9 +43,80 @@
         .status-ready { background-color: #28a745; }
         .status-processing { background-color: #ffc107; }
         .status-error { background-color: #dc3545; }
+        
+        /* 固定プログレスバー */
+        .fixed-progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1050;
+            background: white;
+            border-bottom: 2px solid #dee2e6;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transform: translateY(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        .fixed-progress-bar.show {
+            transform: translateY(0);
+        }
+        
+        /* Toast通知 */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1060;
+        }
+        
+        .progress-toast {
+            min-width: 350px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .progress-mini {
+            height: 6px !important;
+        }
+        
+        /* アニメーション */
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
     </style>
 </head>
 <body>
+    <!-- 固定プログレスバー -->
+    <div class="fixed-progress-bar" id="fixed-progress-bar">
+        <div class="container-fluid px-3 py-2">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <strong id="fixed-task-name" class="me-3">処理中...</strong>
+                    <span class="badge bg-info me-2" id="fixed-task-status">実行中</span>
+                </div>
+                <button class="btn btn-sm btn-outline-secondary" onclick="hideFixedProgressBar()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="progress progress-mini mt-2">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                     id="fixed-progress-bar-inner" 
+                     style="width: 0%">
+                </div>
+            </div>
+            <div class="small text-muted mt-1" id="fixed-progress-message">...</div>
+        </div>
+    </div>
+
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('index') }}">
@@ -82,6 +153,11 @@
         {% endwith %}
 
         {% block content %}{% endblock %}
+    </div>
+
+    <!-- Toast通知コンテナ -->
+    <div class="toast-container" id="toast-container">
+        <!-- Toast通知がここに動的に追加される -->
     </div>
 
     <footer class="bg-light text-center py-3 mt-5">
@@ -135,6 +211,113 @@
             } catch (error) {
                 console.error('Failed to fetch filtered count:', error);
             }
+        }
+
+        // Toast通知関数
+        function showToast(message, type = 'info', progress = null, autohide = true, delay = 5000) {
+            const toastId = 'toast-' + Date.now();
+            const iconMap = {
+                'success': 'fa-check-circle text-success',
+                'error': 'fa-exclamation-circle text-danger', 
+                'warning': 'fa-exclamation-triangle text-warning',
+                'info': 'fa-info-circle text-info',
+                'progress': 'fa-cogs text-primary'
+            };
+            
+            const progressHTML = progress !== null ? 
+                `<div class="progress progress-mini mt-2">
+                    <div class="progress-bar progress-bar-striped ${type === 'progress' ? 'progress-bar-animated' : ''}" 
+                         style="width: ${progress}%"></div>
+                 </div>` : '';
+            
+            const toastHTML = `
+                <div class="toast progress-toast" id="${toastId}" role="alert" ${autohide ? `data-bs-autohide="true" data-bs-delay="${delay}"` : 'data-bs-autohide="false"'}>
+                    <div class="toast-header">
+                        <i class="fas ${iconMap[type]} me-2"></i>
+                        <strong class="me-auto">${type === 'progress' ? '処理進捗' : '通知'}</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${message}
+                        ${progressHTML}
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('toast-container').insertAdjacentHTML('beforeend', toastHTML);
+            const toast = new bootstrap.Toast(document.getElementById(toastId));
+            toast.show();
+            
+            return toastId;
+        }
+
+        // Toast更新関数
+        function updateToast(toastId, message, progress = null) {
+            const toastElement = document.getElementById(toastId);
+            if (toastElement) {
+                const bodyElement = toastElement.querySelector('.toast-body');
+                const progressBar = toastElement.querySelector('.progress-bar');
+                
+                // メッセージ更新
+                const messageElement = bodyElement.childNodes[0];
+                if (messageElement) {
+                    messageElement.textContent = message;
+                }
+                
+                // プログレスバー更新
+                if (progressBar && progress !== null) {
+                    progressBar.style.width = progress + '%';
+                }
+            }
+        }
+
+        // 固定プログレスバー関数
+        function showFixedProgressBar(taskName, message, progress) {
+            const fixedBar = document.getElementById('fixed-progress-bar');
+            const taskNameEl = document.getElementById('fixed-task-name');
+            const statusEl = document.getElementById('fixed-task-status');
+            const messageEl = document.getElementById('fixed-progress-message');
+            const progressBarEl = document.getElementById('fixed-progress-bar-inner');
+            
+            taskNameEl.textContent = taskName;
+            messageEl.textContent = message;
+            progressBarEl.style.width = progress + '%';
+            
+            statusEl.className = 'badge me-2 bg-info';
+            statusEl.textContent = '実行中';
+            
+            fixedBar.classList.add('show');
+        }
+
+        function updateFixedProgressBar(progress, message, status = 'running') {
+            const messageEl = document.getElementById('fixed-progress-message');
+            const progressBarEl = document.getElementById('fixed-progress-bar-inner');
+            const statusEl = document.getElementById('fixed-task-status');
+            
+            messageEl.textContent = message;
+            progressBarEl.style.width = progress + '%';
+            
+            // ステータス色更新
+            statusEl.className = 'badge me-2';
+            switch(status) {
+                case 'completed':
+                    statusEl.className += ' bg-success';
+                    statusEl.textContent = '完了';
+                    progressBarEl.className = progressBarEl.className.replace('progress-bar-animated', '');
+                    break;
+                case 'error':
+                    statusEl.className += ' bg-danger';
+                    statusEl.textContent = 'エラー';
+                    progressBarEl.className = progressBarEl.className.replace('progress-bar-animated', '');
+                    break;
+                default:
+                    statusEl.className += ' bg-info';
+                    statusEl.textContent = '実行中';
+            }
+        }
+
+        function hideFixedProgressBar() {
+            document.getElementById('fixed-progress-bar').classList.remove('show');
         }
 
         // イベントリスナー設定

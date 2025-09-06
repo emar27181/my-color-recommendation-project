@@ -325,10 +325,12 @@
 <script>
 // WebSocket接続
 const socket = io();
+let currentProgressToast = null;
 
 // 進捗更新を受信
 socket.on('progress_update', function(data) {
     updateProgressDisplay(data);
+    updateToastAndFixedBar(data);
 });
 
 // 進捗表示を更新
@@ -395,6 +397,73 @@ function updateProgressDisplay(data) {
     }
 }
 
+// Toast通知と固定バー更新
+function updateToastAndFixedBar(data) {
+    // Toast通知管理
+    if (data.status === 'running') {
+        if (!currentProgressToast) {
+            currentProgressToast = showToast(data.message || '処理中...', 'progress', data.progress, false);
+        } else {
+            updateToast(currentProgressToast, data.message || '処理中...', data.progress);
+        }
+        
+        // 固定プログレスバー表示
+        showFixedProgressBar(data.current_task || '処理中', data.message || '処理中...', data.progress || 0);
+        
+    } else if (data.status === 'completed') {
+        // 完了通知
+        showToast(`${data.current_task}が完了しました！`, 'success', 100, true, 3000);
+        
+        // 固定バー更新
+        updateFixedProgressBar(100, data.message || '完了', 'completed');
+        
+        // 出力ファイル通知
+        if (data.output_files && data.output_files.length > 0) {
+            setTimeout(() => {
+                const filesList = data.output_files.map(file => `• ${file}`).join('\n');
+                showToast(`ファイルが生成されました:\n${filesList}`, 'info', null, true, 8000);
+            }, 1000);
+        }
+        
+        // 現在のToast削除
+        if (currentProgressToast) {
+            const toastElement = document.getElementById(currentProgressToast);
+            if (toastElement) {
+                const toast = bootstrap.Toast.getInstance(toastElement);
+                if (toast) toast.hide();
+            }
+            currentProgressToast = null;
+        }
+        
+        // 3秒後に固定バーを隠す
+        setTimeout(() => {
+            hideFixedProgressBar();
+        }, 3000);
+        
+    } else if (data.status === 'error') {
+        // エラー通知
+        showToast(`エラー: ${data.message}`, 'error', null, true, 10000);
+        
+        // 固定バー更新
+        updateFixedProgressBar(data.progress || 0, data.message || 'エラー', 'error');
+        
+        // 現在のToast削除
+        if (currentProgressToast) {
+            const toastElement = document.getElementById(currentProgressToast);
+            if (toastElement) {
+                const toast = bootstrap.Toast.getInstance(toastElement);
+                if (toast) toast.hide();
+            }
+            currentProgressToast = null;
+        }
+        
+        // 5秒後に固定バーを隠す
+        setTimeout(() => {
+            hideFixedProgressBar();
+        }, 5000);
+    }
+}
+
 // フォーム送信処理
 function submitForm(event, button, url) {
     event.preventDefault();
@@ -413,9 +482,9 @@ function submitForm(event, button, url) {
     .then(response => response.json())
     .then(data => {
         if (data.error) {
-            alert('エラー: ' + data.error);
+            showToast('エラー: ' + data.error, 'error');
         } else {
-            console.log('Success:', data.message);
+            showToast(data.message, 'info', null, true, 3000);
         }
     })
     .catch(error => {
