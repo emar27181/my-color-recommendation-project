@@ -1,6 +1,7 @@
 from utils.helpers.json_utils import get_json_data, get_dir_list
 from utils.helpers.color_utils import print_colored_text
 from utils.helpers.transform_color import hex_to_rgb, rgb_to_hsl
+from utils.helpers.path_utils import get_used_colors_path, get_used_hues_path, get_statistics_path, get_illustration_path, get_output_path
 import json
 import math
 import os
@@ -48,7 +49,7 @@ def _get_saturation_lightness_count_distribution(illustrator_name, illust_name, 
     """
 
     saturation_lightness_count_distribution = [[0 for _ in range(DIVIDE_NUM + 1)] for _ in range(DIVIDE_NUM + 1)]
-    input_file_path = f'src/color_recommendation/data/input/used_colors/used_colors_{illustrator_name}.json'
+    input_file_path = get_used_colors_path(illustrator_name)
     used_colors_data = get_json_data(input_file_path)
 
     # print(f"{used_colors_data[index_num][0]['illustName']}") # これがillust_nameと一致していれば同画像を参照できている
@@ -92,7 +93,7 @@ def _extract_statistics_by_illustrator(illustrator_name):
 
     DIV_NUMBER = 12  # 平均結果長の分布で分割する数
 
-    input_file_path = f"src/color_recommendation/data/input/used_hues/used_hues_{illustrator_name}.json"
+    input_file_path = get_used_hues_path(illustrator_name)
     data = get_json_data(input_file_path)
 
     chromatic_colors_count_sum = 0
@@ -306,12 +307,7 @@ def save_statistics_for_illustrators(illustrator_list):
 
     # print(f"statistics_data = {statistics_data}")
 
-    # 現在の作業ディレクトリに応じてパスを調整
-    import os
-    if os.path.basename(os.getcwd()) == 'src':
-        output_file_path = "color_recommendation/data/input/statistics_for_illustrators.json"
-    else:
-        output_file_path = "src/color_recommendation/data/input/statistics_for_illustrators.json"
+    output_file_path = get_statistics_path()
     with open(output_file_path, 'w', encoding='utf-8') as file:
         json.dump(statistics_data, file, ensure_ascii=False, indent=4)
         print(f"{output_file_path} が保存されました．")
@@ -325,12 +321,7 @@ def get_not_monochrome_illustrator_list(illustrator_list):
     """
     MONOCHROME_THRESHOLD = 0.5  # モノクロ率の閾値
 
-    # 現在の作業ディレクトリに応じてパスを調整
-    import os
-    if os.path.basename(os.getcwd()) == 'src':
-        input_file_path = "color_recommendation/data/input/statistics_for_illustrators.json"
-    else:
-        input_file_path = "src/color_recommendation/data/input/statistics_for_illustrators.json"
+    input_file_path = get_statistics_path()
     data = get_json_data(input_file_path)
     not_monochrome_illustrator_list = []
 
@@ -359,7 +350,7 @@ def get_not_monochrome_illustrator_list(illustrator_list):
 
 def _get_illust_count_by_illustrator(illustrator_name):
 
-    input_dir_path = f"src/color_recommendation/data/input/illustration/{illustrator_name}"
+    input_dir_path = get_illustration_path(illustrator_name)
 
     count = 0
     for filename in os.listdir(input_dir_path):
@@ -410,12 +401,12 @@ def save_recall_at_k_for_illustrators(illustrator_list, sort_type, check_subject
     for illustrator_name in illustrator_list:
         print(f"\n=== {illustrator_name} ========================")
         if (check_subject == "tone"):
-            dir_name_list = get_dir_list(f"src/color_recommendation/data/output/is_contained_next_{check_subject}")
+            dir_name_list = get_dir_list(get_output_path(f"is_contained_next_{check_subject}"))
             for dir_name in dir_name_list:
-                input_file_path = f"src/color_recommendation/data/output/is_contained_next_{check_subject}/{dir_name}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}.json"
-                output_file_path = f"src/color_recommendation/data/output/recall_at_k/recall_at_k_{check_subject}_{dir_name}_{illustrator_name}.json"
+                input_file_path = get_output_path(f"is_contained_next_{check_subject}/{dir_name}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}.json")
+                output_file_path = get_output_path(f"recall_at_k/recall_at_k_{check_subject}_{dir_name}_{illustrator_name}.json")
                 save_recall_at_k(input_file_path, output_file_path)
         else:
-            input_file_path = f"src/color_recommendation/data/output/is_contained_next_{check_subject}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}.json"
-            output_file_path = f"src/color_recommendation/data/output/recall_at_k/recall_at_k_{check_subject}_{sort_type}_{illustrator_name}.json"
+            input_file_path = get_output_path(f"is_contained_next_{check_subject}/{sort_type}/is_contained_next_{check_subject}_{illustrator_name}.json")
+            output_file_path = get_output_path(f"recall_at_k/recall_at_k_{check_subject}_{sort_type}_{illustrator_name}.json")
             save_recall_at_k(input_file_path, output_file_path)

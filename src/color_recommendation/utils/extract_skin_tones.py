@@ -75,7 +75,8 @@ def extract_skin_tones_by_illustrator(illustrator_name: str) -> Optional[List[Di
     Returns:
         肌色データのリスト、または None（ファイルが存在しない場合）
     """
-    file_path = f"data/input/used_colors/used_colors_{illustrator_name}.json"
+    from .helpers.path_utils import get_used_colors_path
+    file_path = get_used_colors_path(illustrator_name)
     
     try:
         used_colors_data = get_json_data(file_path)
@@ -100,7 +101,8 @@ def extract_all_illustrators_skin_tones() -> Dict[str, List[Dict]]:
     Returns:
         {illustrator_name: [skin_tone_data, ...], ...}
     """
-    used_colors_dir = "data/input/used_colors/"
+    from .helpers.path_utils import get_data_path
+    used_colors_dir = get_data_path("input/used_colors/")
     results = {}
     
     # ディレクトリ内のJSONファイルを取得
@@ -140,7 +142,8 @@ def save_skin_tones_data(skin_tones_data: Dict[str, List[Dict]], output_file: st
         output_file: 出力ファイルパス（デフォルト: data/output/skin_tones.json）
     """
     if output_file is None:
-        output_file = "data/output/skin_tones.json"
+        from .helpers.path_utils import get_output_path
+        output_file = get_output_path("skin_tones.json")
     
     # 出力ディレクトリを作成
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
@@ -185,7 +188,9 @@ if __name__ == "__main__":
     
     # 統計情報を生成・保存
     statistics = get_skin_tone_statistics(skin_tones_data)
-    save_json_data(statistics, "data/output", "data/output/skin_tones_statistics.json")
+    from .helpers.path_utils import get_output_path
+    statistics_file = get_output_path("skin_tones_statistics.json")
+    save_json_data(statistics, os.path.dirname(statistics_file), statistics_file)
     
     print(f"\nProcessing completed:")
     print(f"- Total illustrators with skin tones: {len(skin_tones_data)}")

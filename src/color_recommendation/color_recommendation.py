@@ -9,6 +9,7 @@ from utils.check_data_is_contained_next_color import check_data_is_contained_nex
 from utils.estimate_used_color_scheme import generate_json_used_color_scheme, save_estimated_used_colors
 from utils.download_instagram_images import download_instagram_images
 from utils.sort_color_scheme import sort_color_schemes_by_color_difference, shuffle_color_schemes, sort_color_schemes_by_used_color_count, sort_color_schemes_by_mean_resultant_length, sort_color_schemes_by_custom_v0, sort_color_schemes_by_used_tone
+from utils.helpers.path_utils import get_used_colors_path, get_recommend_hues_path, get_recommend_colors_path, get_recommend_tones_path, get_output_path, get_data_path
 import os
 import random
 
@@ -139,7 +140,7 @@ def generate_recommendation_exising_apps_by_illustrator(used_color_data, recomme
         _type_: _description_
     """
 
-    input_file_path = f"src/color_recommendation/data/output/recommendations_by_existing_apps/recommend_{recommend_type}s/recommend_{recommend_type}s_{app_name}.json"
+    input_file_path = get_output_path(f"recommendations_by_existing_apps/recommend_{recommend_type}s/recommend_{recommend_type}s_{app_name}.json")
     json_data = get_json_data(input_file_path)
     
 
@@ -277,15 +278,15 @@ def save_recommendations_for_illustrators(illutrator_list, recommend_type, sort_
     for illustrator_name in illutrator_list:
         print(f"=== {illustrator_name} ====================")
 
-        input_file_path = f"src/color_recommendation/data/input/used_colors/used_colors_{illustrator_name}.json"
-        output_dir_path_hues = f"src/color_recommendation/data/output/recommend_hues/sort_by_{sort_type}"
-        output_file_path_hues = f"src/color_recommendation/data/output/recommend_hues/sort_by_{sort_type}/recommend_hues_{illustrator_name}.json"
-        output_dir_path_colors = f"src/color_recommendation/data/output/recommend_colors/sort_by_{sort_type}"
-        output_file_path_colors = f"src/color_recommendation/data/output/recommend_colors/sort_by_{sort_type}/recommend_colors_{illustrator_name}.json"
+        input_file_path = get_used_colors_path(illustrator_name)
+        output_dir_path_hues = get_output_path(f"recommend_hues/sort_by_{sort_type}")
+        output_file_path_hues = get_recommend_hues_path(sort_type, f"recommend_hues_{illustrator_name}.json")
+        output_dir_path_colors = get_output_path(f"recommend_colors/sort_by_{sort_type}")
+        output_file_path_colors = get_recommend_colors_path(sort_type, f"recommend_colors_{illustrator_name}.json")
 
         diffs_dir_name = '[' + ','.join(str(v) for v in lightness_diffs).replace(' ', '') + ']'
-        output_dir_path_tones = f"src/color_recommendation/data/output/recommend_tones/{diffs_dir_name}/sort_by_{sort_type}"
-        output_file_path_tones = f"{output_dir_path_tones}/recommend_tones_{illustrator_name}.json"
+        output_dir_path_tones = get_output_path(f"recommend_tones/{diffs_dir_name}/sort_by_{sort_type}")
+        output_file_path_tones = get_output_path(f"recommend_tones/{diffs_dir_name}/sort_by_{sort_type}/recommend_tones_{illustrator_name}.json")
         used_colors_data = read_file(input_file_path)
 
         # 推薦の生成と保存
@@ -315,8 +316,8 @@ def save_recommendations_for_illustrators(illutrator_list, recommend_type, sort_
             elif recommend_type == "color_existing_apps":
                 recommend_hues_existing_apps_data = generate_recommendation_exising_apps_by_illustrator(used_colors_data, "color", sort_type, illustrator_name, app_name)
             
-            output_dir_path = f"src/color_recommendation/data/output/recommend_{recommend_type}s/sort_by_{sort_type}"
-            output_file_path = f"src/color_recommendation/data/output/recommend_{recommend_type}s/sort_by_{sort_type}/recommend_{recommend_type}s_{illustrator_name}_{app_name}.json"
+            output_dir_path = get_output_path(f"recommend_{recommend_type}s/sort_by_{sort_type}")
+            output_file_path = get_output_path(f"recommend_{recommend_type}s/sort_by_{sort_type}/recommend_{recommend_type}s_{illustrator_name}_{app_name}.json")
             save_json_data(recommend_hues_existing_apps_data, output_dir_path, output_file_path)
 
         else:

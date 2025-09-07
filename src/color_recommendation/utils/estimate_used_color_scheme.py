@@ -10,6 +10,7 @@ from utils.helpers.color_utils import print_colored_text, calculate_color_differ
 from .config.constants_dev import SATURATION_LOWER_LIMIT, LIGHTNESS_LOWER_LIMIT, LIGHTNESS_UPPER_LIMIT, IS_PRINT_COLOR_SCHEME, IS_PRINT_COLOR_SCHEME_BEFORE_MERGED
 from colorthief import ColorThief
 from utils.helpers.json_utils import get_json_length
+from .helpers.path_utils import get_used_colors_path, get_illustration_path, get_output_path
 # from src.color_recommendation.config.constants import SATURATION_LOWER_LIMIT, LIGHTNESS_UPPER_LIMIT, LIGHTNESS_LOWER_LIMIT
 from concurrent.futures import ThreadPoolExecutor
 
@@ -305,7 +306,7 @@ def save_estimated_used_colors_for_illustrates(illustrater_list, illust_count_li
     """
     for illustrater in illustrater_list:
         print(f"=== {illustrater} =====================")
-        output_file_path = f'src/color_recommendation/data/input/used_colors/used_colors_{illustrater}.json'
+        output_file_path = get_used_colors_path(illustrater)
 
         if os.path.exists(output_file_path):
             print(f"既に '{output_file_path}' が存在するため処理をスキップします．")
@@ -334,7 +335,7 @@ def save_estimated_used_colors_parallel(illustrater_name, illust_count_limit, ou
         return json_used_color_scheme
 
     json_data = []
-    load_directory_path = f'src/color_recommendation/data/input/illustration/{illustrater_name}'
+    load_directory_path = get_illustration_path(illustrater_name)
 
     if not os.path.exists(load_directory_path):
         print(f"'{load_directory_path}' が存在しません．処理をスキップします．")
@@ -371,7 +372,7 @@ def save_estimated_used_colors_parallel(illustrater_name, illust_count_limit, ou
 def save_estimated_used_colors(illustrater_name, illust_count_limit, output_file_path):
     json_data = []
 
-    load_directory_path = f'src/color_recommendation/data/input/illustration/{illustrater_name}'
+    load_directory_path = get_illustration_path(illustrater_name)
 
     # print("here1")
     if not os.path.exists(load_directory_path):
@@ -411,7 +412,7 @@ def print_estimated_used_colors_for_illustrators(illustrator_list, count_limit):
     for illustrator in illustrator_list:
         print(f"=== {illustrator} ==============")
         count = 0
-        with open(f"src/color_recommendation/data/input/used_colors/used_colors_{illustrator}.json", "r") as f:
+        with open(get_used_colors_path(illustrator), "r") as f:
             data = json.load(f)
 
             for illust_data in data:

@@ -109,12 +109,9 @@ def _get_analysis_data(illustrator_name):
         illustrator_data: イラストレーターの統計データ
     """
 
-    # 現在の作業ディレクトリに応じてパスを調整
-    import os
-    if os.path.basename(os.getcwd()) == 'src':
-        statistics_file_path = "color_recommendation/data/input/statistics_for_illustrators.json"
-    else:
-        statistics_file_path = "src/color_recommendation/data/input/statistics_for_illustrators.json"
+    # PathResolver を使用した動的パス解決
+    from .helpers.path_utils import get_statistics_path
+    statistics_file_path = get_statistics_path()
     data = get_json_data(statistics_file_path)
 
     for illustrator_data in data:
