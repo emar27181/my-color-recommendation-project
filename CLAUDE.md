@@ -180,6 +180,19 @@
   - `_get_saturation_lightness_count_distribution()`: 明度彩度分布集計（**2025-09-05修正：出現率考慮**）
   - 色使用傾向分析・統計データ生成
 
+- **`utils/extract_metadata_values.py`**: Instagram投稿メタデータ抽出・分析（**2025-09-08新規追加**）
+  - `extract_metadata_from_json()`: .json.xzファイルから投稿メタデータ抽出
+  - `get_metadata_for_image()`: 画像ファイルに対応するメタデータ取得
+  - `get_all_metadata_by_illustrator()`: イラストレーター全投稿メタデータ取得
+  - `get_engagement_statistics()`: エンゲージメント統計分析（いいね・コメント）
+  - `get_popular_hashtags()`: 人気ハッシュタグ分析
+  - `analyze_posting_patterns()`: 投稿パターン分析（時間帯・曜日）
+
+- **`utils/extract_top_liked_images.py`**: 上位いいね画像抽出・コピー機能（**2025-09-08新規追加**）
+  - `copy_top_liked_images_by_illustrator()`: イラストレーター別上位N枚画像コピー
+  - `copy_all_illustrators_top_images()`: 全イラストレーター一括処理
+  - `save_summary_report()`: 抽出結果サマリーレポート生成
+
 #### **色変換・計算系** (`utils/helpers/`)
 - **`transform_color.py`**: 色空間変換
   - `hex_to_rgb()`, `rgb_to_hex()`: HEX-RGB変換
@@ -197,6 +210,13 @@
   - `get_json_data()`: JSONファイル読み込み
   - `save_json_data()`: JSONファイル保存
   - `convert_color_schemes_to_color_data()`: 配色データ変換
+
+- **`path_utils.py`**: パス管理ユーティリティ（**2025-09-08新規追加**）
+  - `PathResolver`: Flask GUI・通常実行両対応の動的パス解決クラス
+  - `get_used_colors_path()`, `get_used_hues_path()`: 使用色・色相データパス取得
+  - `get_illustration_path()`, `get_statistics_path()`: イラスト・統計データパス取得
+  - `get_output_path()`: 出力ディレクトリパス取得（推薦配色・グラフ・ヒートマップ等）
+  - Flask GUI実行時（`src/`から実行）と通常実行（プロジェクトルートから実行）の両方に対応
 
 #### **可視化・グラフ系** (`utils/plot_graph.py`)
 - recall@kグラフ、バイオリンプロット等の可視化機能（887行の大型ファイル）
@@ -232,6 +252,20 @@
 - **`data/output/recommend_colors/`**: 推薦配色結果（JSON）
 - **`data/output/graph/`**: 生成グラフ（PNG）
 - **`data/output/heatmap/`**: ヒートマップ（PNG）
+- **`data/output/top_liked_images/`**: 上位いいね画像コレクション（**2025-09-08新規追加**）
+  - `{illustrator_name}/`: イラストレーター別ディレクトリ
+  - `rank_{順位:02d}_{いいね数:05d}_likes_{投稿日時}.jpg`: 画像ファイル（命名規則）
+- **`data/output/top_liked_images_summary.json`**: 抽出結果サマリー（**2025-09-08新規追加**）
+  ```json
+  {
+    "total_illustrators": 36,
+    "total_images_copied": 76,
+    "top_performers": [
+      {"name": "oz_yarimasu", "max_likes": 653310, "avg_likes": 302960.7}
+    ],
+    "illustrator_details": {...}
+  }
+  ```
 
 ### ⚙️ 設定・定数管理
 
@@ -250,15 +284,27 @@ INSTAGRAM_PASS = "xxxxxxxxx"    # ⚠️要環境変数化
 - **`sandbox.py`**: メイン実験・テスト（各種機能テスト）
 - **`sandbox2.py`**: バッチ処理実行（複数イラストレーター一括処理）
 - **`sandbox3.py`**: 最新実験コード（モジュール化・エラーバー付きグラフ）
+- **`run_extract_all_top_images.py`**: 上位いいね画像一括抽出スクリプト（**2025-09-08新規追加**）
 
 ### 🔄 主要データ処理フロー
 
 ```
-1. 画像収集 → download_instagram_images.py
-2. 色抽出   → estimate_used_color_scheme.py
-3. 統計生成 → analyze_illustrator_statistics.py
-4. 推薦生成 → color_recommendation.py
-5. 評価     → plot_graph.py
+1. 画像収集     → download_instagram_images.py
+2. 色抽出       → estimate_used_color_scheme.py
+3. 統計生成     → analyze_illustrator_statistics.py
+4. 推薦生成     → color_recommendation.py
+5. 評価         → plot_graph.py
+6. メタデータ分析 → extract_metadata_values.py (2025-09-08新規追加)
+7. 上位画像抽出  → extract_top_liked_images.py (2025-09-08新規追加)
+```
+
+#### **新規追加処理フロー（メタデータ活用系）**
+```
+A. エンゲージメント分析フロー:
+   illustration/*.json.xz → extract_metadata_values.py → 統計分析結果
+
+B. 人気画像抽出フロー:
+   メタデータ分析 → extract_top_liked_images.py → top_liked_images/ + サマリー
 ```
 
 ### 📝 開発時の編集指針
