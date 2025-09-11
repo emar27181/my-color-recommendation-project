@@ -910,6 +910,111 @@ MIN_SAMPLES = 可変      # クラスタ最小サンプル数
 
 ---
 
+## 🚨 Instagram/Instaloader 現状報告（2025-09-11更新）
+
+### 📊 ダウンロード機能の現在の状況
+
+**❌ 深刻な問題発生中**: Instagram画像の新規ダウンロードが**不可能**
+
+#### 🔍 問題の詳細
+
+**根本原因**: Instagram API仕様変更（2025年1月頃〜）
+- **症状**: 401 Unauthorized エラー「Please wait a few minutes before you try again」
+- **影響範囲**: 全世界のInstaloaderユーザーで同様の問題が多発
+- **技術的原因**: `sessionid`クッキーが空になる現象
+
+#### 🧪 実施した調査・テスト
+
+**調査期間**: 2025-09-11  
+**Instaloaderバージョン**: 4.14.1 → 4.14.2 (最新版にアップデート済み)
+
+**✅ 成功した機能**:
+- セッション読み込み (`load_session_from_file()`)
+- プロフィール基本情報取得 (`Profile.from_username()`)
+- フォロワー数・投稿数などの統計取得
+
+**❌ 失敗した機能**:
+- 投稿リスト取得 (`profile.get_posts()`)
+- 投稿ダウンロード (`download_post()`)
+- GraphQL API呼び出し全般
+
+#### 📋 試行した解決策
+
+1. **レート制限対策**: 60秒〜20分の待機時間 → **効果なし**
+2. **セッション再作成**: 既存セッション削除・再生成 → **効果なし**
+3. **設定最適化**: 保守的なInstaloader設定 → **効果なし**
+4. **バージョンアップデート**: 4.14.1 → 4.14.2 → **効果なし**
+
+#### 🔬 技術的分析結果
+
+**セッション診断結果**:
+```
+sessionid: [空文字] ← 問題の核心
+csrftoken: W25iefQ_J8s_wuy6omY7... [正常]
+mid: aMEEggAEAAFW_syS-JYh... [正常]
+ig_did: F692B524-45CD-4497-8... [正常]
+```
+
+**GitHub Issues調査**: 
+- [Issue #2532](https://github.com/instaloader/instaloader/issues/2532)
+- [Issue #2501](https://github.com/instaloader/instaloader/issues/2501) 
+- 同様の報告が多数・解決策は未確立
+
+#### 🛠️ 推奨対応策
+
+**短期対応**:
+1. **手動ログイン実行** (最も確実):
+   ```bash
+   instaloader --login emachansub
+   ```
+2. **Firefoxクッキー取り込み**: `firefox_session_import.py`使用
+3. **プロキシ/VPN経由**: 異なるネットワーク環境での試行
+
+**中長期対応**:
+1. **既存データ活用**: 2024年までの豊富なデータで開発継続
+2. **代替収集手法**: Selenium自動化、Instagram Basic Display API検討
+3. **API状況監視**: Instagram側の制限緩和を待機
+
+#### 📈 データ保有状況
+
+**✅ 利用可能なデータ**:
+- **期間**: 2021年〜2025年1月
+- **イラストレーター数**: 36名以上
+- **画像数**: 数千枚
+- **メタデータ**: いいね数・投稿日時・ハッシュタグ等
+
+**データ例**:
+```
+./src/color_recommendation/data/input/illustration/amao_1015/
+├── 2021-01-01_12-09-07_UTC.jpg
+├── 2021-01-08_13-14-28_UTC.jpg
+└── ... (179投稿分のデータ)
+```
+
+#### 💡 開発継続方針
+
+**現在の推奨アプローチ**:
+1. **既存データで機能完成**: 色推薦システム・評価機能の完成を優先
+2. **新規データ収集は後回し**: Instagram API問題解決まで一時停止
+3. **代替手法の並行検討**: 技術的制約を回避する方法を模索
+
+#### 🔗 作成された調査ツール
+
+プロジェクトに以下の診断・修正ツールを追加:
+- `instagram_debug_report.md`: 詳細分析レポート  
+- `test_download.py`: 改良版テストスクリプト
+- `debug_session.py`: セッション詳細診断
+- `instaloader_fixes.py`: 複数修正方法の実装
+- `minimal_download_test.py`: 最小限ダウンロードテスト
+- `manual_login_attempt.py`: 手動ログイン支援
+
+#### ⏰ 次回確認予定
+
+**再評価時期**: 2025年10月中旬  
+**確認項目**: Instagram API制限の緩和状況・Instaloaderコミュニティでの解決策
+
+---
+
 ## 📁 コーディング・構成ルール
 
 - **エラー状態でのコミットは禁止**  
