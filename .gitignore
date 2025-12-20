@@ -1,13 +1,74 @@
-venv_color_recommendation
-src/color_recommendation/data
-
+# Python環境
+venv_color_recommendation/
+__pycache__/
 *.pyc
-tmp/
-*dev.py
-*sandbox*
-*memo.md
-.env
-*.code-workspace
+*.pyo
+*.pyd
+.Python
 
-# Claude Code settings
-.claude/
+# 実験・開発用ファイル（テンプレートファイルは追跡）
+*sandbox.py
+*sandbox2.py
+*sandbox3.py
+*dev.py
+*memo.md
+
+# 設定ファイル（テンプレートファイルは追跡）
+src/color_recommendation/utils/config/constants_dev.py
+!src/color_recommendation/utils/config/constants_dev_template.py
+
+# データディレクトリ（構造は.gitkeepで保持、中身は除外）
+src/color_recommendation/data/input/illustration/**/*
+!src/color_recommendation/data/input/illustration/**/.gitkeep
+src/color_recommendation/data/input/used_colors/**/*
+!src/color_recommendation/data/input/used_colors/.gitkeep
+src/color_recommendation/data/input/used_hues/**/*
+!src/color_recommendation/data/input/used_hues/.gitkeep
+src/color_recommendation/data/input/backup/**/*
+!src/color_recommendation/data/input/backup/.gitkeep
+src/color_recommendation/data/input/tmp/**/*
+!src/color_recommendation/data/input/tmp/.gitkeep
+src/color_recommendation/data/input/*.json
+!src/color_recommendation/data/input/.gitkeep
+
+# 出力データ（構造は.gitkeepで保持、中身は除外）
+src/color_recommendation/data/output/**/*
+!src/color_recommendation/data/output/**/.gitkeep
+src/color_recommendation/data/output/*.json
+src/color_recommendation/data/output/**/*.json
+src/color_recommendation/data/output/**/*.png
+
+# セッションファイル
+src/color_recommendation/data/sessions/**/*
+!src/color_recommendation/data/sessions/.gitkeep
+
+# 一時ディレクトリ
+src/color_recommendation/data/tmp/**/*
+!src/color_recommendation/data/tmp/.gitkeep
+tmp/**/*
+!tmp/.gitkeep
+
+# 環境変数・認証情報
+.env
+*.env
+
+# IDE設定
+*.code-workspace
+.vscode/
+.idea/
+
+# Claude Code設定（settings.local.jsonは除外、構造は保持）
+.claude/settings.local.json
+!.claude/.gitkeep
+
+# OS生成ファイル
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# テスト・デバッグファイル
+test_*.py
+debug_*.py
+*_test.py

@@ -193,6 +193,56 @@ sort_color_schemes_by_used_tone(color_schemes, illustrator_name)
 
 **修正ファイル**: `utils/analyze_illustrator_statistics.py`
 
+## 🔧 初回セットアップ（テンプレートファイルの使用）
+
+このプロジェクトでは、**設定ファイル**と**実験用スクリプト**はテンプレートとして提供されています。
+初回クローン後、以下の手順でファイルを準備してください。
+
+### 📝 テンプレートファイル一覧
+
+| テンプレートファイル | 実際のファイル名 | 用途 |
+|:---|:---|:---|
+| `sandbox3_template.py` | `sandbox3.py` | 実験・テスト実行（最新版） |
+| `constants_dev_template.py` | `constants_dev.py` | 開発用定数・認証情報 |
+
+### ⚙️ セットアップ手順
+
+**1. 設定ファイルの作成**
+```bash
+cd src/color_recommendation/utils/config
+cp constants_dev_template.py constants_dev.py
+```
+
+`constants_dev.py`を編集してInstagram認証情報を設定：
+```python
+# 推奨: 環境変数から読み込み（.envファイル使用）
+INSTAGRAM_ID = "your_instagram_id"
+INSTAGRAM_PASS = "your_password"
+```
+
+**2. 実験用スクリプトの作成**
+```bash
+cd src/color_recommendation
+cp sandbox3_template.py sandbox3.py
+```
+
+### ⚠️ 重要な注意事項
+
+- **テンプレートファイル**（`*_template.py`）はGit追跡対象です
+- **実際のファイル**（`sandbox.py`, `constants_dev.py`等）はGit追跡対象外です
+- 個人的な実験コードや認証情報を含めても安心して使用できます
+- テンプレートファイルは常に最新の雛形として保持されます
+
+### 📁 ディレクトリ構造の保持
+
+このプロジェクトでは、`.gitkeep`ファイルによって重要なディレクトリ構造を保持しています。
+`git clone`後、以下のディレクトリが自動的に作成されます：
+
+- `data/input/` - 入力データ格納先
+- `data/output/` - 出力結果格納先
+- `tmp/` - 一時ファイル
+- `.claude/` - Claude Code設定
+
 ## 🚀 クイックスタート
 
 ### 📋 前提条件
