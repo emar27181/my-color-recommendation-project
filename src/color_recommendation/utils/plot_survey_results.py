@@ -174,8 +174,8 @@ class SurveyResultPlotter:
         """
         num_questions = len(ui1_data)
 
-        # 図のサイズ設定（質問数に応じて調整）
-        fig, axes = plt.subplots(1, num_questions, figsize=(3 * num_questions, 6))
+        # 図のサイズ設定（質問数に応じて調整、下部ラベル用に高さを増加）
+        fig, axes = plt.subplots(1, num_questions, figsize=(3 * num_questions, 7))
 
         # 1つの質問の場合はリストに変換
         if num_questions == 1:
@@ -234,7 +234,7 @@ class SurveyResultPlotter:
 
             # 質問ラベルを下部に配置
             question_label = self.QUESTION_LABELS[q_idx] if q_idx < len(self.QUESTION_LABELS) else f"Q{q_idx + 1}"
-            ax.set_xlabel(f'Q{q_idx + 1}\n{question_label}', fontsize=11, fontweight='bold')
+            ax.set_xlabel(f'Q{q_idx + 1}\n{question_label}', fontsize=11, fontweight='bold', labelpad=10)
 
             # 統計情報を表示（オプション）
             ui1_median = np.median(ui1_data[q_idx])
@@ -255,8 +255,9 @@ class SurveyResultPlotter:
                 ]
                 ax.legend(handles=legend_elements, loc='upper left', fontsize=10)
 
-        # レイアウト調整
-        plt.tight_layout(rect=[0, 0, 1, 0.94])
+        # レイアウト調整（下部にラベル用のスペースを確保）
+        plt.subplots_adjust(bottom=0.15, top=0.92)
+        plt.tight_layout(rect=[0, 0.12, 1, 0.92])
 
         # 保存
         output_path = self.output_dir / output_filename
