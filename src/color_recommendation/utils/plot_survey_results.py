@@ -12,15 +12,18 @@ from typing import Dict, List, Tuple
 import numpy as np
 
 # 日本語フォント設定
-# 注: 日本語フォントの警告が表示されることがありますが、
-# matplotlibの自動フォールバック機能により正しく描画されます
 import warnings
+# 日本語フォント警告を抑制（グラフは正常に生成されます）
 warnings.filterwarnings('ignore', message='.*Glyph.*missing from font.*')
 
 matplotlib.rcParams['font.family'] = 'sans-serif'
-matplotlib.rcParams['font.sans-serif'] = ['DejaVu Sans', 'Droid Sans Fallback', 'IPAexGothic']
+# システムに応じて利用可能なフォントを使用
+matplotlib.rcParams['font.sans-serif'] = ['DejaVu Sans', 'Droid Sans Fallback', 'IPAexGothic', 'sans-serif']
 matplotlib.rcParams['pdf.fonttype'] = 42  # TrueTypeフォントを埋め込み
 matplotlib.rcParams['axes.unicode_minus'] = False  # マイナス記号の文字化け対策
+
+# PDFで日本語を確実に表示するための設定
+matplotlib.rcParams['pdf.use14corefonts'] = False
 
 
 class SurveyResultPlotter:
@@ -215,14 +218,15 @@ class SurveyResultPlotter:
                 patch.set_alpha(0.6)
 
             # 軸設定
-            ax.set_ylim(0.5, 7.5)
-            ax.set_yticks(range(1, 8))
+            ax.set_ylim(0.5, 5.5)
+            ax.set_yticks(range(1, 6))
             ax.set_xticks(positions)
             ax.set_xticklabels(['UI1', 'UI2'], fontsize=11)
 
-            # Y軸ラベル（最初の質問のみ）
+            # Y軸ラベル（最初の質問のみ、評価スケールを明示）
             if q_idx == 0:
-                ax.set_ylabel('評価スコア', fontsize=12, fontweight='bold')
+                ax.set_ylabel('評価スコア\n1: 全くそう思わない\n5: 非常にそう思う',
+                            fontsize=10, fontweight='bold')
 
             # グリッド
             ax.yaxis.grid(True, linestyle='--', alpha=0.3)
@@ -236,10 +240,10 @@ class SurveyResultPlotter:
             ui1_median = np.median(ui1_data[q_idx])
             ui2_median = np.median(ui2_data[q_idx])
 
-            # 中央値を表示
-            ax.text(1, 0.8, f'{ui1_median:.1f}', ha='center', va='center',
+            # 中央値を表示（1-5スケールに合わせて位置調整）
+            ax.text(1, 0.7, f'{ui1_median:.1f}', ha='center', va='center',
                    fontsize=9, fontweight='bold', color='#3498db')
-            ax.text(2, 0.8, f'{ui2_median:.1f}', ha='center', va='center',
+            ax.text(2, 0.7, f'{ui2_median:.1f}', ha='center', va='center',
                    fontsize=9, fontweight='bold', color='#e74c3c')
 
             # 最初のグラフのみ凡例を追加
