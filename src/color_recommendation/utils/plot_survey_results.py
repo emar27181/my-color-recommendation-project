@@ -7,26 +7,17 @@ UI1とUI2のアンケート結果を箱ひげ図で比較表示し、PDF形式�
 import json
 import matplotlib.pyplot as plt
 import matplotlib
-import matplotlib.font_manager as fm
 from pathlib import Path
 from typing import Dict, List, Tuple
 import numpy as np
 
-# 日本語フォント設定
+# フォント設定
 import warnings
 warnings.filterwarnings('ignore', message='.*Glyph.*missing from font.*')
 
-# 日本語フォントを直接指定
-font_path = '/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf'
-if Path(font_path).exists():
-    # フォントプロパティを設定
-    jp_font = fm.FontProperties(fname=font_path)
-    matplotlib.rcParams['font.family'] = jp_font.get_name()
-else:
-    # フォントが見つからない場合はデフォルト設定
-    matplotlib.rcParams['font.family'] = 'sans-serif'
-    matplotlib.rcParams['font.sans-serif'] = ['Droid Sans Fallback', 'DejaVu Sans']
-
+# 標準フォント設定（英語表示用）
+matplotlib.rcParams['font.family'] = 'sans-serif'
+matplotlib.rcParams['font.sans-serif'] = ['DejaVu Sans']
 matplotlib.rcParams['pdf.fonttype'] = 42  # TrueTypeフォントを埋め込み
 matplotlib.rcParams['axes.unicode_minus'] = False  # マイナス記号の文字化け対策
 
