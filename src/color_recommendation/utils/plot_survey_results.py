@@ -187,15 +187,18 @@ class SurveyResultPlotter:
             axes = [axes]
 
         # タイトルに統計情報を含める（3行に分けて表示）
-        # 数字を全角にして日本語フォントで確実に表示
-        def to_fullwidth_num(n):
-            """半角数字を全角数字に変換"""
-            return str(n).translate(str.maketrans('0123456789', '０１２３４５６７８９'))
+        # 英数字を全角にして日本語フォントで確実に表示
+        def to_fullwidth(text):
+            """半角英数字を全角に変換"""
+            return text.translate(str.maketrans(
+                '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+                '０１２３４５６７８９ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ'
+            ))
 
         title_text = (
-            f'UI評価アンケート結果比較 (n={to_fullwidth_num(participant_count)})\n'
-            f'順序: UI1→UI2 {to_fullwidth_num(stats["ui1_first"])}名, UI2→UI1 {to_fullwidth_num(stats["ui2_first"])}名\n'
-            f'好み: UI1 {to_fullwidth_num(stats["ui1_favorite"])}名, UI2 {to_fullwidth_num(stats["ui2_favorite"])}名'
+            f'ＵＩ評価アンケート結果比較 (n={to_fullwidth(str(participant_count))})\n'
+            f'順序: ＵＩ１→ＵＩ２ {to_fullwidth(str(stats["ui1_first"]))}名, ＵＩ２→ＵＩ１ {to_fullwidth(str(stats["ui2_first"]))}名\n'
+            f'好み: ＵＩ１ {to_fullwidth(str(stats["ui1_favorite"]))}名, ＵＩ２ {to_fullwidth(str(stats["ui2_favorite"]))}名'
         )
         fig.suptitle(
             title_text,
@@ -232,7 +235,7 @@ class SurveyResultPlotter:
             ax.set_ylim(0.5, 5.5)
             ax.set_yticks(range(1, 6))
             ax.set_xticks(positions)
-            ax.set_xticklabels(['UI1', 'UI2'], fontsize=11)
+            ax.set_xticklabels(['ＵＩ１', 'ＵＩ２'], fontsize=11, fontproperties=jp_font_prop)
 
             # Y軸ラベル（最初の質問のみ、評価スケールを明示）
             if q_idx == 0:
@@ -262,10 +265,10 @@ class SurveyResultPlotter:
             if q_idx == 0:
                 from matplotlib.patches import Patch
                 legend_elements = [
-                    Patch(facecolor='#3498db', alpha=0.6, label='UI1'),
-                    Patch(facecolor='#e74c3c', alpha=0.6, label='UI2')
+                    Patch(facecolor='#3498db', alpha=0.6, label='ＵＩ１'),
+                    Patch(facecolor='#e74c3c', alpha=0.6, label='ＵＩ２')
                 ]
-                ax.legend(handles=legend_elements, loc='upper left', fontsize=10)
+                ax.legend(handles=legend_elements, loc='upper left', fontsize=10, prop=jp_font_prop)
 
         # レイアウト調整（上部にタイトル、下部にラベル用のスペースを確保）
         plt.subplots_adjust(bottom=0.15, top=0.89)
@@ -384,15 +387,18 @@ class SurveyResultPlotter:
         fig, ax = plt.subplots(figsize=(8, 6))
 
         # タイトルに統計情報を含める（3行に分けて表示）
-        # 数字を全角にして日本語フォントで確実に表示
-        def to_fullwidth_num(n):
-            """半角数字を全角数字に変換"""
-            return str(n).translate(str.maketrans('0123456789', '０１２３４５６７８９'))
+        # 英数字を全角にして日本語フォントで確実に表示
+        def to_fullwidth(text):
+            """半角英数字を全角に変換"""
+            return text.translate(str.maketrans(
+                '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+                '０１２３４５６７８９ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ'
+            ))
 
         title_text = (
-            f'タスク操作時間比較 (n={to_fullwidth_num(participant_count)})\n'
-            f'順序: UI1→UI2 {to_fullwidth_num(stats["ui1_first"])}名, UI2→UI1 {to_fullwidth_num(stats["ui2_first"])}名\n'
-            f'好み: UI1 {to_fullwidth_num(stats["ui1_favorite"])}名, UI2 {to_fullwidth_num(stats["ui2_favorite"])}名'
+            f'タスク操作時間比較 (n={to_fullwidth(str(participant_count))})\n'
+            f'順序: ＵＩ１→ＵＩ２ {to_fullwidth(str(stats["ui1_first"]))}名, ＵＩ２→ＵＩ１ {to_fullwidth(str(stats["ui2_first"]))}名\n'
+            f'好み: ＵＩ１ {to_fullwidth(str(stats["ui1_favorite"]))}名, ＵＩ２ {to_fullwidth(str(stats["ui2_favorite"]))}名'
         )
         fig.suptitle(
             title_text,
@@ -425,7 +431,7 @@ class SurveyResultPlotter:
         # 軸設定
         ax.set_ylabel('操作時間(秒)', fontsize=12, fontweight='bold', fontproperties=jp_font_prop)
         ax.set_xticks(positions)
-        ax.set_xticklabels(['UI1', 'UI2'], fontsize=12, fontweight='bold')
+        ax.set_xticklabels(['ＵＩ１', 'ＵＩ２'], fontsize=12, fontweight='bold', fontproperties=jp_font_prop)
 
         # グリッド
         ax.yaxis.grid(True, linestyle='--', alpha=0.3)
@@ -451,10 +457,10 @@ class SurveyResultPlotter:
         # 凡例を追加
         from matplotlib.patches import Patch
         legend_elements = [
-            Patch(facecolor='#3498db', alpha=0.6, label='UI1'),
-            Patch(facecolor='#e74c3c', alpha=0.6, label='UI2')
+            Patch(facecolor='#3498db', alpha=0.6, label='ＵＩ１'),
+            Patch(facecolor='#e74c3c', alpha=0.6, label='ＵＩ２')
         ]
-        ax.legend(handles=legend_elements, loc='upper left', fontsize=10)
+        ax.legend(handles=legend_elements, loc='upper left', fontsize=10, prop=jp_font_prop)
 
         # レイアウト調整（上部にタイトルスペース確保）
         plt.tight_layout(rect=[0, 0, 1, 0.90])
