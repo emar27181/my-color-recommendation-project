@@ -348,6 +348,137 @@ class SurveyResultPlotter:
 
         plt.close()
 
+    def plot_violin_comparison(
+        self,
+        ui1_data: List[List[int]],
+        ui2_data: List[List[int]],
+        participant_count: int,
+        stats: Dict,
+        output_filename: str = "survey_violin_comparison.pdf"
+    ):
+        """
+        UI1とUI2のヴァイオリン図比較を作成
+
+        Args:
+            ui1_data: 質問ごとのUI1回答データ
+            ui2_data: 質問ごとのUI2回答データ
+            participant_count: 参加者数
+            stats: 統計情報（順序、好み）
+            output_filename: 出力ファイル名
+        """
+        num_questions = len(ui1_data)
+
+        # 図のサイズ設定
+        fig, axes = plt.subplots(1, num_questions, figsize=(3 * num_questions, 7))
+
+        # 1つの質問の場合はリストに変換
+        if num_questions == 1:
+            axes = [axes]
+
+        # タイトルに統計情報を含める
+        def to_fullwidth(text):
+            """半角英数字を全角に変換"""
+            return text.translate(str.maketrans(
+                '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+                '０１２３４５６７８９ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ'
+            ))
+
+        title_text = (
+            f'ＵＩ評価アンケート結果比較（ヴァイオリン図） (n={to_fullwidth(str(participant_count))})\n'
+            f'順序: ＵＩ１→ＵＩ２: {to_fullwidth(str(stats["ui1_first"]))}名, ＵＩ２→ＵＩ１: {to_fullwidth(str(stats["ui2_first"]))}名\n'
+            f'好み: ＵＩ１: {to_fullwidth(str(stats["ui1_favorite"]))}名, ＵＩ２: {to_fullwidth(str(stats["ui2_favorite"]))}名'
+        )
+        fig.suptitle(
+            title_text,
+            fontsize=11,
+            fontweight='bold',
+            y=0.99,
+            fontproperties=jp_font_prop
+        )
+
+        for q_idx in range(num_questions):
+            ax = axes[q_idx]
+
+            # データ準備
+            data = [ui1_data[q_idx], ui2_data[q_idx]]
+            positions = [1, 2]
+
+            # ヴァイオリン図描画
+            parts = ax.violinplot(
+                data,
+                positions=positions,
+                widths=0.7,
+                showmeans=True,
+                showmedians=True,
+                showextrema=True
+            )
+
+            # 色設定
+            colors = ['#3498db', '#e74c3c']  # UI1: 青, UI2: 赤
+            for pc, color in zip(parts['bodies'], colors):
+                pc.set_facecolor(color)
+                pc.set_alpha(0.6)
+                pc.set_edgecolor('black')
+                pc.set_linewidth(1)
+
+            # 中央値・平均値・extremaの線を見やすく
+            parts['cmedians'].set_edgecolor('black')
+            parts['cmedians'].set_linewidth(2)
+            parts['cmeans'].set_edgecolor('red')
+            parts['cmeans'].set_linewidth(2)
+            parts['cbars'].set_edgecolor('black')
+            parts['cmaxes'].set_edgecolor('black')
+            parts['cmins'].set_edgecolor('black')
+
+            # 軸設定
+            ax.set_ylim(0.5, 5.5)
+            ax.set_yticks(range(1, 6))
+            ax.set_xticks(positions)
+            ax.set_xticklabels(['ＵＩ１', 'ＵＩ２'], fontsize=11, fontproperties=jp_font_prop)
+
+            # Y軸ラベル（最初の質問のみ）
+            if q_idx == 0:
+                ax.set_ylabel('評価スコア\n1: 全くそう思わない    5: 非常にそう思う',
+                            fontsize=9, fontweight='bold', fontproperties=jp_font_prop)
+
+            # グリッド
+            ax.yaxis.grid(True, linestyle='--', alpha=0.3)
+            ax.set_axisbelow(True)
+
+            # 質問ラベル
+            question_label = self.QUESTION_LABELS[q_idx] if q_idx < len(self.QUESTION_LABELS) else f"Q{q_idx + 1}"
+            ax.set_xlabel(f'Q{q_idx + 1}\n{question_label}', fontsize=11, fontweight='bold',
+                         labelpad=10, fontproperties=jp_font_prop)
+
+            # 統計情報を表示
+            ui1_median = np.median(ui1_data[q_idx])
+            ui2_median = np.median(ui2_data[q_idx])
+
+            ax.text(1, 0.7, f'{ui1_median:.1f}', ha='center', va='center',
+                   fontsize=9, fontweight='bold', color='#3498db')
+            ax.text(2, 0.7, f'{ui2_median:.1f}', ha='center', va='center',
+                   fontsize=9, fontweight='bold', color='#e74c3c')
+
+            # 凡例（最初のグラフのみ）
+            if q_idx == 0:
+                from matplotlib.patches import Patch
+                legend_elements = [
+                    Patch(facecolor='#3498db', alpha=0.6, label='ＵＩ１'),
+                    Patch(facecolor='#e74c3c', alpha=0.6, label='ＵＩ２')
+                ]
+                ax.legend(handles=legend_elements, loc='upper left', fontsize=10, prop=jp_font_prop)
+
+        # レイアウト調整
+        plt.subplots_adjust(bottom=0.15, top=0.89)
+        plt.tight_layout(rect=[0, 0.12, 1, 0.89])
+
+        # 保存
+        output_path = self.output_dir / output_filename
+        plt.savefig(output_path, format='pdf', bbox_inches='tight', dpi=300)
+        print(f"✅ グラフ保存完了: {output_path}")
+
+        plt.close()
+
     def plot_first_impression_comparison(
         self,
         ui1_data: List[List[int]],
@@ -476,6 +607,154 @@ class SurveyResultPlotter:
 
         plt.close()
 
+    def plot_violin_first_impression(
+        self,
+        ui1_data: List[List[int]],
+        ui2_data: List[List[int]],
+        participant_count: int,
+        stats: Dict,
+        output_filename: str = "survey_violin_first_impression.pdf"
+    ):
+        """
+        UI1とUI2のヴァイオリン図比較を作成（第一印象のみ）
+
+        Args:
+            ui1_data: 質問ごとのUI1回答データ（第一印象のみ）
+            ui2_data: 質問ごとのUI2回答データ（第一印象のみ）
+            participant_count: 参加者数
+            stats: 統計情報（順序、好み）
+            output_filename: 出力ファイル名
+        """
+        num_questions = len(ui1_data) if ui1_data else len(ui2_data)
+
+        # 図のサイズ設定
+        fig, axes = plt.subplots(1, num_questions, figsize=(3 * num_questions, 7))
+
+        # 1つの質問の場合はリストに変換
+        if num_questions == 1:
+            axes = [axes]
+
+        # タイトルに統計情報を含める
+        def to_fullwidth(text):
+            """半角英数字を全角に変換"""
+            return text.translate(str.maketrans(
+                '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+                '０１２３４５６７８９ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ'
+            ))
+
+        title_text = (
+            f'ＵＩ評価アンケート結果比較（ヴァイオリン図・第一印象のみ） (n={to_fullwidth(str(participant_count))})\n'
+            f'ＵＩ１を最初に使用: {to_fullwidth(str(stats["ui1_first"]))}名, ＵＩ２を最初に使用: {to_fullwidth(str(stats["ui2_first"]))}名\n'
+            f'好み: ＵＩ１: {to_fullwidth(str(stats["ui1_favorite"]))}名, ＵＩ２: {to_fullwidth(str(stats["ui2_favorite"]))}名'
+        )
+        fig.suptitle(
+            title_text,
+            fontsize=11,
+            fontweight='bold',
+            y=0.99,
+            fontproperties=jp_font_prop
+        )
+
+        for q_idx in range(num_questions):
+            ax = axes[q_idx]
+
+            # 各UIのデータを取得
+            ui1_q_data = ui1_data[q_idx] if q_idx < len(ui1_data) else []
+            ui2_q_data = ui2_data[q_idx] if q_idx < len(ui2_data) else []
+
+            # データ準備（空データを除外）
+            data = []
+            positions = []
+            colors_to_use = []
+            if ui1_q_data:
+                data.append(ui1_q_data)
+                positions.append(1)
+                colors_to_use.append('#3498db')
+            if ui2_q_data:
+                data.append(ui2_q_data)
+                positions.append(2)
+                colors_to_use.append('#e74c3c')
+
+            if not data:
+                continue
+
+            # ヴァイオリン図描画
+            parts = ax.violinplot(
+                data,
+                positions=positions,
+                widths=0.7,
+                showmeans=True,
+                showmedians=True,
+                showextrema=True
+            )
+
+            # 色設定
+            for pc, color in zip(parts['bodies'], colors_to_use):
+                pc.set_facecolor(color)
+                pc.set_alpha(0.6)
+                pc.set_edgecolor('black')
+                pc.set_linewidth(1)
+
+            # 中央値・平均値・extremaの線を見やすく
+            parts['cmedians'].set_edgecolor('black')
+            parts['cmedians'].set_linewidth(2)
+            parts['cmeans'].set_edgecolor('red')
+            parts['cmeans'].set_linewidth(2)
+            parts['cbars'].set_edgecolor('black')
+            parts['cmaxes'].set_edgecolor('black')
+            parts['cmins'].set_edgecolor('black')
+
+            # 軸設定
+            ax.set_ylim(0.5, 5.5)
+            ax.set_yticks(range(1, 6))
+            ax.set_xticks([1, 2])
+            ax.set_xticklabels(['ＵＩ１', 'ＵＩ２'], fontsize=11, fontproperties=jp_font_prop)
+
+            # Y軸ラベル（最初の質問のみ）
+            if q_idx == 0:
+                ax.set_ylabel('評価スコア\n1: 全くそう思わない    5: 非常にそう思う',
+                            fontsize=9, fontweight='bold', fontproperties=jp_font_prop)
+
+            # グリッド
+            ax.yaxis.grid(True, linestyle='--', alpha=0.3)
+            ax.set_axisbelow(True)
+
+            # 質問ラベル
+            question_label = self.QUESTION_LABELS[q_idx] if q_idx < len(self.QUESTION_LABELS) else f"Q{q_idx + 1}"
+            ax.set_xlabel(f'Q{q_idx + 1}\n{question_label}', fontsize=11, fontweight='bold',
+                         labelpad=10, fontproperties=jp_font_prop)
+
+            # 統計情報を表示
+            if ui1_q_data:
+                ui1_median = np.median(ui1_q_data)
+                ax.text(1, 0.7, f'{ui1_median:.1f}', ha='center', va='center',
+                       fontsize=9, fontweight='bold', color='#3498db')
+
+            if ui2_q_data:
+                ui2_median = np.median(ui2_q_data)
+                ax.text(2, 0.7, f'{ui2_median:.1f}', ha='center', va='center',
+                       fontsize=9, fontweight='bold', color='#e74c3c')
+
+            # 凡例（最初のグラフのみ）
+            if q_idx == 0:
+                from matplotlib.patches import Patch
+                legend_elements = [
+                    Patch(facecolor='#3498db', alpha=0.6, label='ＵＩ１'),
+                    Patch(facecolor='#e74c3c', alpha=0.6, label='ＵＩ２')
+                ]
+                ax.legend(handles=legend_elements, loc='upper left', fontsize=10, prop=jp_font_prop)
+
+        # レイアウト調整
+        plt.subplots_adjust(bottom=0.15, top=0.89)
+        plt.tight_layout(rect=[0, 0.12, 1, 0.89])
+
+        # 保存
+        output_path = self.output_dir / output_filename
+        plt.savefig(output_path, format='pdf', bbox_inches='tight', dpi=300)
+        print(f"✅ グラフ保存完了: {output_path}")
+
+        plt.close()
+
     def plot_all_results(self):
         """全アンケート結果を読み込んでグラフ作成"""
         print("📊 アンケート結果の可視化を開始します\n")
@@ -497,6 +776,15 @@ class SurveyResultPlotter:
         # グラフ作成
         print("📈 箱ひげ図作成中...")
         self.plot_boxplot_comparison(
+            ui1_by_question,
+            ui2_by_question,
+            participant_count,
+            stats
+        )
+
+        # ヴァイオリン図作成
+        print("🎻 ヴァイオリン図作成中...")
+        self.plot_violin_comparison(
             ui1_by_question,
             ui2_by_question,
             participant_count,
@@ -544,6 +832,15 @@ class SurveyResultPlotter:
         # グラフ作成
         print("📈 箱ひげ図作成中...")
         self.plot_first_impression_comparison(
+            ui1_by_question,
+            ui2_by_question,
+            participant_count,
+            stats
+        )
+
+        # ヴァイオリン図作成
+        print("🎻 ヴァイオリン図作成中...")
+        self.plot_violin_first_impression(
             ui1_by_question,
             ui2_by_question,
             participant_count,
