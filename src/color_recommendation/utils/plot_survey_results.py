@@ -197,8 +197,8 @@ class SurveyResultPlotter:
 
         title_text = (
             f'ＵＩ評価アンケート結果比較 (n={to_fullwidth(str(participant_count))})\n'
-            f'順序: ＵＩ１→ＵＩ２ {to_fullwidth(str(stats["ui1_first"]))}名, ＵＩ２→ＵＩ１ {to_fullwidth(str(stats["ui2_first"]))}名\n'
-            f'好み: ＵＩ１ {to_fullwidth(str(stats["ui1_favorite"]))}名, ＵＩ２ {to_fullwidth(str(stats["ui2_favorite"]))}名'
+            f'順序: ＵＩ１→ＵＩ２: {to_fullwidth(str(stats["ui1_first"]))}名, ＵＩ２→ＵＩ１: {to_fullwidth(str(stats["ui2_first"]))}名\n'
+            f'好み: ＵＩ１: {to_fullwidth(str(stats["ui1_favorite"]))}名, ＵＩ２: {to_fullwidth(str(stats["ui2_favorite"]))}名'
         )
         fig.suptitle(
             title_text,
@@ -397,8 +397,8 @@ class SurveyResultPlotter:
 
         title_text = (
             f'タスク操作時間比較 (n={to_fullwidth(str(participant_count))})\n'
-            f'順序: ＵＩ１→ＵＩ２ {to_fullwidth(str(stats["ui1_first"]))}名, ＵＩ２→ＵＩ１ {to_fullwidth(str(stats["ui2_first"]))}名\n'
-            f'好み: ＵＩ１ {to_fullwidth(str(stats["ui1_favorite"]))}名, ＵＩ２ {to_fullwidth(str(stats["ui2_favorite"]))}名'
+            f'順序: ＵＩ１→ＵＩ２: {to_fullwidth(str(stats["ui1_first"]))}名, ＵＩ２→ＵＩ１: {to_fullwidth(str(stats["ui2_first"]))}名\n'
+            f'好み: ＵＩ１: {to_fullwidth(str(stats["ui1_favorite"]))}名, ＵＩ２: {to_fullwidth(str(stats["ui2_favorite"]))}名'
         )
         fig.suptitle(
             title_text,
