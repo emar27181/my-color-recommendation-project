@@ -7,6 +7,7 @@ UI1とUI2のアンケート結果を箱ひげ図で比較表示し、PDF形式�
 import json
 import matplotlib.pyplot as plt
 import matplotlib
+import matplotlib.font_manager as fm
 from pathlib import Path
 from typing import Dict, List, Tuple
 import numpy as np
@@ -15,25 +16,32 @@ import numpy as np
 import warnings
 warnings.filterwarnings('ignore', message='.*Glyph.*missing from font.*')
 
-# 標準フォント設定（英語表示用）
+# 日本語フォントのパスを取得
+JP_FONT_PATH = '/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf'
+if Path(JP_FONT_PATH).exists():
+    jp_font_prop = fm.FontProperties(fname=JP_FONT_PATH)
+else:
+    jp_font_prop = None
+
+# デフォルトフォント設定
 matplotlib.rcParams['font.family'] = 'sans-serif'
 matplotlib.rcParams['font.sans-serif'] = ['DejaVu Sans']
-matplotlib.rcParams['pdf.fonttype'] = 42  # TrueTypeフォントを埋め込み
-matplotlib.rcParams['axes.unicode_minus'] = False  # マイナス記号の文字化け対策
+matplotlib.rcParams['pdf.fonttype'] = 42
+matplotlib.rcParams['axes.unicode_minus'] = False
 
 
 class SurveyResultPlotter:
     """アンケート結果の可視化クラス"""
 
-    # 質問ラベル（各質問の要約・キーワード）- 英語併記でPDF表示を確実に
+    # 質問ラベル（各質問の要約・キーワード）
     QUESTION_LABELS = [
-        "Too many\ncolors",           # Q1: 色が多すぎると感じた
-        "Too few\ncolors",            # Q2: 色が少なすぎると感じた
-        "Found\ndesired color",       # Q3: 塗りたいと思った色が見つかった
-        "Easy to\nbalance",           # Q4: 指示された「バランスよく塗る」が実践しやすかった
-        "Smooth\naccess",             # Q5: 塗りたい色にたどり着くまでがスムーズだった
-        "Satisfied\nwith result",     # Q6: 完成した絵の出来に満足できた
-        "Satisfied\nwith UI"          # Q7: 使用したUI（カラーパレット）に満足できた
+        "色数(多)",      # Q1: 色が多すぎると感じた
+        "色数(少)",      # Q2: 色が少なすぎると感じた
+        "色発見",        # Q3: 塗りたいと思った色が見つかった
+        "バランス",      # Q4: 指示された「バランスよく塗る」が実践しやすかった
+        "スムーズ",      # Q5: 塗りたい色にたどり着くまでがスムーズだった
+        "絵満足度",      # Q6: 完成した絵の出来に満足できた
+        "UI満足度"       # Q7: 使用したUI（カラーパレット）に満足できた
     ]
 
     def __init__(self, base_dir: str = None):
@@ -179,15 +187,16 @@ class SurveyResultPlotter:
 
         # タイトルに統計情報を含める
         title_text = (
-            f'UI Survey Results Comparison (n={participant_count})\n'
-            f'Order: UI1→UI2 {stats["ui1_first"]} participants, UI2→UI1 {stats["ui2_first"]} participants | '
-            f'Preference: UI1 {stats["ui1_favorite"]}, UI2 {stats["ui2_favorite"]}'
+            f'UI評価アンケート結果比較 (n={participant_count})\n'
+            f'順序: UI1→UI2 {stats["ui1_first"]}名, UI2→UI1 {stats["ui2_first"]}名 | '
+            f'好み: UI1 {stats["ui1_favorite"]}名, UI2 {stats["ui2_favorite"]}名'
         )
         fig.suptitle(
             title_text,
             fontsize=14,
             fontweight='bold',
-            y=0.97
+            y=0.97,
+            fontproperties=jp_font_prop
         )
 
         for q_idx in range(num_questions):
@@ -221,8 +230,8 @@ class SurveyResultPlotter:
 
             # Y軸ラベル（最初の質問のみ、評価スケールを明示）
             if q_idx == 0:
-                ax.set_ylabel('Rating\n1: Strongly disagree\n5: Strongly agree',
-                            fontsize=10, fontweight='bold')
+                ax.set_ylabel('評価スコア\n1:全くそう思わない\n5:非常にそう思う',
+                            fontsize=10, fontweight='bold', fontproperties=jp_font_prop)
 
             # グリッド
             ax.yaxis.grid(True, linestyle='--', alpha=0.3)
@@ -230,7 +239,8 @@ class SurveyResultPlotter:
 
             # 質問ラベルを下部に配置
             question_label = self.QUESTION_LABELS[q_idx] if q_idx < len(self.QUESTION_LABELS) else f"Q{q_idx + 1}"
-            ax.set_xlabel(f'Q{q_idx + 1}\n{question_label}', fontsize=11, fontweight='bold', labelpad=10)
+            ax.set_xlabel(f'Q{q_idx + 1}\n{question_label}', fontsize=11, fontweight='bold',
+                         labelpad=10, fontproperties=jp_font_prop)
 
             # 統計情報を表示（オプション）
             ui1_median = np.median(ui1_data[q_idx])
@@ -369,15 +379,16 @@ class SurveyResultPlotter:
 
         # タイトルに統計情報を含める
         title_text = (
-            f'Task Duration Comparison (n={participant_count})\n'
-            f'Order: UI1→UI2 {stats["ui1_first"]} participants, UI2→UI1 {stats["ui2_first"]} participants | '
-            f'Preference: UI1 {stats["ui1_favorite"]}, UI2 {stats["ui2_favorite"]}'
+            f'タスク操作時間比較 (n={participant_count})\n'
+            f'順序: UI1→UI2 {stats["ui1_first"]}名, UI2→UI1 {stats["ui2_first"]}名 | '
+            f'好み: UI1 {stats["ui1_favorite"]}名, UI2 {stats["ui2_favorite"]}名'
         )
         fig.suptitle(
             title_text,
             fontsize=14,
             fontweight='bold',
-            y=0.97
+            y=0.97,
+            fontproperties=jp_font_prop
         )
 
         # データ準備
@@ -401,7 +412,7 @@ class SurveyResultPlotter:
             patch.set_alpha(0.6)
 
         # 軸設定
-        ax.set_ylabel('Duration (seconds)', fontsize=12, fontweight='bold')
+        ax.set_ylabel('操作時間(秒)', fontsize=12, fontweight='bold', fontproperties=jp_font_prop)
         ax.set_xticks(positions)
         ax.set_xticklabels(['UI1', 'UI2'], fontsize=12, fontweight='bold')
 
@@ -417,10 +428,14 @@ class SurveyResultPlotter:
 
         # 平均値と中央値をテキストで表示
         y_max = max(max(ui1_durations), max(ui2_durations))
-        ax.text(1, y_max * 0.95, f'Mean: {ui1_mean:.1f}s\nMedian: {ui1_median:.1f}s',
-               ha='center', va='top', fontsize=10, bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
-        ax.text(2, y_max * 0.95, f'Mean: {ui2_mean:.1f}s\nMedian: {ui2_median:.1f}s',
-               ha='center', va='top', fontsize=10, bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+        ax.text(1, y_max * 0.95, f'平均: {ui1_mean:.1f}秒\n中央値: {ui1_median:.1f}秒',
+               ha='center', va='top', fontsize=10,
+               bbox=dict(boxstyle='round', facecolor='white', alpha=0.8),
+               fontproperties=jp_font_prop)
+        ax.text(2, y_max * 0.95, f'平均: {ui2_mean:.1f}秒\n中央値: {ui2_median:.1f}秒',
+               ha='center', va='top', fontsize=10,
+               bbox=dict(boxstyle='round', facecolor='white', alpha=0.8),
+               fontproperties=jp_font_prop)
 
         # 凡例を追加
         from matplotlib.patches import Patch
