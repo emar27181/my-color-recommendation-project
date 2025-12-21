@@ -23,9 +23,10 @@ if Path(JP_FONT_PATH).exists():
 else:
     jp_font_prop = None
 
-# デフォルトフォント設定
+# デフォルトフォント設定（日本語と英数字の両方を表示）
 matplotlib.rcParams['font.family'] = 'sans-serif'
-matplotlib.rcParams['font.sans-serif'] = ['DejaVu Sans']
+# Droid Sans Fallbackを優先して日本語を表示、フォールバックでDejaVu Sans
+matplotlib.rcParams['font.sans-serif'] = ['Droid Sans Fallback', 'DejaVu Sans']
 matplotlib.rcParams['pdf.fonttype'] = 42
 matplotlib.rcParams['axes.unicode_minus'] = False
 
@@ -186,10 +187,15 @@ class SurveyResultPlotter:
             axes = [axes]
 
         # タイトルに統計情報を含める（3行に分けて表示）
+        # 数字を全角にして日本語フォントで確実に表示
+        def to_fullwidth_num(n):
+            """半角数字を全角数字に変換"""
+            return str(n).translate(str.maketrans('0123456789', '０１２３４５６７８９'))
+
         title_text = (
-            f'UI評価アンケート結果比較 (n={participant_count})\n'
-            f'順序: UI1→UI2 {stats["ui1_first"]}名, UI2→UI1 {stats["ui2_first"]}名\n'
-            f'好み: UI1 {stats["ui1_favorite"]}名, UI2 {stats["ui2_favorite"]}名'
+            f'UI評価アンケート結果比較 (n={to_fullwidth_num(participant_count)})\n'
+            f'順序: UI1→UI2 {to_fullwidth_num(stats["ui1_first"])}名, UI2→UI1 {to_fullwidth_num(stats["ui2_first"])}名\n'
+            f'好み: UI1 {to_fullwidth_num(stats["ui1_favorite"])}名, UI2 {to_fullwidth_num(stats["ui2_favorite"])}名'
         )
         fig.suptitle(
             title_text,
@@ -230,8 +236,8 @@ class SurveyResultPlotter:
 
             # Y軸ラベル（最初の質問のみ、評価スケールを明示）
             if q_idx == 0:
-                ax.set_ylabel('評価スコア\n1:全くそう思わない\n5:非常にそう思う',
-                            fontsize=10, fontweight='bold', fontproperties=jp_font_prop)
+                ax.set_ylabel('評価スコア\n1: 全くそう思わない    5: 非常にそう思う',
+                            fontsize=9, fontweight='bold', fontproperties=jp_font_prop)
 
             # グリッド
             ax.yaxis.grid(True, linestyle='--', alpha=0.3)
@@ -378,10 +384,15 @@ class SurveyResultPlotter:
         fig, ax = plt.subplots(figsize=(8, 6))
 
         # タイトルに統計情報を含める（3行に分けて表示）
+        # 数字を全角にして日本語フォントで確実に表示
+        def to_fullwidth_num(n):
+            """半角数字を全角数字に変換"""
+            return str(n).translate(str.maketrans('0123456789', '０１２３４５６７８９'))
+
         title_text = (
-            f'タスク操作時間比較 (n={participant_count})\n'
-            f'順序: UI1→UI2 {stats["ui1_first"]}名, UI2→UI1 {stats["ui2_first"]}名\n'
-            f'好み: UI1 {stats["ui1_favorite"]}名, UI2 {stats["ui2_favorite"]}名'
+            f'タスク操作時間比較 (n={to_fullwidth_num(participant_count)})\n'
+            f'順序: UI1→UI2 {to_fullwidth_num(stats["ui1_first"])}名, UI2→UI1 {to_fullwidth_num(stats["ui2_first"])}名\n'
+            f'好み: UI1 {to_fullwidth_num(stats["ui1_favorite"])}名, UI2 {to_fullwidth_num(stats["ui2_favorite"])}名'
         )
         fig.suptitle(
             title_text,
