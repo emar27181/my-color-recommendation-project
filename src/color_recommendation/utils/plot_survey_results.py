@@ -126,6 +126,73 @@ class SurveyResultPlotter:
 
         return ui1_all_responses, ui2_all_responses, participant_count, stats
 
+    def load_first_impression_data(self) -> Tuple[List[List[int]], List[List[int]], int, Dict]:
+        """
+        順序効果を排除：各参加者が最初に使ったUIのデータのみを読み込む
+
+        UI1→UI2の順序の人：UI1のデータのみ使用
+        UI2→UI1の順序の人：UI2のデータのみ使用
+
+        Returns:
+            Tuple[List[List[int]], List[List[int]], int, Dict]:
+                (UI1の回答リスト（第一印象のみ）, UI2の回答リスト（第一印象のみ）, 参加者数, 統計情報)
+        """
+        ui1_all_responses = []
+        ui2_all_responses = []
+
+        # 統計情報
+        ui1_first_count = 0  # UI1を最初に使った人数
+        ui2_first_count = 0  # UI2を最初に使った人数
+        ui1_favorite_count = 0  # UI1を好んだ人数
+        ui2_favorite_count = 0  # UI2を好んだ人数
+
+        survey_files = sorted(self.survey_dir.glob("*_survey.json"))
+
+        for survey_file in survey_files:
+            participant_id = survey_file.stem.replace('_survey', '')
+
+            # メタデータから順序を取得
+            metadata_file = self.survey_dir / f"{participant_id}_metadata.json"
+            if not metadata_file.exists():
+                continue
+
+            with open(metadata_file, 'r', encoding='utf-8') as f:
+                metadata = json.load(f)
+                first_ui = metadata.get("first_ui", "")
+
+            # アンケートデータを読み込み
+            with open(survey_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+
+                ui1_responses = data.get("ui1_responses", [])
+                ui2_responses = data.get("ui2_responses", [])
+
+                # 最初に使ったUIのデータのみを集計
+                if first_ui == "UI1" and ui1_responses:
+                    ui1_all_responses.append(ui1_responses)
+                    ui1_first_count += 1
+                elif first_ui == "UI2" and ui2_responses:
+                    ui2_all_responses.append(ui2_responses)
+                    ui2_first_count += 1
+
+                # 好みの集計
+                favorite = data.get("favoriteUI", "")
+                if favorite == "UI1":
+                    ui1_favorite_count += 1
+                elif favorite == "UI2":
+                    ui2_favorite_count += 1
+
+        participant_count = len(ui1_all_responses) + len(ui2_all_responses)
+
+        stats = {
+            'ui1_first': ui1_first_count,
+            'ui2_first': ui2_first_count,
+            'ui1_favorite': ui1_favorite_count,
+            'ui2_favorite': ui2_favorite_count
+        }
+
+        return ui1_all_responses, ui2_all_responses, participant_count, stats
+
     def prepare_data_for_boxplot(
         self,
         ui1_responses: List[List[int]],
@@ -281,6 +348,134 @@ class SurveyResultPlotter:
 
         plt.close()
 
+    def plot_first_impression_comparison(
+        self,
+        ui1_data: List[List[int]],
+        ui2_data: List[List[int]],
+        participant_count: int,
+        stats: Dict,
+        output_filename: str = "survey_boxplot_first_impression.pdf"
+    ):
+        """
+        UI1とUI2の箱ひげ図比較を作成（第一印象のみ）
+
+        Args:
+            ui1_data: 質問ごとのUI1回答データ（第一印象のみ）
+            ui2_data: 質問ごとのUI2回答データ（第一印象のみ）
+            participant_count: 参加者数
+            stats: 統計情報（順序、好み）
+            output_filename: 出力ファイル名
+        """
+        num_questions = len(ui1_data) if ui1_data else len(ui2_data)
+
+        # 図のサイズ設定（質問数に応じて調整、下部ラベル用に高さを増加）
+        fig, axes = plt.subplots(1, num_questions, figsize=(num_questions * 2.2, 7))
+
+        # axesが1つの場合はリストに変換
+        if num_questions == 1:
+            axes = [axes]
+
+        # タイトルに統計情報を含める（3行に分けて表示、第一印象であることを明記）
+        # 英数字を全角にして日本語フォントで確実に表示
+        def to_fullwidth(text):
+            """半角英数字を全角に変換"""
+            return text.translate(str.maketrans(
+                '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+                '０１２３４５６７８９ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ'
+            ))
+
+        title_text = (
+            f'ＵＩ評価アンケート結果比較（第一印象のみ） (n={to_fullwidth(str(participant_count))})\n'
+            f'ＵＩ１を最初に使用: {to_fullwidth(str(stats["ui1_first"]))}名, ＵＩ２を最初に使用: {to_fullwidth(str(stats["ui2_first"]))}名\n'
+            f'好み: ＵＩ１: {to_fullwidth(str(stats["ui1_favorite"]))}名, ＵＩ２: {to_fullwidth(str(stats["ui2_favorite"]))}名'
+        )
+        fig.suptitle(
+            title_text,
+            fontsize=11,
+            fontweight='bold',
+            y=0.99,
+            fontproperties=jp_font_prop
+        )
+
+        positions = [1, 2]
+
+        for q_idx in range(num_questions):
+            ax = axes[q_idx]
+
+            # 各UIのデータを取得
+            ui1_q_data = ui1_data[q_idx] if q_idx < len(ui1_data) else []
+            ui2_q_data = ui2_data[q_idx] if q_idx < len(ui2_data) else []
+
+            # 箱ひげ図を作成
+            bp1 = ax.boxplot(
+                [ui1_q_data],
+                positions=[positions[0]],
+                widths=0.5,
+                patch_artist=True,
+                boxprops=dict(facecolor='#3498db', alpha=0.6),
+                medianprops=dict(color='black', linewidth=2),
+                showfliers=True
+            )
+
+            bp2 = ax.boxplot(
+                [ui2_q_data],
+                positions=[positions[1]],
+                widths=0.5,
+                patch_artist=True,
+                boxprops=dict(facecolor='#e74c3c', alpha=0.6),
+                medianprops=dict(color='black', linewidth=2),
+                showfliers=True
+            )
+
+            # 平均値をプロット
+            if ui1_q_data:
+                mean1 = np.mean(ui1_q_data)
+                ax.plot(positions[0], mean1, marker='D', color='blue', markersize=8,
+                       label='平均値' if q_idx == 0 else '', zorder=3)
+
+            if ui2_q_data:
+                mean2 = np.mean(ui2_q_data)
+                ax.plot(positions[1], mean2, marker='D', color='red', markersize=8, zorder=3)
+
+            # 軸設定
+            ax.set_ylim(0.5, 5.5)
+            ax.set_yticks(range(1, 6))
+            ax.set_xticks(positions)
+            ax.set_xticklabels(['ＵＩ１', 'ＵＩ２'], fontsize=11, fontproperties=jp_font_prop)
+
+            # Y軸ラベル（最初の質問のみ、評価スケールを明示）
+            if q_idx == 0:
+                ax.set_ylabel('評価スコア\n1: 全くそう思わない    5: 非常にそう思う',
+                            fontsize=9, fontweight='bold', fontproperties=jp_font_prop)
+
+            # グリッド
+            ax.yaxis.grid(True, linestyle='--', alpha=0.3)
+
+            # X軸ラベル（質問ラベル）
+            question_label = self.QUESTION_LABELS[q_idx] if q_idx < len(self.QUESTION_LABELS) else f"Q{q_idx + 1}"
+            ax.set_xlabel(f'Q{q_idx + 1}\n{question_label}', fontsize=11, fontweight='bold',
+                        labelpad=10, fontproperties=jp_font_prop)
+
+            # 凡例（最初の質問のみ）
+            if q_idx == 0:
+                from matplotlib.patches import Patch
+                legend_elements = [
+                    Patch(facecolor='#3498db', alpha=0.6, label='ＵＩ１'),
+                    Patch(facecolor='#e74c3c', alpha=0.6, label='ＵＩ２')
+                ]
+                ax.legend(handles=legend_elements, loc='upper left', fontsize=10, prop=jp_font_prop)
+
+        # レイアウト調整（上部にタイトル、下部にラベル用のスペースを確保）
+        plt.subplots_adjust(bottom=0.15, top=0.89)
+        plt.tight_layout(rect=[0, 0.12, 1, 0.89])
+
+        # 保存
+        output_path = self.output_dir / output_filename
+        plt.savefig(output_path, format='pdf', bbox_inches='tight', dpi=300)
+        print(f"✅ グラフ保存完了: {output_path}")
+
+        plt.close()
+
     def plot_all_results(self):
         """全アンケート結果を読み込んでグラフ作成"""
         print("📊 アンケート結果の可視化を開始します\n")
@@ -323,6 +518,40 @@ class SurveyResultPlotter:
 
         print(f"\n{'=' * 60}")
         print("✅ 可視化完了")
+        print(f"{'=' * 60}\n")
+
+        # 統計情報表示
+        self._print_statistics(ui1_by_question, ui2_by_question, participant_count)
+
+    def plot_first_impression_results(self):
+        """第一印象データのみを読み込んでグラフ作成（順序効果を排除）"""
+        print("📊 アンケート結果の可視化を開始します（第一印象のみ）\n")
+
+        # データ読み込み
+        print("📁 データ読み込み中...")
+        ui1_responses, ui2_responses, participant_count, stats = self.load_first_impression_data()
+        print(f"✅ 参加者数: {participant_count}名")
+        print(f"✅ UI1を最初に使用: {stats['ui1_first']}名")
+        print(f"✅ UI2を最初に使用: {stats['ui2_first']}名")
+        print(f"✅ 好み: UI1 {stats['ui1_favorite']}名, UI2 {stats['ui2_favorite']}名\n")
+
+        # データ整形
+        print("🔧 データ整形中...")
+        ui1_by_question, ui2_by_question = self.prepare_data_for_boxplot(
+            ui1_responses, ui2_responses
+        )
+
+        # グラフ作成
+        print("📈 箱ひげ図作成中...")
+        self.plot_first_impression_comparison(
+            ui1_by_question,
+            ui2_by_question,
+            participant_count,
+            stats
+        )
+
+        print(f"\n{'=' * 60}")
+        print("✅ 可視化完了（第一印象のみ）")
         print(f"{'=' * 60}\n")
 
         # 統計情報表示
@@ -505,6 +734,9 @@ def main():
     """メイン実行関数"""
     plotter = SurveyResultPlotter()
     plotter.plot_all_results()
+
+    # 第一印象のみのグラフも作成
+    plotter.plot_first_impression_results()
 
 
 if __name__ == "__main__":
