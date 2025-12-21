@@ -185,17 +185,17 @@ class SurveyResultPlotter:
         if num_questions == 1:
             axes = [axes]
 
-        # タイトルに統計情報を含める
+        # タイトルに統計情報を含める（3行に分けて表示）
         title_text = (
             f'UI評価アンケート結果比較 (n={participant_count})\n'
-            f'順序: UI1→UI2 {stats["ui1_first"]}名, UI2→UI1 {stats["ui2_first"]}名 | '
+            f'順序: UI1→UI2 {stats["ui1_first"]}名, UI2→UI1 {stats["ui2_first"]}名\n'
             f'好み: UI1 {stats["ui1_favorite"]}名, UI2 {stats["ui2_favorite"]}名'
         )
         fig.suptitle(
             title_text,
-            fontsize=14,
+            fontsize=11,
             fontweight='bold',
-            y=0.97,
+            y=0.99,
             fontproperties=jp_font_prop
         )
 
@@ -261,9 +261,9 @@ class SurveyResultPlotter:
                 ]
                 ax.legend(handles=legend_elements, loc='upper left', fontsize=10)
 
-        # レイアウト調整（下部にラベル用のスペースを確保）
-        plt.subplots_adjust(bottom=0.15, top=0.92)
-        plt.tight_layout(rect=[0, 0.12, 1, 0.92])
+        # レイアウト調整（上部にタイトル、下部にラベル用のスペースを確保）
+        plt.subplots_adjust(bottom=0.15, top=0.89)
+        plt.tight_layout(rect=[0, 0.12, 1, 0.89])
 
         # 保存
         output_path = self.output_dir / output_filename
@@ -377,17 +377,17 @@ class SurveyResultPlotter:
         """
         fig, ax = plt.subplots(figsize=(8, 6))
 
-        # タイトルに統計情報を含める
+        # タイトルに統計情報を含める（3行に分けて表示）
         title_text = (
             f'タスク操作時間比較 (n={participant_count})\n'
-            f'順序: UI1→UI2 {stats["ui1_first"]}名, UI2→UI1 {stats["ui2_first"]}名 | '
+            f'順序: UI1→UI2 {stats["ui1_first"]}名, UI2→UI1 {stats["ui2_first"]}名\n'
             f'好み: UI1 {stats["ui1_favorite"]}名, UI2 {stats["ui2_favorite"]}名'
         )
         fig.suptitle(
             title_text,
-            fontsize=14,
+            fontsize=11,
             fontweight='bold',
-            y=0.97,
+            y=0.98,
             fontproperties=jp_font_prop
         )
 
@@ -445,8 +445,8 @@ class SurveyResultPlotter:
         ]
         ax.legend(handles=legend_elements, loc='upper left', fontsize=10)
 
-        # レイアウト調整
-        plt.tight_layout(rect=[0, 0, 1, 0.94])
+        # レイアウト調整（上部にタイトルスペース確保）
+        plt.tight_layout(rect=[0, 0, 1, 0.90])
 
         # 保存
         output_path = self.output_dir / output_filename
