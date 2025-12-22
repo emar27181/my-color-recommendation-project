@@ -301,6 +301,10 @@ class SurveyResultPlotter:
             # 軸設定
             ax.set_ylim(0.5, 5.5)
             ax.set_yticks(range(1, 6))
+            # Y軸の数字は明示的にDejaVu Sansフォントで表示（日本語フォントの影響を回避）
+            for tick in ax.get_yticklabels():
+                tick.set_fontsize(11)
+                tick.set_fontfamily('DejaVu Sans')
             ax.set_xticks(positions)
             ax.set_xticklabels(['ＵＩ１', 'ＵＩ２'], fontsize=11, fontproperties=jp_font_prop)
 
@@ -499,8 +503,8 @@ class SurveyResultPlotter:
         """
         num_questions = len(ui1_data) if ui1_data else len(ui2_data)
 
-        # 図のサイズ設定（質問数に応じて調整、下部ラベル用に高さを増加）
-        fig, axes = plt.subplots(1, num_questions, figsize=(num_questions * 2.2, 7))
+        # 図のサイズ設定（plot_boxplot_comparisonと統一）
+        fig, axes = plt.subplots(1, num_questions, figsize=(3 * num_questions, 7))
 
         # axesが1つの場合はリストに変換
         if num_questions == 1:
@@ -528,8 +532,6 @@ class SurveyResultPlotter:
             fontproperties=jp_font_prop
         )
 
-        positions = [1, 2]
-
         for q_idx in range(num_questions):
             ax = axes[q_idx]
 
@@ -537,40 +539,33 @@ class SurveyResultPlotter:
             ui1_q_data = ui1_data[q_idx] if q_idx < len(ui1_data) else []
             ui2_q_data = ui2_data[q_idx] if q_idx < len(ui2_data) else []
 
-            # 箱ひげ図を作成
-            bp1 = ax.boxplot(
-                [ui1_q_data],
-                positions=[positions[0]],
-                widths=0.5,
+            # データ準備
+            data = [ui1_q_data, ui2_q_data]
+            positions = [1, 2]
+
+            # 箱ひげ図描画（plot_boxplot_comparisonと統一）
+            bp = ax.boxplot(
+                data,
+                positions=positions,
+                widths=0.6,
                 patch_artist=True,
-                boxprops=dict(facecolor='#3498db', alpha=0.6),
-                medianprops=dict(color='black', linewidth=2),
-                showfliers=True
+                showmeans=True,
+                meanprops=dict(marker='D', markerfacecolor='red', markersize=6)
             )
 
-            bp2 = ax.boxplot(
-                [ui2_q_data],
-                positions=[positions[1]],
-                widths=0.5,
-                patch_artist=True,
-                boxprops=dict(facecolor='#e74c3c', alpha=0.6),
-                medianprops=dict(color='black', linewidth=2),
-                showfliers=True
-            )
-
-            # 平均値をプロット
-            if ui1_q_data:
-                mean1 = np.mean(ui1_q_data)
-                ax.plot(positions[0], mean1, marker='D', color='blue', markersize=8,
-                       label='平均値' if q_idx == 0 else '', zorder=3)
-
-            if ui2_q_data:
-                mean2 = np.mean(ui2_q_data)
-                ax.plot(positions[1], mean2, marker='D', color='red', markersize=8, zorder=3)
+            # 色設定（plot_boxplot_comparisonと統一）
+            colors = ['#3498db', '#e74c3c']  # UI1: 青, UI2: 赤
+            for patch, color in zip(bp['boxes'], colors):
+                patch.set_facecolor(color)
+                patch.set_alpha(0.6)
 
             # 軸設定
             ax.set_ylim(0.5, 5.5)
             ax.set_yticks(range(1, 6))
+            # Y軸の数字は明示的にDejaVu Sansフォントで表示（日本語フォントの影響を回避）
+            for tick in ax.get_yticklabels():
+                tick.set_fontsize(11)
+                tick.set_fontfamily('DejaVu Sans')
             ax.set_xticks(positions)
             ax.set_xticklabels(['ＵＩ１', 'ＵＩ２'], fontsize=11, fontproperties=jp_font_prop)
 
@@ -581,11 +576,23 @@ class SurveyResultPlotter:
 
             # グリッド
             ax.yaxis.grid(True, linestyle='--', alpha=0.3)
+            ax.set_axisbelow(True)
 
             # X軸ラベル（質問ラベル）
             question_label = self.QUESTION_LABELS[q_idx] if q_idx < len(self.QUESTION_LABELS) else f"Q{q_idx + 1}"
             ax.set_xlabel(f'Q{q_idx + 1}\n{question_label}', fontsize=11, fontweight='bold',
                         labelpad=10, fontproperties=jp_font_prop)
+
+            # 統計情報を表示（中央値を表示）
+            if ui1_q_data:
+                ui1_median = np.median(ui1_q_data)
+                ax.text(1, 0.7, f'{ui1_median:.1f}', ha='center', va='center',
+                       fontsize=9, fontweight='bold', color='#3498db')
+
+            if ui2_q_data:
+                ui2_median = np.median(ui2_q_data)
+                ax.text(2, 0.7, f'{ui2_median:.1f}', ha='center', va='center',
+                       fontsize=9, fontweight='bold', color='#e74c3c')
 
             # 凡例（最初の質問のみ）
             if q_idx == 0:
