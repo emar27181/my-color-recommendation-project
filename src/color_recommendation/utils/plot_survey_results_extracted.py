@@ -197,10 +197,10 @@ def plot_boxplot_comparison(ui1_data, ui2_data, participant_count, stats, output
             # 凡例を図の下部中央に配置（グラフの外側）
             fig.legend(handles=legend_elements, loc='lower center', fontsize=8,
                       prop=jp_font_prop, framealpha=0.9, ncol=2,
-                      bbox_to_anchor=(0.5, -0.05))
+                      bbox_to_anchor=(0.5, 0.02))
 
-    plt.subplots_adjust(left=0.08, right=0.98, bottom=0.20, top=0.89)
-    plt.tight_layout(rect=[0.05, 0.18, 1, 0.89])
+    plt.subplots_adjust(left=0.08, right=0.98, bottom=0.28, top=0.89)
+    plt.tight_layout(rect=[0.05, 0.26, 1, 0.89])
 
     output_dir = Path("/mnt/c/WSL-directory/my-color-recommendation-project/src/color_recommendation/data/output/experiment_analysis")
     output_path = output_dir / output_filename
@@ -290,10 +290,10 @@ def plot_violin_comparison(ui1_data, ui2_data, participant_count, stats, output_
             # 凡例を図の下部中央に配置（グラフの外側）
             fig.legend(handles=legend_elements, loc='lower center', fontsize=8,
                       prop=jp_font_prop, framealpha=0.9, ncol=2,
-                      bbox_to_anchor=(0.5, -0.05))
+                      bbox_to_anchor=(0.5, 0.02))
 
-    plt.subplots_adjust(left=0.08, right=0.98, bottom=0.20, top=0.89)
-    plt.tight_layout(rect=[0.05, 0.18, 1, 0.89])
+    plt.subplots_adjust(left=0.08, right=0.98, bottom=0.28, top=0.89)
+    plt.tight_layout(rect=[0.05, 0.26, 1, 0.89])
 
     output_dir = Path("/mnt/c/WSL-directory/my-color-recommendation-project/src/color_recommendation/data/output/experiment_analysis")
     output_path = output_dir / output_filename
