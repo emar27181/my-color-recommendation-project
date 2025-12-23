@@ -152,8 +152,9 @@ def plot_boxplot_comparison(ui1_data, ui2_data, participant_count, stats, output
                       alpha=0.4, s=20, color=colors[pos_idx], edgecolors='black', linewidth=0.5, zorder=3)
 
         ax.set_ylim(0.5, 5.5)
-        ax.set_yticks(range(1, 6))
-        ax.set_yticklabels(['1', '2', '3', '4', '5'], fontsize=11)
+        ax.set_yticks([1, 2, 3, 4, 5])
+        ax.set_yticklabels(['1', '2', '3', '4', '5'], fontsize=11, fontweight='bold')
+        ax.tick_params(axis='y', which='both', left=True, labelleft=True)
         ax.set_xticks(positions)
         ax.set_xticklabels(['ＵＩ１', 'ＵＩ２'], fontsize=11, fontproperties=jp_font_prop)
 
@@ -246,8 +247,9 @@ def plot_violin_comparison(ui1_data, ui2_data, participant_count, stats, output_
         parts['cmins'].set_edgecolor('black')
 
         ax.set_ylim(0.5, 5.5)
-        ax.set_yticks(range(1, 6))
-        ax.set_yticklabels(['1', '2', '3', '4', '5'], fontsize=11)
+        ax.set_yticks([1, 2, 3, 4, 5])
+        ax.set_yticklabels(['1', '2', '3', '4', '5'], fontsize=11, fontweight='bold')
+        ax.tick_params(axis='y', which='both', left=True, labelleft=True)
         ax.set_xticks(positions)
         ax.set_xticklabels(['ＵＩ１', 'ＵＩ２'], fontsize=11, fontproperties=jp_font_prop)
 
