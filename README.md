@@ -528,3 +528,76 @@ MIN_SAMPLES = 可変      # クラスタ最小サンプル数
 **開発者**: 配色推薦研究チーム  
 **最終更新**: 2025-08-15 (論文用データ追加)  
 **ライセンス**: 研究用途
+## 📊 実験データの処理・グラフ生成
+
+### 🎯 概要
+
+実験参加者から収集したzipファイルを解凍し、アンケート結果のグラフと感想まとめを自動生成します。
+
+### 📁 必要なファイル
+
+**入力データ**: `src/color_recommendation/data/input/experiment_result/zip/`
+- `experiment_{participant_name}.zip` 形式のzipファイル
+- 各zipには `log_noname.json` と作成画像（PNG）が含まれます
+
+### 🚀 クイックスタート
+
+#### 1. zipファイルを配置
+
+```bash
+# zipファイルを指定ディレクトリに配置
+cp /path/to/experiment_*.zip src/color_recommendation/data/input/experiment_result/zip/
+```
+
+#### 2. データを解凍
+
+```bash
+cd src/color_recommendation/data/input/experiment_result
+rm -rf extracted && mkdir -p extracted
+
+for zipfile in zip/*.zip; do
+    participant=$(basename "$zipfile" .zip | sed 's/experiment_//')
+    echo "解凍中: $participant"
+    unzip -oq "$zipfile" -d "extracted/$participant"
+done
+```
+
+#### 3. グラフと感想まとめを生成
+
+```bash
+cd /mnt/c/WSL-directory/my-color-recommendation-project
+python3 src/color_recommendation/utils/plot_survey_results_extracted.py
+```
+
+### 📈 出力結果
+
+**グラフ** (`data/output/experiment_analysis/`):
+- `survey_boxplot_comparison.pdf`: UI評価の箱ひげ図
+- `survey_violin_comparison.pdf`: UI評価のヴァイオリン図
+- `task_duration_comparison.pdf`: タスク所要時間比較
+
+**感想まとめ** (`data/output/experiment_analysis/`):
+- `experiment_feedback_summary.md`: 統計サマリー付き感想まとめ
+  - UI選好率・使用順序分布
+  - 参加者属性統計
+  - 主な意見・改善提案（上位件）
+  - 全参加者の個別回答詳細
+
+### 📝 データ更新時の手順
+
+新しい参加者データを追加した場合：
+
+1. zipファイルを `zip/` ディレクトリに追加
+2. 上記「2. データを解凍」を再実行
+3. 上記「3. グラフと感想まとめを生成」を再実行
+
+自動的に全データが再集計され、最新のグラフと感想まとめが生成されます。
+
+### ⚠️ 注意事項
+
+- zipファイル名は `experiment_{participant_name}.zip` 形式を厳守
+- 日本語フォント（Droid Sans Fallback）が必要
+- log_noname.jsonのデータ構造を変更しないこと
+
+---
+

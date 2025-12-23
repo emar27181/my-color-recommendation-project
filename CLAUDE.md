@@ -1171,3 +1171,89 @@ Instaloaderのダウンロード問題が個別のライブラリ問題か、Ins
   → `constants/` ディレクトリなどにまとめておく。
 
 ---
+## 📊 実験データ処理・グラフ生成ワークフロー
+
+### 🎯 概要
+
+実験参加者から収集したzipファイルを解凍し、アンケート結果のグラフと感想まとめを自動生成する。
+
+### 📁 データ構造
+
+**入力データ**: `src/color_recommendation/data/input/experiment_result/zip/`
+- `experiment_{participant_name}.zip` 形式のzipファイル
+- 各zipファイルには以下が含まれる：
+  - `log_noname.json`: アンケート・実験ログデータ
+  - `UI1-TaskA_canvas.png`, `UI1-TaskB_canvas.png`: UI1で作成した画像
+  - `UI2-TaskA_canvas.png`, `UI2-TaskB_canvas.png`: UI2で作成した画像
+
+**出力データ**: `src/color_recommendation/data/output/experiment_analysis/`
+- `survey_boxplot_comparison.pdf`: UI評価の箱ひげ図
+- `survey_violin_comparison.pdf`: UI評価のヴァイオリン図
+- `task_duration_comparison.pdf`: タスク所要時間比較グラフ
+- `experiment_feedback_summary.md`: 統計サマリー付き感想まとめ
+
+### 🔄 処理フロー
+
+#### 1. zipファイルの解凍
+
+```bash
+# extractedディレクトリをクリーンアップ
+cd src/color_recommendation/data/input/experiment_result
+rm -rf extracted
+mkdir -p extracted
+
+# 全zipファイルを解凍
+for zipfile in zip/*.zip; do
+    participant=$(basename "$zipfile" .zip | sed 's/experiment_//')
+    echo "解凍中: $participant"
+    unzip -oq "$zipfile" -d "extracted/$participant"
+done
+```
+
+#### 2. グラフ生成
+
+```bash
+cd /mnt/c/WSL-directory/my-color-recommendation-project
+python3 src/color_recommendation/utils/plot_survey_results_extracted.py
+```
+
+**生成されるグラフ**:
+- 箱ひげ図（UI1 vs UI2の7項目評価）
+- ヴァイオリン図（UI1 vs UI2の7項目評価）
+- タスク所要時間比較（UI1 vs UI2）
+
+#### 3. 感想まとめ生成
+
+統計サマリー付きの感想mdファイルを自動生成（`plot_survey_results_extracted.py`と同時に生成）
+
+**生成される内容**:
+1. **統計サマリー**:
+   - UI選好率（UI1/UI2好み）
+   - 使用順序分布
+   - 参加者属性（デバイスタイプ、イラスト経験、入力デバイス）
+2. **主な意見・傾向**:
+   - UI2を好んだ理由（上位5件）
+   - UI1を好んだ理由（上位5件）
+   - 改善提案（上位10件）
+3. **個別回答詳細**: 全参加者の詳細データ
+
+### 🛠️ 使用ツール・モジュール
+
+- **`plot_survey_results_extracted.py`**: extractedディレクトリから直接グラフ生成
+  - 箱ひげ図生成: `plot_boxplot_comparison()`
+  - ヴァイオリン図生成: `plot_violin_comparison()`
+  - タスク時間グラフ: `plot_task_duration_comparison()`
+
+### 📋 新しいデータを追加した場合の手順
+
+1. zipファイルを `src/color_recommendation/data/input/experiment_result/zip/` に配置
+2. 解凍スクリプト実行（上記「1. zipファイルの解凍」参照）
+3. グラフ生成スクリプト実行（上記「2. グラフ生成」参照）
+
+### ⚠️ 注意事項
+
+- zipファイル名は必ず `experiment_{participant_name}.zip` 形式にすること
+- log_noname.jsonのフォーマットを変更しないこと
+- 日本語フォント（Droid Sans Fallback）がシステムにインストールされていること
+
+---
