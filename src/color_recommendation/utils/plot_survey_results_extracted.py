@@ -153,9 +153,7 @@ def plot_boxplot_comparison(ui1_data, ui2_data, participant_count, stats, output
 
         ax.set_ylim(0.5, 5.5)
         ax.set_yticks(range(1, 6))
-        for tick in ax.get_yticklabels():
-            tick.set_fontsize(11)
-            tick.set_fontfamily('DejaVu Sans')
+        ax.set_yticklabels(['1', '2', '3', '4', '5'], fontsize=11)
         ax.set_xticks(positions)
         ax.set_xticklabels(['ＵＩ１', 'ＵＩ２'], fontsize=11, fontproperties=jp_font_prop)
 
@@ -249,6 +247,7 @@ def plot_violin_comparison(ui1_data, ui2_data, participant_count, stats, output_
 
         ax.set_ylim(0.5, 5.5)
         ax.set_yticks(range(1, 6))
+        ax.set_yticklabels(['1', '2', '3', '4', '5'], fontsize=11)
         ax.set_xticks(positions)
         ax.set_xticklabels(['ＵＩ１', 'ＵＩ２'], fontsize=11, fontproperties=jp_font_prop)
 
