@@ -197,12 +197,12 @@ def plot_boxplot_comparison(ui1_data, ui2_data, participant_count, stats, output
                       prop=jp_font_prop, framealpha=0.9, ncol=2,
                       bbox_to_anchor=(0.5, -0.05))
 
-    plt.subplots_adjust(bottom=0.20, top=0.89)
-    plt.tight_layout(rect=[0, 0.18, 1, 0.89])
+    plt.subplots_adjust(left=0.08, right=0.98, bottom=0.20, top=0.89)
+    plt.tight_layout(rect=[0.05, 0.18, 1, 0.89])
 
     output_dir = Path("/mnt/c/WSL-directory/my-color-recommendation-project/src/color_recommendation/data/output/experiment_analysis")
     output_path = output_dir / output_filename
-    plt.savefig(output_path, format='pdf', bbox_inches='tight', dpi=300)
+    plt.savefig(output_path, format='pdf', dpi=300)
     print(f"✅ グラフ保存完了: {output_path}")
     plt.close()
 
@@ -288,12 +288,12 @@ def plot_violin_comparison(ui1_data, ui2_data, participant_count, stats, output_
                       prop=jp_font_prop, framealpha=0.9, ncol=2,
                       bbox_to_anchor=(0.5, -0.05))
 
-    plt.subplots_adjust(bottom=0.20, top=0.89)
-    plt.tight_layout(rect=[0, 0.18, 1, 0.89])
+    plt.subplots_adjust(left=0.08, right=0.98, bottom=0.20, top=0.89)
+    plt.tight_layout(rect=[0.05, 0.18, 1, 0.89])
 
     output_dir = Path("/mnt/c/WSL-directory/my-color-recommendation-project/src/color_recommendation/data/output/experiment_analysis")
     output_path = output_dir / output_filename
-    plt.savefig(output_path, format='pdf', bbox_inches='tight', dpi=300)
+    plt.savefig(output_path, format='pdf', dpi=300)
     print(f"✅ グラフ保存完了: {output_path}")
     plt.close()
 
@@ -386,11 +386,12 @@ def plot_task_duration_comparison(all_data, participant_count, stats, output_fil
               prop=jp_font_prop, framealpha=0.9, ncol=2,
               bbox_to_anchor=(0.5, -0.05))
 
-    plt.tight_layout(rect=[0, 0.15, 1, 0.90])
+    plt.subplots_adjust(left=0.10, right=0.95, bottom=0.15, top=0.90)
+    plt.tight_layout(rect=[0.08, 0.15, 1, 0.90])
 
     output_dir = Path("/mnt/c/WSL-directory/my-color-recommendation-project/src/color_recommendation/data/output/experiment_analysis")
     output_path = output_dir / output_filename
-    plt.savefig(output_path, format='pdf', bbox_inches='tight', dpi=300)
+    plt.savefig(output_path, format='pdf', dpi=300)
     print(f"✅ グラフ保存完了: {output_path}")
     plt.close()
 
