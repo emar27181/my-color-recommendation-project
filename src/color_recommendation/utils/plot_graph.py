@@ -180,15 +180,22 @@ def _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, s
         markersize=3
     )
 
-    plt.title(f"recall@k({check_subject}) sort_type={sort_type}")
+    plt.title(f"recall@k({check_subject}) sort_type={sort_type}", color='black')
     plt.ylim(0, 1)
     plt.xlim(0, plot_range)
-    plt.xlabel('color_scheme')
-    plt.ylabel('recall')
-    plt.grid(True)
-    plt.gca().xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f"{int(x)}" if x == int(x) else ""))
+    plt.xlabel('color_scheme', color='black')
+    plt.ylabel('recall', color='black')
+    plt.grid(True, color='gray', alpha=0.5)
 
-    plt.legend(title="Illustrators (mean ± std)", fontsize=6, loc=legend_location)
+    ax = plt.gca()
+    ax.tick_params(axis='x', colors='black')
+    ax.tick_params(axis='y', colors='black')
+    ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f"{int(x)}" if x == int(x) else ""))
+
+    legend = plt.legend(title="Illustrators (mean ± std)", fontsize=6, loc=legend_location)
+    legend.get_title().set_color('black')
+    for text in legend.get_texts():
+        text.set_color('black')
     plt.savefig(output_file_path, bbox_inches="tight", format='pdf', facecolor='white', edgecolor='none')
     plt.clf()
     print(f"{output_file_path} が保存されました．(エラーバー付きグラフの作成)")
@@ -276,14 +283,22 @@ def _save_plot_recall_at_k_multiple_apps(input_dir_path, output_file_path, illus
                 markersize=3
             )
 
-    plt.title(f"recall@k({check_subject}) sort_type={sort_type}")
+    plt.title(f"recall@k({check_subject}) sort_type={sort_type}", color='black')
     plt.ylim(0, 1)
     plt.xlim(0, X_MAX)
-    plt.xlabel('color_count')
-    plt.ylabel('recall')
-    plt.grid(True)
-    plt.gca().xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f"{int(x)}" if x == int(x) else ""))
-    plt.legend(title="App", fontsize=8, loc=legend_location)
+    plt.xlabel('color_count', color='black')
+    plt.ylabel('recall', color='black')
+    plt.grid(True, color='gray', alpha=0.5)
+
+    ax = plt.gca()
+    ax.tick_params(axis='x', colors='black')
+    ax.tick_params(axis='y', colors='black')
+    ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f"{int(x)}" if x == int(x) else ""))
+
+    legend = plt.legend(title="App", fontsize=8, loc=legend_location)
+    legend.get_title().set_color('black')
+    for text in legend.get_texts():
+        text.set_color('black')
     plt.savefig(output_file_path, bbox_inches="tight", format='pdf', facecolor='white', edgecolor='none')
     plt.clf()
     print(f"{output_file_path} が保存されました．(複数アプリの比較グラフ)")
@@ -339,14 +354,23 @@ def save_plot_recall_at_k_sort_types(illustrator_list, sort_types, check_subject
             markersize=3
         )
 
-    plt.title(f"recall@k({check_subject})")
+    plt.title(f"recall@k({check_subject})", color='black')
     plt.ylim(0, 1)
     # plt.xlim(0, X_MAX)
-    plt.xlabel('color_scheme')
-    plt.ylabel('recall')
-    plt.grid(True)
-    plt.gca().xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f"{int(x)}" if x == int(x) else ""))
-    plt.legend(title="sort_type", fontsize=8, loc=legend_location)
+    plt.xlabel('color_scheme', color='black')
+    plt.ylabel('recall', color='black')
+    plt.grid(True, color='gray', alpha=0.5)
+
+    # 軸の目盛りラベルを黒に設定
+    ax = plt.gca()
+    ax.tick_params(axis='x', colors='black')
+    ax.tick_params(axis='y', colors='black')
+    ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f"{int(x)}" if x == int(x) else ""))
+
+    legend = plt.legend(title="sort_type", fontsize=8, loc=legend_location)
+    legend.get_title().set_color('black')
+    for text in legend.get_texts():
+        text.set_color('black')
     output_file_path = f'src/color_recommendation/data/output/graph_pdf/{check_subject}_recall_at_k_error_bar_sort_types.pdf'
     plt.savefig(output_file_path, bbox_inches="tight", format='pdf', facecolor='white', edgecolor='none')
     plt.clf()
@@ -430,13 +454,21 @@ def save_plot_recall_at_k_diff_values(
             markersize=3
         )
 
-    plt.title(f"recall@k(tone) sort_type={sort_type}")
+    plt.title(f"recall@k(tone) sort_type={sort_type}", color='black')
     plt.ylim(0, 1)
-    plt.xlabel('color_count')
-    plt.ylabel('recall')
-    plt.grid(True)
-    plt.gca().xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f"{int(x)}" if x == int(x) else ""))
-    plt.legend(title="diff_values", fontsize=8, loc=legend_location)
+    plt.xlabel('color_count', color='black')
+    plt.ylabel('recall', color='black')
+    plt.grid(True, color='gray', alpha=0.5)
+
+    ax = plt.gca()
+    ax.tick_params(axis='x', colors='black')
+    ax.tick_params(axis='y', colors='black')
+    ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f"{int(x)}" if x == int(x) else ""))
+
+    legend = plt.legend(title="diff_values", fontsize=8, loc=legend_location)
+    legend.get_title().set_color('black')
+    for text in legend.get_texts():
+        text.set_color('black')
 
     output_file_path = f'src/color_recommendation/data/output/graph_pdf/tone_recall_at_k_error_bar_diff_values_{sort_type}.pdf'
     plt.savefig(output_file_path, bbox_inches="tight", format='pdf', facecolor='white', edgecolor='none')
@@ -522,13 +554,21 @@ def save_plot_recall_at_k_sort_types_fixed_subjects(illustrator_list, sort_type,
             markersize=3
         )
 
-    plt.title(f"recall@k ({sort_type})")
+    plt.title(f"recall@k ({sort_type})", color='black')
     plt.ylim(0, 1)
-    plt.xlabel('color_count')
-    plt.ylabel('recall')
-    plt.grid(True)
-    plt.gca().xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f"{int(x)}" if x == int(x) else ""))
-    plt.legend(title="recommend_type", fontsize=8, loc=legend_location)
+    plt.xlabel('color_count', color='black')
+    plt.ylabel('recall', color='black')
+    plt.grid(True, color='gray', alpha=0.5)
+
+    ax = plt.gca()
+    ax.tick_params(axis='x', colors='black')
+    ax.tick_params(axis='y', colors='black')
+    ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f"{int(x)}" if x == int(x) else ""))
+
+    legend = plt.legend(title="recommend_type", fontsize=8, loc=legend_location)
+    legend.get_title().set_color('black')
+    for text in legend.get_texts():
+        text.set_color('black')
     output_file_path = f'src/color_recommendation/data/output/graph_pdf/recall_at_k_error_bar_recommend_type_diff_{sort_type}.pdf'
     plt.savefig(output_file_path, bbox_inches="tight", format='pdf', facecolor='white', edgecolor='none')
     plt.clf()
