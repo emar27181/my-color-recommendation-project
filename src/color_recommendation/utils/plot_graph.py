@@ -20,6 +20,27 @@ matplotlib.rcParams['axes.labelcolor'] = 'black'
 matplotlib.rcParams['xtick.color'] = 'black'
 matplotlib.rcParams['ytick.color'] = 'black'
 matplotlib.rcParams['axes.edgecolor'] = 'black'
+matplotlib.rcParams['axes.facecolor'] = 'white'
+matplotlib.rcParams['figure.facecolor'] = 'white'
+matplotlib.rcParams['savefig.facecolor'] = 'white'
+matplotlib.rcParams['savefig.edgecolor'] = 'none'
+# 凡例の設定
+matplotlib.rcParams['legend.facecolor'] = 'white'
+matplotlib.rcParams['legend.edgecolor'] = 'black'
+# グリッド線の設定
+matplotlib.rcParams['grid.color'] = 'gray'
+matplotlib.rcParams['grid.alpha'] = 0.5
+
+# seabornのデフォルトスタイルをリセット（PDF出力時の色問題を回避）
+sns.set_style("whitegrid", {
+    'axes.edgecolor': 'black',
+    'axes.labelcolor': 'black',
+    'xtick.color': 'black',
+    'ytick.color': 'black',
+    'text.color': 'black',
+    'axes.facecolor': 'white',
+    'figure.facecolor': 'white'
+})
 
 DEBUG = False
 DEBUG = True  # デバッグモードを有効にする場合はTrueに設定
@@ -211,7 +232,10 @@ def _save_plot_recall_at_k_multiple_apps(input_dir_path, output_file_path, illus
             max_count = max(max_count, count)
         return max_count
 
-    plt.figure()
+    fig = plt.figure()
+    fig.patch.set_facecolor('white')
+    ax = plt.gca()
+    ax.set_facecolor('white')
 
     for app_name in app_names:
         print(f"=== {app_name} ===")
@@ -284,7 +308,10 @@ def save_plot_recall_at_k_sort_types(illustrator_list, sort_types, check_subject
             max_count = max(max_count, count)
         return max_count
 
-    plt.figure()
+    fig = plt.figure()
+    fig.patch.set_facecolor('white')  # 背景を明示的に白に設定
+    ax = plt.gca()
+    ax.set_facecolor('white')  # 軸の背景も白に設定
 
     for sort_type in sort_types:
         print(f"=== sort_type: {sort_type} ===")
@@ -372,7 +399,10 @@ def save_plot_recall_at_k_diff_values(
             max_count = max(max_count, count)
         return max_count
 
-    plt.figure()
+    fig = plt.figure()
+    fig.patch.set_facecolor('white')
+    ax = plt.gca()
+    ax.set_facecolor('white')
 
     for diff_values in diff_values_list:
         print(f"=== diff_values: {diff_values} ===")
@@ -461,7 +491,10 @@ def save_plot_recall_at_k_sort_types_fixed_subjects(illustrator_list, sort_type,
             max_count = max(max_count, count)
         return max_count
 
-    plt.figure()
+    fig = plt.figure()
+    fig.patch.set_facecolor('white')
+    ax = plt.gca()
+    ax.set_facecolor('white')
 
     for check_subject in check_subjects:
         print(f"=== check_subject: {check_subject} ===")
