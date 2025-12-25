@@ -472,9 +472,14 @@ class SurveyResultPlotter:
                 ]
                 ax.legend(handles=legend_elements, loc='upper left', fontsize=10, prop=jp_font_prop)
 
+        # 使用されていないサブプロットを非表示にする
+        total_subplots = nrows * ncols
+        for idx in range(num_questions, total_subplots):
+            axes[idx].set_visible(False)
+
         # レイアウト調整
-        plt.subplots_adjust(bottom=0.15, top=0.89)
-        plt.tight_layout(rect=[0, 0.12, 1, 0.89])
+        plt.subplots_adjust(bottom=0.10, top=0.92, hspace=0.4, wspace=0.3)
+        plt.tight_layout(rect=[0, 0.05, 1, 0.95])
 
         # 保存
         output_path = self.output_dir / output_filename
@@ -503,12 +508,13 @@ class SurveyResultPlotter:
         """
         num_questions = len(ui1_data) if ui1_data else len(ui2_data)
 
-        # 図のサイズ設定（plot_boxplot_comparisonと統一）
-        fig, axes = plt.subplots(1, num_questions, figsize=(3 * num_questions, 7))
+        # 図のサイズ設定（2行×4列のレイアウト）
+        ncols = 4  # 列数
+        nrows = (num_questions + ncols - 1) // ncols  # 必要な行数を計算
+        fig, axes = plt.subplots(nrows, ncols, figsize=(3.5 * ncols, 7 * nrows))
 
-        # axesが1つの場合はリストに変換
-        if num_questions == 1:
-            axes = [axes]
+        # axesを1次元配列に変換（アクセスしやすくする）
+        axes = axes.flatten() if num_questions > 1 else [axes]
 
         # タイトルに統計情報を含める（3行に分けて表示、第一印象であることを明記）
         # 英数字を全角にして日本語フォントで確実に表示
@@ -603,9 +609,14 @@ class SurveyResultPlotter:
                 ]
                 ax.legend(handles=legend_elements, loc='upper left', fontsize=10, prop=jp_font_prop)
 
+        # 使用されていないサブプロットを非表示にする
+        total_subplots = nrows * ncols
+        for idx in range(num_questions, total_subplots):
+            axes[idx].set_visible(False)
+
         # レイアウト調整（上部にタイトル、下部にラベル用のスペースを確保）
-        plt.subplots_adjust(bottom=0.15, top=0.89)
-        plt.tight_layout(rect=[0, 0.12, 1, 0.89])
+        plt.subplots_adjust(bottom=0.10, top=0.92, hspace=0.4, wspace=0.3)
+        plt.tight_layout(rect=[0, 0.05, 1, 0.95])
 
         # 保存
         output_path = self.output_dir / output_filename
@@ -634,12 +645,13 @@ class SurveyResultPlotter:
         """
         num_questions = len(ui1_data) if ui1_data else len(ui2_data)
 
-        # 図のサイズ設定
-        fig, axes = plt.subplots(1, num_questions, figsize=(3 * num_questions, 7))
+        # 図のサイズ設定（2行×4列のレイアウト）
+        ncols = 4  # 列数
+        nrows = (num_questions + ncols - 1) // ncols  # 必要な行数を計算
+        fig, axes = plt.subplots(nrows, ncols, figsize=(3.5 * ncols, 7 * nrows))
 
-        # 1つの質問の場合はリストに変換
-        if num_questions == 1:
-            axes = [axes]
+        # axesを1次元配列に変換（アクセスしやすくする）
+        axes = axes.flatten() if num_questions > 1 else [axes]
 
         # タイトルに統計情報を含める
         def to_fullwidth(text):
@@ -751,9 +763,14 @@ class SurveyResultPlotter:
                 ]
                 ax.legend(handles=legend_elements, loc='upper left', fontsize=10, prop=jp_font_prop)
 
+        # 使用されていないサブプロットを非表示にする
+        total_subplots = nrows * ncols
+        for idx in range(num_questions, total_subplots):
+            axes[idx].set_visible(False)
+
         # レイアウト調整
-        plt.subplots_adjust(bottom=0.15, top=0.89)
-        plt.tight_layout(rect=[0, 0.12, 1, 0.89])
+        plt.subplots_adjust(bottom=0.10, top=0.92, hspace=0.4, wspace=0.3)
+        plt.tight_layout(rect=[0, 0.05, 1, 0.95])
 
         # 保存
         output_path = self.output_dir / output_filename

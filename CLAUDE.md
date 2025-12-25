@@ -660,6 +660,28 @@ my-color-recommendation-project/
   2. 🟡 中：新しい並び替えアルゴリズムの追加実装
   3. 🟢 低：並び替え評価とテスト実行
 
+- [ ] **PDF出力グラフの文字色表示問題の解決**
+  - ファイル: `src/color_recommendation/utils/plot_graph.py`
+  - 問題: PDFで出力したグラフの文字（タイトル、軸ラベル、凡例）が白色になり背景と同化して見えない
+  - 現在の対応状況:
+    - matplotlib.rcParamsで各種色設定を追加済み（text.color, axes.labelcolor等）
+    - seabornスタイルをreset_orig()でリセット済み
+    - 各グラフ生成関数で明示的にcolor='black'を指定済み
+    - savefigにtransparent=False, facecolor='white'を追加済み
+  - 未解決の原因:
+    - PDFバックエンドとmatplotlib/seabornの相互作用が複雑
+    - 何らかの設定が上書きされている可能性
+  - 検討すべき対応策:
+    - matplotlib/seabornの完全なスタイルリセット（mpl.style.use('default')）
+    - PDFバックエンドの明示的な設定（matplotlib.use('PDF')）
+    - 別のバックエンド（cairo、svg→pdf変換）の検討
+    - フォント埋め込み設定の見直し
+    - PDFライブラリ（reportlab等）での直接生成
+  - 期限: 未定（機能的には動作しているが見た目の問題）
+  - 担当者: 未定
+  - 優先度: 中（論文用グラフとして重要）
+  - 回避策: PNG形式での出力は問題なく動作
+
 ### 🟢 改善推奨（時間のある時に対応）
 
 #### コード品質向上
