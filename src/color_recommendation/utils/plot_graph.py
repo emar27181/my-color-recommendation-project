@@ -23,7 +23,11 @@ matplotlib.rcParams['axes.edgecolor'] = 'black'
 matplotlib.rcParams['axes.facecolor'] = 'white'
 matplotlib.rcParams['figure.facecolor'] = 'white'
 matplotlib.rcParams['savefig.facecolor'] = 'white'
-matplotlib.rcParams['savefig.edgecolor'] = 'none'
+matplotlib.rcParams['savefig.edgecolor'] = 'white'
+matplotlib.rcParams['axes.spines.left'] = True
+matplotlib.rcParams['axes.spines.bottom'] = True
+matplotlib.rcParams['axes.spines.top'] = True
+matplotlib.rcParams['axes.spines.right'] = True
 # 凡例の設定
 matplotlib.rcParams['legend.facecolor'] = 'white'
 matplotlib.rcParams['legend.edgecolor'] = 'black'
@@ -31,16 +35,13 @@ matplotlib.rcParams['legend.edgecolor'] = 'black'
 matplotlib.rcParams['grid.color'] = 'gray'
 matplotlib.rcParams['grid.alpha'] = 0.5
 
-# seabornのデフォルトスタイルをリセット（PDF出力時の色問題を回避）
-sns.set_style("whitegrid", {
-    'axes.edgecolor': 'black',
-    'axes.labelcolor': 'black',
-    'xtick.color': 'black',
-    'ytick.color': 'black',
-    'text.color': 'black',
-    'axes.facecolor': 'white',
-    'figure.facecolor': 'white'
-})
+# seabornのスタイルを完全にリセット
+sns.reset_orig()
+sns.set_palette("deep")  # デフォルトカラーパレット
+
+# PDFバックエンドの設定
+matplotlib.rcParams['pdf.fonttype'] = 42  # TrueTypeフォントを埋め込む
+matplotlib.rcParams['ps.fonttype'] = 42
 
 DEBUG = False
 DEBUG = True  # デバッグモードを有効にする場合はTrueに設定
@@ -67,7 +68,7 @@ def plot_graph_3d(data, clusters, output_file_path):
     ax.set_ylabel('Y-axis')
     ax.set_zlabel('Z-axis')
     plt.legend()
-    plt.savefig(output_file_path, format='pdf', facecolor='white', edgecolor='none')
+    plt.savefig(output_file_path, format='pdf', facecolor='white', edgecolor='white', transparent=False)
     plt.clf()
 
 
@@ -82,7 +83,7 @@ def plot_graph(plot_data, graph_name, output_file_path):
     plt.grid(True)
 
     # ファイルに保存
-    plt.savefig(output_file_path, format='pdf', facecolor='white', edgecolor='none')
+    plt.savefig(output_file_path, format='pdf', facecolor='white', edgecolor='white', transparent=False)
     plt.clf()
 
 
@@ -196,7 +197,7 @@ def _save_plot_recall_at_k(input_dir_path, output_file_path, illustrator_list, s
     legend.get_title().set_color('black')
     for text in legend.get_texts():
         text.set_color('black')
-    plt.savefig(output_file_path, bbox_inches="tight", format='pdf', facecolor='white', edgecolor='none')
+    plt.savefig(output_file_path, bbox_inches="tight", format='pdf', facecolor='white', edgecolor='none', transparent=False)
     plt.clf()
     print(f"{output_file_path} が保存されました．(エラーバー付きグラフの作成)")
 
@@ -299,7 +300,7 @@ def _save_plot_recall_at_k_multiple_apps(input_dir_path, output_file_path, illus
     legend.get_title().set_color('black')
     for text in legend.get_texts():
         text.set_color('black')
-    plt.savefig(output_file_path, bbox_inches="tight", format='pdf', facecolor='white', edgecolor='none')
+    plt.savefig(output_file_path, bbox_inches="tight", format='pdf', facecolor='white', edgecolor='none', transparent=False)
     plt.clf()
     print(f"{output_file_path} が保存されました．(複数アプリの比較グラフ)")
 
@@ -372,7 +373,7 @@ def save_plot_recall_at_k_sort_types(illustrator_list, sort_types, check_subject
     for text in legend.get_texts():
         text.set_color('black')
     output_file_path = f'src/color_recommendation/data/output/graph_pdf/{check_subject}_recall_at_k_error_bar_sort_types.pdf'
-    plt.savefig(output_file_path, bbox_inches="tight", format='pdf', facecolor='white', edgecolor='none')
+    plt.savefig(output_file_path, bbox_inches="tight", format='pdf', facecolor='white', edgecolor='none', transparent=False)
     plt.clf()
     print(f"{output_file_path} が保存されました．(提案手法における sort_type の比較グラフ)")
 
@@ -471,7 +472,7 @@ def save_plot_recall_at_k_diff_values(
         text.set_color('black')
 
     output_file_path = f'src/color_recommendation/data/output/graph_pdf/tone_recall_at_k_error_bar_diff_values_{sort_type}.pdf'
-    plt.savefig(output_file_path, bbox_inches="tight", format='pdf', facecolor='white', edgecolor='none')
+    plt.savefig(output_file_path, bbox_inches="tight", format='pdf', facecolor='white', edgecolor='none', transparent=False)
     plt.clf()
     print(f"{output_file_path} が保存されました．(diff_valuesごとの比較グラフ)")
 
@@ -570,7 +571,7 @@ def save_plot_recall_at_k_sort_types_fixed_subjects(illustrator_list, sort_type,
     for text in legend.get_texts():
         text.set_color('black')
     output_file_path = f'src/color_recommendation/data/output/graph_pdf/recall_at_k_error_bar_recommend_type_diff_{sort_type}.pdf'
-    plt.savefig(output_file_path, bbox_inches="tight", format='pdf', facecolor='white', edgecolor='none')
+    plt.savefig(output_file_path, bbox_inches="tight", format='pdf', facecolor='white', edgecolor='none', transparent=False)
     plt.clf()
     print(f"{output_file_path} が保存されました．(check_subjectの比較グラフ)")
 
@@ -677,7 +678,7 @@ def save_plot_bar_from_used_achromatic_colors_average_rate_for_illustrators(illu
     plt.tight_layout()
 
     output_file_path = 'src/color_recommendation/data/output/graph_pdf/bar_from_used_achromatic_colors_average_rate.pdf'
-    plt.savefig(output_file_path, format='pdf', facecolor='white', edgecolor='none')
+    plt.savefig(output_file_path, format='pdf', facecolor='white', edgecolor='white', transparent=False)
     plt.clf()
     print(f"{output_file_path} が保存されました．")
 
@@ -733,7 +734,7 @@ def save_plot_violin_from_mean_resultant_length_count_for_illustrators(illustrat
     plt.tight_layout()
 
     output_file_path = f'src/color_recommendation/data/output/graph_pdf/violin_from_mean_resultant_length.pdf'
-    plt.savefig(output_file_path, format='pdf', facecolor='white', edgecolor='none')
+    plt.savefig(output_file_path, format='pdf', facecolor='white', edgecolor='white', transparent=False)
     plt.clf()
     print(f"{output_file_path} が保存されました．")
 
@@ -776,7 +777,7 @@ def save_plot_violin_from_used_hues_count_for_illustrators(illustrator_list):
     plt.tight_layout()
 
     output_file_path = f'src/color_recommendation/data/output/graph_pdf/violin_from_used_hues_count.pdf'
-    plt.savefig(output_file_path, format='pdf', facecolor='white', edgecolor='none')
+    plt.savefig(output_file_path, format='pdf', facecolor='white', edgecolor='white', transparent=False)
     plt.clf()
     print(f"{output_file_path} が保存されました．")
 
@@ -845,7 +846,7 @@ def save_plot_violin_from_used_pccs_distribution_for_illustrators():
 
     plt.tight_layout()
     output_file_path = 'src/color_recommendation/data/output/graph_pdf/violin_from_used_pccs_count.pdf'
-    plt.savefig(output_file_path, format='pdf', facecolor='white', edgecolor='none')
+    plt.savefig(output_file_path, format='pdf', facecolor='white', edgecolor='white', transparent=False)
     plt.clf()
     print(f"{output_file_path} が保存されました．")
 
@@ -924,7 +925,7 @@ def plot_used_colors_scatter(illustrator_name):
 
     output_file_path = f'src/color_recommendation/data/output/scatter_graph/scatter_plot_{illustrator_name}.pdf'
 
-    plt.savefig(output_file_path, format='pdf', facecolor='white', edgecolor='none')
+    plt.savefig(output_file_path, format='pdf', facecolor='white', edgecolor='white', transparent=False)
     plt.clf()
     print(f"{output_file_path} が保存されました．")
     print(f"イラスト:  src/color_recommendation/data/input/illustration/{illustrator_name}")
@@ -946,7 +947,7 @@ def save_plot_heatmap(illustrator_name, data):
     plt.ylabel("Row Index")
     plt.colorbar(label="Value")
     output_file_path = f'src/color_recommendation/data/output/heatmap/heatmap_plot_{illustrator_name}.pdf'
-    plt.savefig(output_file_path, format='pdf', facecolor='white', edgecolor='none')
+    plt.savefig(output_file_path, format='pdf', facecolor='white', edgecolor='white', transparent=False)
     plt.clf()
     print(f"{output_file_path} が保存されました．")
 
