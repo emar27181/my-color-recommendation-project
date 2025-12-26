@@ -246,12 +246,13 @@ class SurveyResultPlotter:
         """
         num_questions = len(ui1_data)
 
-        # 図のサイズ設定（質問数に応じて調整、下部ラベル用に高さを増加）
-        fig, axes = plt.subplots(1, num_questions, figsize=(3 * num_questions, 7))
+        # 図のサイズ設定（2行×4列のレイアウト）
+        ncols = 4  # 列数
+        nrows = (num_questions + ncols - 1) // ncols  # 必要な行数を計算
+        fig, axes = plt.subplots(nrows, ncols, figsize=(3.5 * ncols, 5 * nrows))
 
-        # 1つの質問の場合はリストに変換
-        if num_questions == 1:
-            axes = [axes]
+        # axesを1次元配列に変換
+        axes = axes.flatten() if num_questions > 1 else [axes]
 
         # タイトルに統計情報を含める（3行に分けて表示）
         # 英数字を全角にして日本語フォントで確実に表示
@@ -335,15 +336,30 @@ class SurveyResultPlotter:
             # 最初のグラフのみ凡例を追加
             if q_idx == 0:
                 from matplotlib.patches import Patch
+                from matplotlib.lines import Line2D
                 legend_elements = [
                     Patch(facecolor='#3498db', alpha=0.6, label='ＵＩ１'),
-                    Patch(facecolor='#e74c3c', alpha=0.6, label='ＵＩ２')
+                    Patch(facecolor='#e74c3c', alpha=0.6, label='ＵＩ２'),
+                    Line2D([0], [0], marker='D', color='w', markerfacecolor='red',
+                          markersize=6, label='平均値（赤ひし形）'),
+                    Line2D([0], [0], color='black', linewidth=1.5, label='中央値（箱内の線）'),
+                    Patch(facecolor='gray', alpha=0.3, label='箱（第１〜第３四分位）'),
+                    Line2D([0], [0], color='black', linewidth=1, linestyle='-',
+                          label='ひげ（最小値・最大値）')
                 ]
-                ax.legend(handles=legend_elements, loc='upper left', fontsize=10, prop=jp_font_prop)
+                # 凡例を図の外側（下部中央）に配置
+                fig.legend(handles=legend_elements, loc='lower center',
+                          bbox_to_anchor=(0.5, -0.02), ncol=3, fontsize=8,
+                          prop=jp_font_prop, frameon=True)
 
-        # レイアウト調整（上部にタイトル、下部にラベル用のスペースを確保）
-        plt.subplots_adjust(bottom=0.15, top=0.89)
-        plt.tight_layout(rect=[0, 0.12, 1, 0.89])
+        # 使用されていないサブプロットを非表示にする
+        total_subplots = nrows * ncols
+        for idx in range(num_questions, total_subplots):
+            axes[idx].set_visible(False)
+
+        # レイアウト調整（上部にタイトル、下部にラベル・凡例用のスペースを確保）
+        plt.subplots_adjust(bottom=0.15, top=0.92, hspace=0.4, wspace=0.3)
+        plt.tight_layout(rect=[0, 0.10, 1, 0.95])
 
         # 保存
         output_path = self.output_dir / output_filename
@@ -372,12 +388,13 @@ class SurveyResultPlotter:
         """
         num_questions = len(ui1_data)
 
-        # 図のサイズ設定
-        fig, axes = plt.subplots(1, num_questions, figsize=(3 * num_questions, 7))
+        # 図のサイズ設定（2行×4列のレイアウト）
+        ncols = 4  # 列数
+        nrows = (num_questions + ncols - 1) // ncols  # 必要な行数を計算
+        fig, axes = plt.subplots(nrows, ncols, figsize=(3.5 * ncols, 5 * nrows))
 
-        # 1つの質問の場合はリストに変換
-        if num_questions == 1:
-            axes = [axes]
+        # axesを1次元配列に変換
+        axes = axes.flatten() if num_questions > 1 else [axes]
 
         # タイトルに統計情報を含める
         def to_fullwidth(text):
@@ -466,20 +483,29 @@ class SurveyResultPlotter:
             # 凡例（最初のグラフのみ）
             if q_idx == 0:
                 from matplotlib.patches import Patch
+                from matplotlib.lines import Line2D
                 legend_elements = [
                     Patch(facecolor='#3498db', alpha=0.6, label='ＵＩ１'),
-                    Patch(facecolor='#e74c3c', alpha=0.6, label='ＵＩ２')
+                    Patch(facecolor='#e74c3c', alpha=0.6, label='ＵＩ２'),
+                    Line2D([0], [0], color='red', linewidth=2, label='平均値（赤線）'),
+                    Line2D([0], [0], color='black', linewidth=2, label='中央値（黒線）'),
+                    Patch(facecolor='gray', alpha=0.3, label='分布（ヴァイオリン形状）'),
+                    Line2D([0], [0], color='black', linewidth=1, linestyle='-',
+                          label='範囲（最小値・最大値）')
                 ]
-                ax.legend(handles=legend_elements, loc='upper left', fontsize=10, prop=jp_font_prop)
+                # 凡例を図の外側（下部中央）に配置
+                fig.legend(handles=legend_elements, loc='lower center',
+                          bbox_to_anchor=(0.5, -0.02), ncol=3, fontsize=8,
+                          prop=jp_font_prop, frameon=True)
 
         # 使用されていないサブプロットを非表示にする
         total_subplots = nrows * ncols
         for idx in range(num_questions, total_subplots):
             axes[idx].set_visible(False)
 
-        # レイアウト調整
-        plt.subplots_adjust(bottom=0.10, top=0.92, hspace=0.4, wspace=0.3)
-        plt.tight_layout(rect=[0, 0.05, 1, 0.95])
+        # レイアウト調整（上部にタイトル、下部にラベル・凡例用のスペースを確保）
+        plt.subplots_adjust(bottom=0.15, top=0.92, hspace=0.4, wspace=0.3)
+        plt.tight_layout(rect=[0, 0.10, 1, 0.95])
 
         # 保存
         output_path = self.output_dir / output_filename
@@ -511,7 +537,7 @@ class SurveyResultPlotter:
         # 図のサイズ設定（2行×4列のレイアウト）
         ncols = 4  # 列数
         nrows = (num_questions + ncols - 1) // ncols  # 必要な行数を計算
-        fig, axes = plt.subplots(nrows, ncols, figsize=(3.5 * ncols, 7 * nrows))
+        fig, axes = plt.subplots(nrows, ncols, figsize=(3.5 * ncols, 5 * nrows))
 
         # axesを1次元配列に変換（アクセスしやすくする）
         axes = axes.flatten() if num_questions > 1 else [axes]
@@ -603,20 +629,30 @@ class SurveyResultPlotter:
             # 凡例（最初の質問のみ）
             if q_idx == 0:
                 from matplotlib.patches import Patch
+                from matplotlib.lines import Line2D
                 legend_elements = [
                     Patch(facecolor='#3498db', alpha=0.6, label='ＵＩ１'),
-                    Patch(facecolor='#e74c3c', alpha=0.6, label='ＵＩ２')
+                    Patch(facecolor='#e74c3c', alpha=0.6, label='ＵＩ２'),
+                    Line2D([0], [0], marker='D', color='w', markerfacecolor='red',
+                          markersize=6, label='平均値（赤ひし形）'),
+                    Line2D([0], [0], color='black', linewidth=1.5, label='中央値（箱内の線）'),
+                    Patch(facecolor='gray', alpha=0.3, label='箱（第１〜第３四分位）'),
+                    Line2D([0], [0], color='black', linewidth=1, linestyle='-',
+                          label='ひげ（最小値・最大値）')
                 ]
-                ax.legend(handles=legend_elements, loc='upper left', fontsize=10, prop=jp_font_prop)
+                # 凡例を図の外側（下部中央）に配置
+                fig.legend(handles=legend_elements, loc='lower center',
+                          bbox_to_anchor=(0.5, -0.02), ncol=3, fontsize=8,
+                          prop=jp_font_prop, frameon=True)
 
         # 使用されていないサブプロットを非表示にする
         total_subplots = nrows * ncols
         for idx in range(num_questions, total_subplots):
             axes[idx].set_visible(False)
 
-        # レイアウト調整（上部にタイトル、下部にラベル用のスペースを確保）
-        plt.subplots_adjust(bottom=0.10, top=0.92, hspace=0.4, wspace=0.3)
-        plt.tight_layout(rect=[0, 0.05, 1, 0.95])
+        # レイアウト調整（上部にタイトル、下部にラベル・凡例用のスペースを確保）
+        plt.subplots_adjust(bottom=0.15, top=0.92, hspace=0.4, wspace=0.3)
+        plt.tight_layout(rect=[0, 0.10, 1, 0.95])
 
         # 保存
         output_path = self.output_dir / output_filename
@@ -648,7 +684,7 @@ class SurveyResultPlotter:
         # 図のサイズ設定（2行×4列のレイアウト）
         ncols = 4  # 列数
         nrows = (num_questions + ncols - 1) // ncols  # 必要な行数を計算
-        fig, axes = plt.subplots(nrows, ncols, figsize=(3.5 * ncols, 7 * nrows))
+        fig, axes = plt.subplots(nrows, ncols, figsize=(3.5 * ncols, 5 * nrows))
 
         # axesを1次元配列に変換（アクセスしやすくする）
         axes = axes.flatten() if num_questions > 1 else [axes]
@@ -757,20 +793,29 @@ class SurveyResultPlotter:
             # 凡例（最初のグラフのみ）
             if q_idx == 0:
                 from matplotlib.patches import Patch
+                from matplotlib.lines import Line2D
                 legend_elements = [
                     Patch(facecolor='#3498db', alpha=0.6, label='ＵＩ１'),
-                    Patch(facecolor='#e74c3c', alpha=0.6, label='ＵＩ２')
+                    Patch(facecolor='#e74c3c', alpha=0.6, label='ＵＩ２'),
+                    Line2D([0], [0], color='red', linewidth=2, label='平均値（赤線）'),
+                    Line2D([0], [0], color='black', linewidth=2, label='中央値（黒線）'),
+                    Patch(facecolor='gray', alpha=0.3, label='分布（ヴァイオリン形状）'),
+                    Line2D([0], [0], color='black', linewidth=1, linestyle='-',
+                          label='範囲（最小値・最大値）')
                 ]
-                ax.legend(handles=legend_elements, loc='upper left', fontsize=10, prop=jp_font_prop)
+                # 凡例を図の外側（下部中央）に配置
+                fig.legend(handles=legend_elements, loc='lower center',
+                          bbox_to_anchor=(0.5, -0.02), ncol=3, fontsize=8,
+                          prop=jp_font_prop, frameon=True)
 
         # 使用されていないサブプロットを非表示にする
         total_subplots = nrows * ncols
         for idx in range(num_questions, total_subplots):
             axes[idx].set_visible(False)
 
-        # レイアウト調整
-        plt.subplots_adjust(bottom=0.10, top=0.92, hspace=0.4, wspace=0.3)
-        plt.tight_layout(rect=[0, 0.05, 1, 0.95])
+        # レイアウト調整（上部にタイトル、下部にラベル・凡例用のスペースを確保）
+        plt.subplots_adjust(bottom=0.15, top=0.92, hspace=0.4, wspace=0.3)
+        plt.tight_layout(rect=[0, 0.10, 1, 0.95])
 
         # 保存
         output_path = self.output_dir / output_filename
