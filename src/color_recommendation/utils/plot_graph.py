@@ -355,23 +355,23 @@ def save_plot_recall_at_k_sort_types(illustrator_list, sort_types, check_subject
             markersize=3
         )
 
-    plt.title(f"recall@k({check_subject})", color='black')
+    plt.title(f"recall@k({check_subject})", color='red', fontsize=14, fontweight='bold')
     plt.ylim(0, 1)
     # plt.xlim(0, X_MAX)
-    plt.xlabel('color_scheme', color='black')
-    plt.ylabel('recall', color='black')
+    plt.xlabel('color_scheme', color='red', fontsize=12, fontweight='bold')
+    plt.ylabel('recall', color='red', fontsize=12, fontweight='bold')
     plt.grid(True, color='gray', alpha=0.5)
 
-    # 軸の目盛りラベルを黒に設定
+    # 軸の目盛りラベルを赤に設定（テスト）
     ax = plt.gca()
-    ax.tick_params(axis='x', colors='black')
-    ax.tick_params(axis='y', colors='black')
+    ax.tick_params(axis='x', colors='red', labelsize=10)
+    ax.tick_params(axis='y', colors='red', labelsize=10)
     ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f"{int(x)}" if x == int(x) else ""))
 
     legend = plt.legend(title="sort_type", fontsize=8, loc=legend_location)
-    legend.get_title().set_color('black')
+    legend.get_title().set_color('red')
     for text in legend.get_texts():
-        text.set_color('black')
+        text.set_color('red')
     output_file_path = f'src/color_recommendation/data/output/graph_pdf/{check_subject}_recall_at_k_error_bar_sort_types.pdf'
     plt.savefig(output_file_path, bbox_inches="tight", format='pdf', facecolor='white', edgecolor='none', transparent=False)
     plt.clf()
