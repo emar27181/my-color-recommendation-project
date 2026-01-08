@@ -25,13 +25,13 @@ matplotlib.rcParams['axes.unicode_minus'] = False
 
 # 質問ラベル
 QUESTION_LABELS = [
-    "色が多すぎると感じた",
-    "色が少なすぎると感じた",
-    "塗りたい色が見つかった",
-    "バランスよく塗れた",
-    "スムーズに色を選べた",
-    "絵の出来に満足できた",
-    "UIに満足できた"
+    "Ｑ１：色が多すぎると感じた",
+    "Ｑ２：色が少なすぎると感じた",
+    "Ｑ３：塗りたい色が見つかった",
+    "Ｑ４：バランスよく塗れた",
+    "Ｑ５：スムーズに色を選べた",
+    "Ｑ６：絵の出来に満足できた",
+    "Ｑ７：ＵＩに満足できた"
 ]
 
 
@@ -141,7 +141,8 @@ def plot_boxplot_comparison(ui1_data, ui2_data, participant_count, stats, output
         positions = [1, 2]
 
         bp = ax.boxplot(data, positions=positions, widths=0.6, patch_artist=True,
-                       showmeans=True, meanprops=dict(marker='D', markerfacecolor='red', markersize=6))
+                       showmeans=True, meanprops=dict(marker='D', markerfacecolor='red', markersize=6),
+                       medianprops=dict(color='black', linewidth=2))
 
         colors = ['#3498db', '#e74c3c']
         for patch, color in zip(bp['boxes'], colors):
@@ -172,7 +173,7 @@ def plot_boxplot_comparison(ui1_data, ui2_data, participant_count, stats, output
         ax.set_axisbelow(True)
 
         question_label = QUESTION_LABELS[q_idx] if q_idx < len(QUESTION_LABELS) else f"Q{q_idx + 1}"
-        ax.set_xlabel(f'Q{q_idx + 1}\n{question_label}', fontsize=11, fontweight='bold',
+        ax.set_xlabel(question_label, fontsize=11, fontweight='bold',
                      labelpad=10, fontproperties=jp_font_prop)
 
         # 統計情報表示は一旦オフ（別表で表示）
@@ -214,7 +215,7 @@ def plot_boxplot_comparison(ui1_data, ui2_data, participant_count, stats, output
 
     output_dir = Path("/mnt/c/WSL-directory/my-color-recommendation-project/src/color_recommendation/data/output/experiment_analysis")
     output_path = output_dir / output_filename
-    plt.savefig(output_path, format='pdf', dpi=300, bbox_inches='tight')
+    plt.savefig(output_path, format='pdf', dpi=300, bbox_inches='tight', facecolor='white', transparent=False)
     print(f"✅ グラフ保存完了: {output_path}")
     plt.close()
 
@@ -279,7 +280,7 @@ def plot_violin_comparison(ui1_data, ui2_data, participant_count, stats, output_
         ax.set_axisbelow(True)
 
         question_label = QUESTION_LABELS[q_idx] if q_idx < len(QUESTION_LABELS) else f"Q{q_idx + 1}"
-        ax.set_xlabel(f'Q{q_idx + 1}\n{question_label}', fontsize=11, fontweight='bold',
+        ax.set_xlabel(question_label, fontsize=11, fontweight='bold',
                      labelpad=10, fontproperties=jp_font_prop)
 
         # 統計情報表示は一旦オフ（別表で表示）
@@ -317,7 +318,7 @@ def plot_violin_comparison(ui1_data, ui2_data, participant_count, stats, output_
 
     output_dir = Path("/mnt/c/WSL-directory/my-color-recommendation-project/src/color_recommendation/data/output/experiment_analysis")
     output_path = output_dir / output_filename
-    plt.savefig(output_path, format='pdf', dpi=300, bbox_inches='tight')
+    plt.savefig(output_path, format='pdf', dpi=300, bbox_inches='tight', facecolor='white', transparent=False)
     print(f"✅ グラフ保存完了: {output_path}")
     plt.close()
 
@@ -355,7 +356,8 @@ def plot_task_duration_comparison(all_data, participant_count, stats, output_fil
     positions = [1, 2]
 
     bp = ax.boxplot(data, positions=positions, widths=0.6, patch_artist=True,
-                   showmeans=True, meanprops=dict(marker='D', markerfacecolor='red', markersize=8))
+                   showmeans=True, meanprops=dict(marker='D', markerfacecolor='red', markersize=8),
+                   medianprops=dict(color='black', linewidth=2))
 
     colors = ['#3498db', '#e74c3c']
     for patch, color in zip(bp['boxes'], colors):
@@ -415,7 +417,7 @@ def plot_task_duration_comparison(all_data, participant_count, stats, output_fil
 
     output_dir = Path("/mnt/c/WSL-directory/my-color-recommendation-project/src/color_recommendation/data/output/experiment_analysis")
     output_path = output_dir / output_filename
-    plt.savefig(output_path, format='pdf', dpi=300)
+    plt.savefig(output_path, format='pdf', dpi=300, facecolor='white', transparent=False)
     print(f"✅ グラフ保存完了: {output_path}")
     plt.close()
 

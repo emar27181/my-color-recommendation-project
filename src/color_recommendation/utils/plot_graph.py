@@ -14,7 +14,11 @@ import colorsys
 import itertools
 import numpy as np
 
+# seabornのスタイルを完全にリセット（matplotlibの設定より先に実行）
+sns.reset_orig()
+
 # PDF出力時の色設定（文字や軸が見えるように）
+# ※seabornのリセット後に設定することで、seabornに上書きされないようにする
 matplotlib.rcParams['text.color'] = 'black'
 matplotlib.rcParams['axes.labelcolor'] = 'black'
 matplotlib.rcParams['xtick.color'] = 'black'
@@ -34,14 +38,13 @@ matplotlib.rcParams['legend.edgecolor'] = 'black'
 # グリッド線の設定
 matplotlib.rcParams['grid.color'] = 'gray'
 matplotlib.rcParams['grid.alpha'] = 0.5
-
-# seabornのスタイルを完全にリセット
-sns.reset_orig()
-sns.set_palette("deep")  # デフォルトカラーパレット
-
 # PDFバックエンドの設定
 matplotlib.rcParams['pdf.fonttype'] = 42  # TrueTypeフォントを埋め込む
 matplotlib.rcParams['ps.fonttype'] = 42
+
+# seabornのカラーパレット設定（色の設定の後に実行）
+# ※パレットのみ設定し、スタイルは変更しない
+sns.set_palette("deep")
 
 DEBUG = False
 DEBUG = True  # デバッグモードを有効にする場合はTrueに設定
@@ -74,13 +77,22 @@ def plot_graph_3d(data, clusters, output_file_path):
 
 def plot_graph(plot_data, graph_name, output_file_path):
     # プロット
+    fig = plt.figure()
+    fig.patch.set_facecolor('white')  # 背景を明示的に白に設定
+
     plt.plot(plot_data, label=f'{graph_name}', marker='o')
-    plt.title(f'{graph_name}')
+    plt.title(f'{graph_name}', color='black')
     plt.ylim(0, 1)
     plt.xlim(0, 60)
-    plt.xlabel('color_scheme')
-    plt.ylabel(f'{graph_name}')
-    plt.grid(True)
+    plt.xlabel('color_scheme', color='black')
+    plt.ylabel(f'{graph_name}', color='black')
+    plt.grid(True, color='gray', alpha=0.5)
+
+    # 軸の目盛り色を設定
+    ax = plt.gca()
+    ax.set_facecolor('white')  # 軸の背景も白に設定
+    ax.tick_params(axis='x', colors='black')
+    ax.tick_params(axis='y', colors='black')
 
     # ファイルに保存
     plt.savefig(output_file_path, format='pdf', facecolor='white', edgecolor='white', transparent=False)
@@ -355,23 +367,23 @@ def save_plot_recall_at_k_sort_types(illustrator_list, sort_types, check_subject
             markersize=3
         )
 
-    plt.title(f"recall@k({check_subject})", color='red', fontsize=14, fontweight='bold')
+    plt.title(f"recall@k({check_subject})", color='black', fontsize=14, fontweight='bold')
     plt.ylim(0, 1)
     # plt.xlim(0, X_MAX)
-    plt.xlabel('color_scheme', color='red', fontsize=12, fontweight='bold')
-    plt.ylabel('recall', color='red', fontsize=12, fontweight='bold')
+    plt.xlabel('color_scheme', color='black', fontsize=12, fontweight='bold')
+    plt.ylabel('recall', color='black', fontsize=12, fontweight='bold')
     plt.grid(True, color='gray', alpha=0.5)
 
-    # 軸の目盛りラベルを赤に設定（テスト）
+    # 軸の目盛りラベルを黒に設定
     ax = plt.gca()
-    ax.tick_params(axis='x', colors='red', labelsize=10)
-    ax.tick_params(axis='y', colors='red', labelsize=10)
+    ax.tick_params(axis='x', colors='black', labelsize=10)
+    ax.tick_params(axis='y', colors='black', labelsize=10)
     ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f"{int(x)}" if x == int(x) else ""))
 
     legend = plt.legend(title="sort_type", fontsize=8, loc=legend_location)
-    legend.get_title().set_color('red')
+    legend.get_title().set_color('black')
     for text in legend.get_texts():
-        text.set_color('red')
+        text.set_color('black')
     output_file_path = f'src/color_recommendation/data/output/graph_pdf/{check_subject}_recall_at_k_error_bar_sort_types.pdf'
     plt.savefig(output_file_path, bbox_inches="tight", format='pdf', facecolor='white', edgecolor='none', transparent=False)
     plt.clf()
@@ -664,17 +676,30 @@ def save_plot_bar_from_used_achromatic_colors_average_rate_for_illustrators(illu
     achromatic_rates = list(used_achromatic_colors_average_rate_for_illustrators.values())
 
     # 積み上げ棒グラフの描画
-    plt.figure(figsize=(20, 10))
+    fig = plt.figure(figsize=(20, 10))
+    fig.patch.set_facecolor('white')  # 背景を明示的に白に設定
+
     # 無彩色部分（灰色）を描画
     plt.bar(illustrators, achromatic_rates, color='#AAAAAA', label='achromatic_rate')
     # 有彩色部分（赤色）：高さは (1 - 無彩色の割合) で、bottom を無彩色の割合に指定
     plt.bar(illustrators, [1 - rate for rate in achromatic_rates], bottom=achromatic_rates, color='#990000', label='choromatic_rate')
 
-    plt.title("Used Achromatic Colors Average Rate by Illustrator")
-    plt.xlabel("Illustrator")
-    plt.ylabel("achromatic rate vs chromatic rate")
-    plt.xticks(rotation=45)
-    plt.legend()
+    plt.title("Used Achromatic Colors Average Rate by Illustrator", color='black')
+    plt.xlabel("Illustrator", color='black')
+    plt.ylabel("achromatic rate vs chromatic rate", color='black')
+    plt.xticks(rotation=45, color='black')
+
+    # 軸の目盛り色を設定
+    ax = plt.gca()
+    ax.set_facecolor('white')  # 軸の背景も白に設定
+    ax.tick_params(axis='x', colors='black')
+    ax.tick_params(axis='y', colors='black')
+
+    # 凡例の色を設定
+    legend = plt.legend()
+    for text in legend.get_texts():
+        text.set_color('black')
+
     plt.tight_layout()
 
     output_file_path = 'src/color_recommendation/data/output/graph_pdf/bar_from_used_achromatic_colors_average_rate.pdf'
@@ -726,11 +751,28 @@ def save_plot_violin_from_mean_resultant_length_count_for_illustrators(illustrat
     df = pd.DataFrame(records)
 
     # ヴァイオリン図を描画（横軸がElement、縦軸がIllustrator）
-    plt.figure(figsize=(10, 12))
+    fig = plt.figure(figsize=(10, 12))
+    fig.patch.set_facecolor('white')  # 背景を明示的に白に設定
+
+    # seabornのviolinplotを呼び出し
     sns.violinplot(x="Element", y="Illustrator", data=df, inner="quartile", cut=0, scale="count")
-    plt.title("Violin Plot of Mean resultant length distribution by Illustrator")
-    plt.xlabel("Mean resultant length(0~12)")
-    plt.ylabel("Illustrator")
+
+    # seabornが設定を上書きするため、violinplot後に再度色設定を適用
+    plt.title("Violin Plot of Mean resultant length distribution by Illustrator", color='black')
+    plt.xlabel("Mean resultant length(0~12)", color='black')
+    plt.ylabel("Illustrator", color='black')
+
+    # 軸の目盛り色を設定（seaborn後に再適用）
+    ax = plt.gca()
+    ax.set_facecolor('white')  # 軸の背景も白に設定
+    ax.tick_params(axis='x', colors='black', labelcolor='black')
+    ax.tick_params(axis='y', colors='black', labelcolor='black')
+    # Y軸ラベル（イラストレーター名）の色も明示的に設定
+    for label in ax.get_yticklabels():
+        label.set_color('black')
+    for label in ax.get_xticklabels():
+        label.set_color('black')
+
     plt.tight_layout()
 
     output_file_path = f'src/color_recommendation/data/output/graph_pdf/violin_from_mean_resultant_length.pdf'
@@ -769,11 +811,28 @@ def save_plot_violin_from_used_hues_count_for_illustrators(illustrator_list):
     df = pd.DataFrame(records)
 
     # ヴァイオリン図を描画（横軸がElement、縦軸がIllustrator）
-    plt.figure(figsize=(10, 12))
+    fig = plt.figure(figsize=(10, 12))
+    fig.patch.set_facecolor('white')  # 背景を明示的に白に設定
+
+    # seabornのviolinplotを呼び出し
     sns.violinplot(x="Element", y="Illustrator", data=df, inner="quartile", cut=0, scale="count")
-    plt.title("Violin Plot of Used hues count by Illustrator")
-    plt.xlabel("Used hues count")
-    plt.ylabel("Illustrator")
+
+    # seabornが設定を上書きするため、violinplot後に再度色設定を適用
+    plt.title("Violin Plot of Used hues count by Illustrator", color='black')
+    plt.xlabel("Used hues count", color='black')
+    plt.ylabel("Illustrator", color='black')
+
+    # 軸の目盛り色を設定（seaborn後に再適用）
+    ax = plt.gca()
+    ax.set_facecolor('white')  # 軸の背景も白に設定
+    ax.tick_params(axis='x', colors='black', labelcolor='black')
+    ax.tick_params(axis='y', colors='black', labelcolor='black')
+    # Y軸ラベル（イラストレーター名）の色も明示的に設定
+    for label in ax.get_yticklabels():
+        label.set_color('black')
+    for label in ax.get_xticklabels():
+        label.set_color('black')
+
     plt.tight_layout()
 
     output_file_path = f'src/color_recommendation/data/output/graph_pdf/violin_from_used_hues_count.pdf'
@@ -913,14 +972,23 @@ def plot_used_colors_scatter(illustrator_name):
     lightness_list, saturation_list, color_labels, sizes = _get_scatter_data_by_used_colors(data)
 
     # 散布図を作成
-    plt.figure(figsize=(8, 6))
+    fig = plt.figure(figsize=(8, 6))
+    fig.patch.set_facecolor('white')  # 背景を明示的に白に設定
+
     plt.scatter(saturation_list, lightness_list, s=sizes, c=color_labels, edgecolor=None)
 
     # グラフの設定
-    plt.title(f'{illustrator_name}', fontsize=14)
-    plt.xlabel('Saturation', fontsize=12)
-    plt.ylabel('Lightness', fontsize=12)
-    plt.grid(True)
+    plt.title(f'{illustrator_name}', fontsize=14, color='black')
+    plt.xlabel('Saturation', fontsize=12, color='black')
+    plt.ylabel('Lightness', fontsize=12, color='black')
+    plt.grid(True, color='gray', alpha=0.5)
+
+    # 軸の目盛り色を設定
+    ax = plt.gca()
+    ax.set_facecolor('white')  # 軸の背景も白に設定
+    ax.tick_params(axis='x', colors='black')
+    ax.tick_params(axis='y', colors='black')
+
     # plt.show()
 
     output_file_path = f'src/color_recommendation/data/output/scatter_graph/scatter_plot_{illustrator_name}.pdf'
@@ -940,12 +1008,25 @@ def save_plot_scatter_for_illustrators(illustrater_list):
 
 def save_plot_heatmap(illustrator_name, data):
 
-    plt.figure(figsize=(6, 6))
+    fig = plt.figure(figsize=(6, 6))
+    fig.patch.set_facecolor('white')  # 背景を明示的に白に設定
+
     plt.imshow(data, origin='lower')
-    plt.title("Heatmap of Provided Data")
-    plt.xlabel("Column Index")
-    plt.ylabel("Row Index")
-    plt.colorbar(label="Value")
+    plt.title("Heatmap of Provided Data", color='black')
+    plt.xlabel("Column Index", color='black')
+    plt.ylabel("Row Index", color='black')
+
+    # カラーバーの設定
+    cbar = plt.colorbar(label="Value")
+    cbar.set_label("Value", color='black')
+    cbar.ax.tick_params(colors='black')
+
+    # 軸の目盛り色を設定
+    ax = plt.gca()
+    ax.set_facecolor('white')  # 軸の背景も白に設定
+    ax.tick_params(axis='x', colors='black')
+    ax.tick_params(axis='y', colors='black')
+
     output_file_path = f'src/color_recommendation/data/output/heatmap/heatmap_plot_{illustrator_name}.pdf'
     plt.savefig(output_file_path, format='pdf', facecolor='white', edgecolor='white', transparent=False)
     plt.clf()
