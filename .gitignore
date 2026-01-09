@@ -16,6 +16,8 @@ __pycache__/
 # 設定ファイル（テンプレートファイルは追跡）
 src/color_recommendation/utils/config/constants_dev.py
 !src/color_recommendation/utils/config/constants_dev_template.py
+src/color_recommendation/config/config.py
+!src/color_recommendation/config/config.example.py
 
 # データディレクトリ（構造は.gitkeepで保持、中身は除外）
 src/color_recommendation/data/input/**/*

@@ -285,10 +285,22 @@ http://localhost:5000/
 
 ### 🧪 研究・実験モード
 
+**推奨：メインスクリプト（設定ファイルベース）**
+```bash
+# 1. 設定ファイルを作成
+cp src/color_recommendation/config/config.example.py src/color_recommendation/config/config.py
+
+# 2. config.py を編集して実行内容をカスタマイズ
+
+# 3. メインスクリプトを実行
+cd src/color_recommendation
+python main.py
+```
+
 最新の実験機能を使用する場合：
 ```bash
 cd src/color_recommendation
-python sandbox3.py  # 最新実験コード（推奨）
+python sandbox3.py  # 最新実験コード
 ```
 
 パラメータ調整やバッチ処理：

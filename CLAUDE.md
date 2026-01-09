@@ -77,6 +77,66 @@
 
 ---
 
+## 🚀 メイン実行スクリプト（main.py）
+
+### 📋 概要
+
+**main.py**は、プロジェクトのメイン実行スクリプトで、**設定ファイル（config.py）ベース**で動作します。sandbox3.pyの機能を整理し、柔軟な実行制御を実現しています。
+
+### 🔧 設定ファイルシステム
+
+#### ファイル構成
+```
+src/color_recommendation/config/
+├── config.example.py  # 設定テンプレート（git追跡）
+└── config.py          # 実際の設定（git追跡しない）
+```
+
+#### 設定項目
+- **実行制御フラグ**:
+  - `IS_SAVE_GRAPH`: グラフ生成のON/OFF
+  - `IS_PLOT_SURVEY_RESULTS`: アンケート結果グラフ生成のON/OFF
+  - `DEBUG_MODE`: デバッグモード（1名のイラストレーターのみで実行）
+  - `RUN_EXISTING_APP_COMPARISON`: 既存アプリとの比較実行
+
+- **データ設定**:
+  - `ILLUSTRATOR_LIST`: 分析対象イラストレーターリスト
+  - `DEBUG_ILLUSTRATOR_LIST`: デバッグ用イラストレーターリスト
+
+- **推薦設定**:
+  - `SORT_TYPES`: ソートタイプリスト（random, used_color_count等）
+  - `RECOMMEND_TYPES`: 推薦タイプリスト（hue, tone, color等）
+  - `DIFF_VALUES`: 差分値リスト（明度・彩度のバリエーション）
+  - `APP_NAMES`: 比較対象アプリ名リスト
+
+- **グラフ生成フラグ**:
+  - `GENERATE_RECALL_AT_K_SORT_TYPES`: ソートタイプ別recall@kグラフ
+  - `GENERATE_ACHROMATIC_BAR`: 無彩色使用率の棒グラフ
+  - `GENERATE_MEAN_RESULTANT_VIOLIN`: 平均結果長のヴァイオリン図
+  - その他多数のグラフ生成フラグ
+
+### 📝 使用方法
+
+```bash
+# 1. 設定ファイルを作成
+cp src/color_recommendation/config/config.example.py src/color_recommendation/config/config.py
+
+# 2. config.py を編集して実行内容をカスタマイズ
+
+# 3. メインスクリプトを実行
+cd src/color_recommendation
+python main.py
+```
+
+### 💡 利点
+
+- **設定の分離**: 実行ロジックと設定を分離、メンテナンス性向上
+- **個人設定の保存**: config.pyはgit追跡されないため、個人の実験設定を保存可能
+- **柔軟な実行制御**: フラグベースで必要な処理のみ実行
+- **再現性**: config.example.pyをテンプレートとして、設定を共有可能
+
+---
+
 ## 📋 プロジェクト機能・関数一覧（開発者向けリファレンス）
 
 ### 🎯 メインシステム構成
@@ -86,6 +146,11 @@
   - `/`: 色推薦画面
   - `/color_recommend`: 推薦機能API
   - `/about`: 概要ページ
+
+- **`src/color_recommendation/main.py`**: メイン実行スクリプト（推奨）
+  - 設定ファイル（config.py）ベースで動作
+  - グラフ生成・統計分析の統合実行
+  - デバッグモード・既存アプリ比較等の制御
 
 - **`src/color_recommendation/color_recommendation.py`**: 色推薦システム中核
   - `get_recommendations()`: 推薦配色生成統一インターフェース
