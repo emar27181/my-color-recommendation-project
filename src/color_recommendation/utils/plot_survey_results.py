@@ -264,7 +264,7 @@ class SurveyResultPlotter:
             ))
 
         title_text = (
-            f'ＵＩ評価アンケート結果比較 (n={to_fullwidth(str(participant_count))})\n'
+            f'ＵＩ評価アンケート結果比較 (n={to_fullwidth(str(participant_count))}名)\n'
             f'順序: ＵＩ１→ＵＩ２: {to_fullwidth(str(stats["ui1_first"]))}名, ＵＩ２→ＵＩ１: {to_fullwidth(str(stats["ui2_first"]))}名\n'
             f'好み: ＵＩ１: {to_fullwidth(str(stats["ui1_favorite"]))}名, ＵＩ２: {to_fullwidth(str(stats["ui2_favorite"]))}名'
         )
@@ -405,7 +405,7 @@ class SurveyResultPlotter:
             ))
 
         title_text = (
-            f'ＵＩ評価アンケート結果比較（ヴァイオリン図） (n={to_fullwidth(str(participant_count))})\n'
+            f'ＵＩ評価アンケート結果比較（ヴァイオリン図） (n={to_fullwidth(str(participant_count))}名)\n'
             f'順序: ＵＩ１→ＵＩ２: {to_fullwidth(str(stats["ui1_first"]))}名, ＵＩ２→ＵＩ１: {to_fullwidth(str(stats["ui2_first"]))}名\n'
             f'好み: ＵＩ１: {to_fullwidth(str(stats["ui1_favorite"]))}名, ＵＩ２: {to_fullwidth(str(stats["ui2_favorite"]))}名'
         )
@@ -552,7 +552,7 @@ class SurveyResultPlotter:
             ))
 
         title_text = (
-            f'ＵＩ評価アンケート結果比較（第一印象のみ） (n={to_fullwidth(str(participant_count))})\n'
+            f'ＵＩ評価アンケート結果比較（第一印象のみ） (n={to_fullwidth(str(participant_count))}名)\n'
             f'ＵＩ１を最初に使用: {to_fullwidth(str(stats["ui1_first"]))}名, ＵＩ２を最初に使用: {to_fullwidth(str(stats["ui2_first"]))}名\n'
             f'好み: ＵＩ１: {to_fullwidth(str(stats["ui1_favorite"]))}名, ＵＩ２: {to_fullwidth(str(stats["ui2_favorite"]))}名'
         )
@@ -698,7 +698,7 @@ class SurveyResultPlotter:
             ))
 
         title_text = (
-            f'ＵＩ評価アンケート結果比較（ヴァイオリン図・第一印象のみ） (n={to_fullwidth(str(participant_count))})\n'
+            f'ＵＩ評価アンケート結果比較（ヴァイオリン図・第一印象のみ） (n={to_fullwidth(str(participant_count))}名)\n'
             f'ＵＩ１を最初に使用: {to_fullwidth(str(stats["ui1_first"]))}名, ＵＩ２を最初に使用: {to_fullwidth(str(stats["ui2_first"]))}名\n'
             f'好み: ＵＩ１: {to_fullwidth(str(stats["ui1_favorite"]))}名, ＵＩ２: {to_fullwidth(str(stats["ui2_favorite"]))}名'
         )
@@ -991,7 +991,7 @@ class SurveyResultPlotter:
             ))
 
         title_text = (
-            f'タスク操作時間比較 (n={to_fullwidth(str(participant_count))})\n'
+            f'タスク操作時間比較 (n={to_fullwidth(str(participant_count))}名)\n'
             f'順序: ＵＩ１→ＵＩ２: {to_fullwidth(str(stats["ui1_first"]))}名, ＵＩ２→ＵＩ１: {to_fullwidth(str(stats["ui2_first"]))}名\n'
             f'好み: ＵＩ１: {to_fullwidth(str(stats["ui1_favorite"]))}名, ＵＩ２: {to_fullwidth(str(stats["ui2_favorite"]))}名'
         )

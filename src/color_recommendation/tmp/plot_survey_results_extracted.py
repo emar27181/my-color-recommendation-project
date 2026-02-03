@@ -129,7 +129,7 @@ def plot_boxplot_comparison(ui1_data, ui2_data, participant_count, stats, output
     axes = axes.flatten() if num_questions > 1 else [axes]
 
     title_text = (
-        f'ＵＩ評価アンケート結果比較 (n={to_fullwidth(str(participant_count))})\n'
+        f'ＵＩ評価アンケート結果比較 (n={to_fullwidth(str(participant_count))}名)\n'
         f'順序: ＵＩ１→ＵＩ２: {to_fullwidth(str(stats["ui1_first"]))}名, ＵＩ２→ＵＩ１: {to_fullwidth(str(stats["ui2_first"]))}名\n'
         f'好み: ＵＩ１: {to_fullwidth(str(stats["ui1_favorite"]))}名, ＵＩ２: {to_fullwidth(str(stats["ui2_favorite"]))}名'
     )
@@ -233,7 +233,7 @@ def plot_violin_comparison(ui1_data, ui2_data, participant_count, stats, output_
     axes = axes.flatten() if num_questions > 1 else [axes]
 
     title_text = (
-        f'ＵＩ評価アンケート結果比較（ヴァイオリン図） (n={to_fullwidth(str(participant_count))})\n'
+        f'ＵＩ評価アンケート結果比較（ヴァイオリン図） (n={to_fullwidth(str(participant_count))}名)\n'
         f'順序: ＵＩ１→ＵＩ２: {to_fullwidth(str(stats["ui1_first"]))}名, ＵＩ２→ＵＩ１: {to_fullwidth(str(stats["ui2_first"]))}名\n'
         f'好み: ＵＩ１: {to_fullwidth(str(stats["ui1_favorite"]))}名, ＵＩ２: {to_fullwidth(str(stats["ui2_favorite"]))}名'
     )
@@ -346,7 +346,7 @@ def plot_task_duration_comparison(all_data, participant_count, stats, output_fil
     fig, ax = plt.subplots(figsize=(8, 6))
 
     title_text = (
-        f'タスク操作時間比較 (n={to_fullwidth(str(participant_count))})\n'
+        f'タスク操作時間比較 (n={to_fullwidth(str(participant_count))}名)\n'
         f'順序: ＵＩ１→ＵＩ２: {to_fullwidth(str(stats["ui1_first"]))}名, ＵＩ２→ＵＩ１: {to_fullwidth(str(stats["ui2_first"]))}名\n'
         f'好み: ＵＩ１: {to_fullwidth(str(stats["ui1_favorite"]))}名, ＵＩ２: {to_fullwidth(str(stats["ui2_favorite"]))}名'
     )

@@ -12,7 +12,7 @@ BASE_DIR = os.path.join(os.path.dirname(__file__), '..', 'data', 'input', 'exper
 
 PARTICIPANTS = [
     "ema_kennosuke", "ema_megumi", "ikeyama", "irie", "ito_mitsuki",
-    "ito_yuta", "kawasaki", "kurita", "matsusita", "naka",
+    "ito_yuta", "kawasaki", "kurita", "matsusita", "nagaoka", "naka",
     "niiya", "nishio", "oomuro", "sato_hiromu", "sato_takehiro",
     "tsuchiya", "uemura", "ugawa", "ukigai"
 ]
