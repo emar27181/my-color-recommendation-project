@@ -1,6 +1,7 @@
 import json
 import matplotlib.pyplot as plt
 import matplotlib
+import matplotlib.style as mplstyle
 from utils.helpers.json_utils import get_json_data, get_dir_list
 from utils.helpers.color_utils import print_color_scheme
 from utils.analyze_illustrator_statistics import get_statistics_by_illustrator
@@ -14,37 +15,50 @@ import colorsys
 import itertools
 import numpy as np
 
-# seabornのスタイルを完全にリセット（matplotlibの設定より先に実行）
-sns.reset_orig()
+def _apply_black_text_style():
+    """
+    PDF出力時にテキストが確実に黒で表示されるようにスタイルを適用する関数
+    seabornやその他のライブラリによる上書きを防ぐため、各グラフ生成前に呼び出す
+    """
+    # matplotlibのデフォルトスタイルを適用
+    mplstyle.use('default')
 
-# PDF出力時の色設定（文字や軸が見えるように）
-# ※seabornのリセット後に設定することで、seabornに上書きされないようにする
-matplotlib.rcParams['text.color'] = 'black'
-matplotlib.rcParams['axes.labelcolor'] = 'black'
-matplotlib.rcParams['xtick.color'] = 'black'
-matplotlib.rcParams['ytick.color'] = 'black'
-matplotlib.rcParams['axes.edgecolor'] = 'black'
-matplotlib.rcParams['axes.facecolor'] = 'white'
-matplotlib.rcParams['figure.facecolor'] = 'white'
-matplotlib.rcParams['savefig.facecolor'] = 'white'
-matplotlib.rcParams['savefig.edgecolor'] = 'white'
-matplotlib.rcParams['axes.spines.left'] = True
-matplotlib.rcParams['axes.spines.bottom'] = True
-matplotlib.rcParams['axes.spines.top'] = True
-matplotlib.rcParams['axes.spines.right'] = True
-# 凡例の設定
-matplotlib.rcParams['legend.facecolor'] = 'white'
-matplotlib.rcParams['legend.edgecolor'] = 'black'
-# グリッド線の設定
-matplotlib.rcParams['grid.color'] = 'gray'
-matplotlib.rcParams['grid.alpha'] = 0.5
-# PDFバックエンドの設定
-matplotlib.rcParams['pdf.fonttype'] = 42  # TrueTypeフォントを埋め込む
-matplotlib.rcParams['ps.fonttype'] = 42
+    # seabornのスタイルをリセット
+    sns.reset_orig()
 
-# seabornのカラーパレット設定（色の設定の後に実行）
-# ※パレットのみ設定し、スタイルは変更しない
-sns.set_palette("deep")
+    # PDF出力時の色設定（文字や軸が見えるように）
+    matplotlib.rcParams['text.color'] = 'black'
+    matplotlib.rcParams['axes.labelcolor'] = 'black'
+    matplotlib.rcParams['axes.titlecolor'] = 'black'
+    matplotlib.rcParams['xtick.color'] = 'black'
+    matplotlib.rcParams['ytick.color'] = 'black'
+    matplotlib.rcParams['xtick.labelcolor'] = 'black'
+    matplotlib.rcParams['ytick.labelcolor'] = 'black'
+    matplotlib.rcParams['axes.edgecolor'] = 'black'
+    matplotlib.rcParams['axes.facecolor'] = 'white'
+    matplotlib.rcParams['figure.facecolor'] = 'white'
+    matplotlib.rcParams['savefig.facecolor'] = 'white'
+    matplotlib.rcParams['savefig.edgecolor'] = 'white'
+    matplotlib.rcParams['axes.spines.left'] = True
+    matplotlib.rcParams['axes.spines.bottom'] = True
+    matplotlib.rcParams['axes.spines.top'] = True
+    matplotlib.rcParams['axes.spines.right'] = True
+    # 凡例の設定
+    matplotlib.rcParams['legend.facecolor'] = 'white'
+    matplotlib.rcParams['legend.edgecolor'] = 'black'
+    matplotlib.rcParams['legend.labelcolor'] = 'black'
+    # グリッド線の設定
+    matplotlib.rcParams['grid.color'] = 'gray'
+    matplotlib.rcParams['grid.alpha'] = 0.5
+    # PDFバックエンドの設定
+    matplotlib.rcParams['pdf.fonttype'] = 42  # TrueTypeフォントを埋め込む
+    matplotlib.rcParams['ps.fonttype'] = 42
+
+    # seabornのカラーパレットのみ設定（スタイルは変更しない）
+    sns.set_palette("deep")
+
+# 初期化時にスタイルを適用
+_apply_black_text_style()
 
 DEBUG = False
 DEBUG = True  # デバッグモードを有効にする場合はTrueに設定
@@ -322,6 +336,9 @@ def save_plot_recall_at_k_sort_types(illustrator_list, sort_types, check_subject
     """
     提案手法における複数の sort_type を比較して recall@k をプロット（エラーバー付き）する関数
     """
+    # PDF出力時にテキストが黒で表示されるようにスタイルを適用
+    _apply_black_text_style()
+
     X_INTERVAL = 2
     X_MAX = 150
 
@@ -661,6 +678,8 @@ def save_plot_bar_from_used_achromatic_colors_average_rate_for_illustrators(illu
     戻り値:
         None
     """
+    # PDF出力時にテキストが黒で表示されるようにスタイルを適用
+    _apply_black_text_style()
 
     used_achromatic_colors_average_rate_for_illustrators = {}
 
@@ -732,6 +751,8 @@ def save_plot_violin_from_mean_resultant_length_count_for_illustrators(illustrat
     戻り値:
         None
     """
+    # seabornによるスタイル上書きを防ぐため、グラフ生成前にスタイルを適用
+    _apply_black_text_style()
 
     mean_resultant_length_distribution_for_illustrators = {}
 
@@ -791,6 +812,8 @@ def save_plot_violin_from_used_hues_count_for_illustrators(illustrator_list):
     戻り値:
         None
     """
+    # seabornによるスタイル上書きを防ぐため、グラフ生成前にスタイルを適用
+    _apply_black_text_style()
 
     used_hues_counts_for_illustrators = {}
 
@@ -869,6 +892,9 @@ def save_plot_violin_from_used_pccs_distribution_for_illustrators():
     イラストレーターの使用PCCS(1~24)の分布をヴァイオリン図にプロットする関数。
     横軸の背景に色相のグラデーションを表示する。
     """
+    # seabornによるスタイル上書きを防ぐため、グラフ生成前にスタイルを適用
+    _apply_black_text_style()
+
     # ダミーデータまたは既存の関数からデータを取得
     used_pccs_count_sum_distributions_for_illustrators = _extract_used_pccs_count_sum_distribution_from_json()
 
@@ -1007,6 +1033,8 @@ def save_plot_scatter_for_illustrators(illustrater_list):
 
 
 def save_plot_heatmap(illustrator_name, data):
+    # PDF出力時にテキストが黒で表示されるようにスタイルを適用
+    _apply_black_text_style()
 
     fig = plt.figure(figsize=(6, 6))
     fig.patch.set_facecolor('white')  # 背景を明示的に白に設定
