@@ -59,8 +59,10 @@ class SurveyResultPlotter:
             self.base_dir = Path(base_dir)
 
         self.survey_dir = self.base_dir / "questionnaire" / "other"
+        self.other_dir = self.survey_dir  # survey_dirと同じ（metadata, surveyファイルの場所）
 
         # 出力ディレクトリ設定
+        current_file = Path(__file__).resolve()
         self.output_dir = current_file.parent.parent / "data" / "output" / "experiment_analysis"
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -232,7 +234,7 @@ class SurveyResultPlotter:
         ui2_data: List[List[int]],
         participant_count: int,
         stats: Dict,
-        output_filename: str = "survey_boxplot_comparison.pdf"
+        output_filename: str = "01_survey_all_boxplot.pdf"
     ):
         """
         UI1とUI2の箱ひげ図比較を作成
@@ -265,8 +267,7 @@ class SurveyResultPlotter:
 
         title_text = (
             f'ＵＩ評価アンケート結果比較 (n={to_fullwidth(str(participant_count))}名)\n'
-            f'順序: ＵＩ１→ＵＩ２: {to_fullwidth(str(stats["ui1_first"]))}名, ＵＩ２→ＵＩ１: {to_fullwidth(str(stats["ui2_first"]))}名\n'
-            f'好み: ＵＩ１: {to_fullwidth(str(stats["ui1_favorite"]))}名, ＵＩ２: {to_fullwidth(str(stats["ui2_favorite"]))}名'
+            f'順序: ＵＩ１->ＵＩ２: {to_fullwidth(str(stats["ui1_first"]))}名, ＵＩ２->ＵＩ１: {to_fullwidth(str(stats["ui2_first"]))}名'
         )
         fig.suptitle(
             title_text,
@@ -374,7 +375,7 @@ class SurveyResultPlotter:
         ui2_data: List[List[int]],
         participant_count: int,
         stats: Dict,
-        output_filename: str = "survey_violin_comparison.pdf"
+        output_filename: str = "01_survey_all_violin.pdf"
     ):
         """
         UI1とUI2のヴァイオリン図比較を作成
@@ -406,8 +407,7 @@ class SurveyResultPlotter:
 
         title_text = (
             f'ＵＩ評価アンケート結果比較（ヴァイオリン図） (n={to_fullwidth(str(participant_count))}名)\n'
-            f'順序: ＵＩ１→ＵＩ２: {to_fullwidth(str(stats["ui1_first"]))}名, ＵＩ２→ＵＩ１: {to_fullwidth(str(stats["ui2_first"]))}名\n'
-            f'好み: ＵＩ１: {to_fullwidth(str(stats["ui1_favorite"]))}名, ＵＩ２: {to_fullwidth(str(stats["ui2_favorite"]))}名'
+            f'順序: ＵＩ１->ＵＩ２: {to_fullwidth(str(stats["ui1_first"]))}名, ＵＩ２->ＵＩ１: {to_fullwidth(str(stats["ui2_first"]))}名'
         )
         fig.suptitle(
             title_text,
@@ -520,7 +520,7 @@ class SurveyResultPlotter:
         ui2_data: List[List[int]],
         participant_count: int,
         stats: Dict,
-        output_filename: str = "survey_boxplot_first_impression.pdf"
+        output_filename: str = "01_survey_first_boxplot.pdf"
     ):
         """
         UI1とUI2の箱ひげ図比較を作成（第一印象のみ）
@@ -553,8 +553,7 @@ class SurveyResultPlotter:
 
         title_text = (
             f'ＵＩ評価アンケート結果比較（第一印象のみ） (n={to_fullwidth(str(participant_count))}名)\n'
-            f'ＵＩ１を最初に使用: {to_fullwidth(str(stats["ui1_first"]))}名, ＵＩ２を最初に使用: {to_fullwidth(str(stats["ui2_first"]))}名\n'
-            f'好み: ＵＩ１: {to_fullwidth(str(stats["ui1_favorite"]))}名, ＵＩ２: {to_fullwidth(str(stats["ui2_favorite"]))}名'
+            f'ＵＩ１を最初に使用: {to_fullwidth(str(stats["ui1_first"]))}名, ＵＩ２を最初に使用: {to_fullwidth(str(stats["ui2_first"]))}名'
         )
         fig.suptitle(
             title_text,
@@ -667,7 +666,7 @@ class SurveyResultPlotter:
         ui2_data: List[List[int]],
         participant_count: int,
         stats: Dict,
-        output_filename: str = "survey_violin_first_impression.pdf"
+        output_filename: str = "01_survey_first_violin.pdf"
     ):
         """
         UI1とUI2のヴァイオリン図比較を作成（第一印象のみ）
@@ -699,8 +698,7 @@ class SurveyResultPlotter:
 
         title_text = (
             f'ＵＩ評価アンケート結果比較（ヴァイオリン図・第一印象のみ） (n={to_fullwidth(str(participant_count))}名)\n'
-            f'ＵＩ１を最初に使用: {to_fullwidth(str(stats["ui1_first"]))}名, ＵＩ２を最初に使用: {to_fullwidth(str(stats["ui2_first"]))}名\n'
-            f'好み: ＵＩ１: {to_fullwidth(str(stats["ui1_favorite"]))}名, ＵＩ２: {to_fullwidth(str(stats["ui2_favorite"]))}名'
+            f'ＵＩ１を最初に使用: {to_fullwidth(str(stats["ui1_first"]))}名, ＵＩ２を最初に使用: {to_fullwidth(str(stats["ui2_first"]))}名'
         )
         fig.suptitle(
             title_text,
@@ -967,7 +965,7 @@ class SurveyResultPlotter:
         ui2_durations: List[float],
         participant_count: int,
         stats: Dict,
-        output_filename: str = "task_duration_comparison.pdf"
+        output_filename: str = "02_task_duration_boxplot.pdf"
     ):
         """
         UI1とUI2のタスク操作時間の箱ひげ図比較を作成
@@ -1095,14 +1093,316 @@ class SurveyResultPlotter:
             print(f"  UI2 - 平均: {ui2_mean:.2f}, 中央値: {ui2_median:.1f}, 標準偏差: {ui2_std:.2f}")
             print()
 
+    def save_statistics_csv(
+        self,
+        ui1_data: List[List[int]],
+        ui2_data: List[List[int]],
+        output_filename: str = "01_survey_statistics_all.csv"
+    ):
+        """
+        統計情報をCSVファイルに保存
+
+        Args:
+            ui1_data: 質問ごとのUI1回答データ
+            ui2_data: 質問ごとのUI2回答データ
+            output_filename: 出力ファイル名
+        """
+        import csv
+
+        output_path = self.output_dir / output_filename
+
+        with open(output_path, 'w', encoding='utf-8', newline='') as f:
+            writer = csv.writer(f)
+
+            # ヘッダー
+            header = [
+                '質問', '質問内容',
+                'UI1_n', 'UI1_平均', 'UI1_中央値', 'UI1_SD', 'UI1_分散',
+                'UI1_最小値', 'UI1_最大値', 'UI1_範囲', 'UI1_Q1', 'UI1_Q3', 'UI1_IQR',
+                'UI2_n', 'UI2_平均', 'UI2_中央値', 'UI2_SD', 'UI2_分散',
+                'UI2_最小値', 'UI2_最大値', 'UI2_範囲', 'UI2_Q1', 'UI2_Q3', 'UI2_IQR'
+            ]
+            writer.writerow(header)
+
+            # 各質問の統計
+            for q_idx in range(len(ui1_data)):
+                question_label = self.QUESTION_LABELS[q_idx] if q_idx < len(self.QUESTION_LABELS) else f"Q{q_idx + 1}"
+
+                ui1_arr = np.array(ui1_data[q_idx])
+                ui2_arr = np.array(ui2_data[q_idx])
+
+                row = [
+                    f'Q{q_idx + 1}',
+                    f'Ｑ{q_idx + 1}：{question_label}',
+                    len(ui1_arr),
+                    f'{np.mean(ui1_arr):.2f}',
+                    np.median(ui1_arr),
+                    f'{np.std(ui1_arr, ddof=1):.2f}',
+                    f'{np.var(ui1_arr, ddof=1):.2f}',
+                    np.min(ui1_arr),
+                    np.max(ui1_arr),
+                    np.max(ui1_arr) - np.min(ui1_arr),
+                    np.percentile(ui1_arr, 25),
+                    np.percentile(ui1_arr, 75),
+                    np.percentile(ui1_arr, 75) - np.percentile(ui1_arr, 25),
+                    len(ui2_arr),
+                    f'{np.mean(ui2_arr):.2f}',
+                    np.median(ui2_arr),
+                    f'{np.std(ui2_arr, ddof=1):.2f}',
+                    f'{np.var(ui2_arr, ddof=1):.2f}',
+                    np.min(ui2_arr),
+                    np.max(ui2_arr),
+                    np.max(ui2_arr) - np.min(ui2_arr),
+                    np.percentile(ui2_arr, 25),
+                    np.percentile(ui2_arr, 75),
+                    np.percentile(ui2_arr, 75) - np.percentile(ui2_arr, 25),
+                ]
+                writer.writerow(row)
+
+        print(f"✅ 統計CSV保存完了: {output_path}")
+
+    def generate_feedback_summary(self, output_filename: str = "05_report_feedback.md"):
+        """
+        参加者の感想・改善提案をまとめたMarkdownファイルを生成
+
+        Args:
+            output_filename: 出力ファイル名
+        """
+        from datetime import datetime
+
+        survey_files = sorted(self.survey_dir.glob("*_survey.json"))
+        metadata_files = {f.stem.replace('_metadata', ''): f for f in self.other_dir.glob("*_metadata.json")}
+
+        participants = []
+        ui1_favorite_count = 0
+        ui2_favorite_count = 0
+        ui1_first_count = 0
+        ui2_first_count = 0
+
+        # デバイス・経験統計
+        device_stats = {}
+        experience_stats = {}
+        input_device_stats = {}
+
+        for survey_file in survey_files:
+            participant_id = survey_file.stem.replace('_survey', '')
+
+            with open(survey_file, 'r', encoding='utf-8') as f:
+                survey_data = json.load(f)
+
+            # メタデータ読み込み
+            metadata = {}
+            if participant_id in metadata_files:
+                with open(metadata_files[participant_id], 'r', encoding='utf-8') as f:
+                    metadata = json.load(f)
+
+            # 参加者情報
+            participant_info = metadata.get('participant_info', {})
+            device_info = metadata.get('device', {})
+
+            # 統計集計
+            favorite = survey_data.get('favoriteUI', '')
+            if favorite == 'UI1':
+                ui1_favorite_count += 1
+            elif favorite == 'UI2':
+                ui2_favorite_count += 1
+
+            first_ui = metadata.get('first_ui', '')
+            if first_ui == 'UI1':
+                ui1_first_count += 1
+            elif first_ui == 'UI2':
+                ui2_first_count += 1
+
+            # デバイス統計
+            device_type = device_info.get('deviceType', 'unknown')
+            device_stats[device_type] = device_stats.get(device_type, 0) + 1
+
+            # 経験統計
+            exp = participant_info.get('illustrationExperience', 'unknown')
+            experience_stats[exp] = experience_stats.get(exp, 0) + 1
+
+            # 入力デバイス統計
+            input_dev = participant_info.get('inputDevice', 'unknown')
+            input_device_stats[input_dev] = input_device_stats.get(input_dev, 0) + 1
+
+            participants.append({
+                'id': participant_id,
+                'survey': survey_data,
+                'metadata': metadata,
+                'participant_info': participant_info,
+                'device_info': device_info,
+            })
+
+        # Markdown生成
+        lines = []
+        lines.append("# 実験参加者の感想・改善提案まとめ")
+        lines.append("")
+        lines.append(f"**データ集計日**: {datetime.now().strftime('%Y-%m-%d')}")
+        lines.append(f"**参加者数**: {len(participants)}名")
+        lines.append("")
+
+        # 統計サマリー
+        lines.append("## 統計サマリー")
+        lines.append("")
+        lines.append("### UI選好と順序")
+        lines.append("")
+        lines.append("- **お気に入りUI**:")
+        total = ui1_favorite_count + ui2_favorite_count
+        if total > 0:
+            lines.append(f"  - UI1（現行UI）: {ui1_favorite_count}名 ({ui1_favorite_count/total*100:.1f}%)")
+            lines.append(f"  - UI2（新UI）: {ui2_favorite_count}名 ({ui2_favorite_count/total*100:.1f}%)")
+        lines.append("")
+        lines.append("- **使用順序**:")
+        total_order = ui1_first_count + ui2_first_count
+        if total_order > 0:
+            lines.append(f"  - UI1→UI2: {ui1_first_count}名 ({ui1_first_count/total_order*100:.1f}%)")
+            lines.append(f"  - UI2→UI1: {ui2_first_count}名 ({ui2_first_count/total_order*100:.1f}%)")
+        lines.append("")
+
+        # 参加者属性
+        lines.append("### 参加者属性")
+        lines.append("")
+        lines.append("#### デバイスタイプ")
+        lines.append("")
+        for device, count in sorted(device_stats.items(), key=lambda x: -x[1]):
+            lines.append(f"- {device}: {count}名 ({count/len(participants)*100:.1f}%)")
+        lines.append("")
+
+        lines.append("#### イラスト経験")
+        lines.append("")
+        for exp, count in sorted(experience_stats.items(), key=lambda x: -x[1]):
+            lines.append(f"- {exp}: {count}名 ({count/len(participants)*100:.1f}%)")
+        lines.append("")
+
+        lines.append("#### 入力デバイス")
+        lines.append("")
+        for dev, count in sorted(input_device_stats.items(), key=lambda x: -x[1]):
+            lines.append(f"- {dev}: {count}名 ({count/len(participants)*100:.1f}%)")
+        lines.append("")
+
+        # 主な意見
+        lines.append("## 主な意見・傾向")
+        lines.append("")
+
+        # UI2を好んだ理由
+        ui2_reasons = []
+        ui1_reasons = []
+        improvements = []
+
+        for p in participants:
+            survey = p['survey']
+            favorite = survey.get('favoriteUI', '')
+            # キー名はfavoriteReasonまたはreasonの両方をサポート
+            reason = survey.get('favoriteReason', survey.get('reason', '')).strip()
+            # キー名はimprovementsまたはsuggestionsの両方をサポート
+            improvement = survey.get('improvements', survey.get('suggestions', '')).strip()
+
+            if reason:
+                if favorite == 'UI2':
+                    ui2_reasons.append(reason)
+                elif favorite == 'UI1':
+                    ui1_reasons.append(reason)
+
+            if improvement and improvement != '（記載なし）':
+                improvements.append(improvement)
+
+        lines.append("### UI2（新UI）を好んだ理由（主な意見）")
+        lines.append("")
+        lines.append("#### 肯定的意見")
+        lines.append("")
+        for i, reason in enumerate(ui2_reasons[:5], 1):
+            lines.append(f"{i}. {reason}")
+        lines.append("")
+        lines.append("")
+
+        lines.append("### UI1（現行UI）を好んだ理由（主な意見）")
+        lines.append("")
+        for i, reason in enumerate(ui1_reasons[:5], 1):
+            lines.append(f"{i}. {reason}")
+        lines.append("")
+
+        lines.append("### 改善提案（頻出キーワード・主要な提案）")
+        lines.append("")
+        for i, imp in enumerate(improvements[:10], 1):
+            lines.append(f"{i}. {imp}")
+        lines.append("")
+
+        lines.append("---")
+        lines.append("")
+
+        # 個別回答詳細
+        lines.append("## 個別回答詳細")
+        lines.append("")
+
+        for i, p in enumerate(participants, 1):
+            survey = p['survey']
+            info = p['participant_info']
+
+            lines.append(f"### {i}. {p['id']}")
+            lines.append("")
+            lines.append("**参加者情報**")
+            lines.append("")
+            lines.append(f"- **イラスト経験**: {info.get('illustrationExperience', '不明')}")
+            lines.append(f"- **デバイスタイプ**: {p['device_info'].get('deviceType', '不明')}")
+            lines.append(f"- **入力デバイス**: {info.get('inputDevice', '不明')}")
+            lines.append(f"- **お気に入りUI**: {survey.get('favoriteUI', '不明')}")
+            lines.append("")
+
+            lines.append("**お気に入りUIを選んだ理由**")
+            lines.append("")
+            reason = survey.get('favoriteReason', survey.get('reason', '')).strip()
+            if not reason:
+                reason = '（記載なし）'
+            lines.append(f"> {reason}")
+            lines.append("")
+
+            lines.append("**改善提案・気づいた点**")
+            lines.append("")
+            improvement = survey.get('improvements', survey.get('suggestions', '')).strip()
+            if not improvement:
+                improvement = '（記載なし）'
+            lines.append(f"> {improvement}")
+            lines.append("")
+
+            lines.append("---")
+            lines.append("")
+
+        # ファイル保存
+        output_path = self.output_dir / output_filename
+        with open(output_path, 'w', encoding='utf-8') as f:
+            f.write('\n'.join(lines))
+
+        print(f"✅ 感想まとめ保存完了: {output_path}")
+
 
 def main():
     """メイン実行関数"""
     plotter = SurveyResultPlotter()
+
+    # 全データのグラフ作成
     plotter.plot_all_results()
 
     # 第一印象のみのグラフも作成
     plotter.plot_first_impression_results()
+
+    # 統計CSVを保存
+    print("\n📊 統計CSV出力中...")
+    ui1_responses, ui2_responses, participant_count, stats = plotter.load_survey_data()
+    ui1_by_question, ui2_by_question = plotter.prepare_data_for_boxplot(ui1_responses, ui2_responses)
+    plotter.save_statistics_csv(ui1_by_question, ui2_by_question, "01_survey_statistics_all.csv")
+
+    # 第一印象の統計CSV
+    ui1_first, ui2_first, first_count, first_stats = plotter.load_first_impression_data()
+    ui1_first_q, ui2_first_q = plotter.prepare_data_for_boxplot(ui1_first, ui2_first)
+    plotter.save_statistics_csv(ui1_first_q, ui2_first_q, "01_survey_statistics_first.csv")
+
+    # 感想まとめを生成
+    print("\n📝 感想まとめ生成中...")
+    plotter.generate_feedback_summary("05_report_feedback.md")
+
+    print("\n" + "=" * 60)
+    print("✅ 全ての出力完了")
+    print("=" * 60)
 
 
 if __name__ == "__main__":
