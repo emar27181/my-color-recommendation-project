@@ -177,7 +177,7 @@ def run_statistical_graphs(illustrator_list):
     # PCCS色相分布のヴァイオリン図
     if config.GENERATE_PCCS_DISTRIBUTION_VIOLIN:
         print("\n🎻 PCCS色相分布のヴァイオリン図")
-        save_plot_violin_from_used_pccs_distribution_for_illustrators(illustrator_list)
+        save_plot_violin_from_used_pccs_distribution_for_illustrators()
 
     # 使用色の散布図（彩度×明度）※多数のファイル生成
     if config.GENERATE_SCATTER_PLOTS:
@@ -188,6 +188,36 @@ def run_statistical_graphs(illustrator_list):
     if config.GENERATE_TONE_HEATMAPS:
         print("\n🗺️  トーン使用のヒートマップ※多数のファイル生成")
         save_plot_tone_heatmap_for_illustrators(illustrator_list)
+
+    # 匿名版の統計グラフ生成
+    if config.GENERATE_ANONYMOUS_GRAPHS:
+        print("\n" + "=" * 60)
+        print("📊 匿名版の統計グラフ生成")
+        print("=" * 60)
+
+        if config.GENERATE_ACHROMATIC_BAR:
+            print("\n📊 匿名版：無彩色使用率の棒グラフ（積み上げ）")
+            save_plot_bar_from_used_achromatic_colors_average_rate_for_illustrators(illustrator_list, is_anonymous=True)
+
+        if config.GENERATE_MEAN_RESULTANT_VIOLIN:
+            print("\n🎻 匿名版：平均結果長のヴァイオリン図")
+            save_plot_violin_from_mean_resultant_length_count_for_illustrators(illustrator_list, is_anonymous=True)
+
+        if config.GENERATE_USED_HUES_VIOLIN:
+            print("\n🎻 匿名版：使用色相数のヴァイオリン図")
+            save_plot_violin_from_used_hues_count_for_illustrators(illustrator_list, is_anonymous=True)
+
+        if config.GENERATE_PCCS_DISTRIBUTION_VIOLIN:
+            print("\n🎻 匿名版：PCCS色相分布のヴァイオリン図")
+            save_plot_violin_from_used_pccs_distribution_for_illustrators(is_anonymous=True)
+
+        if config.GENERATE_SCATTER_PLOTS:
+            print("\n📊 匿名版：使用色の散布図（彩度×明度）")
+            save_plot_scatter_for_illustrators(illustrator_list, is_anonymous=True)
+
+        if config.GENERATE_TONE_HEATMAPS:
+            print("\n🗺️  匿名版：トーン使用のヒートマップ")
+            save_plot_tone_heatmap_for_illustrators(illustrator_list, is_anonymous=True)
 
 
 def print_config_summary():
@@ -211,39 +241,37 @@ def print_config_summary():
 
 
 def main():
-    """メイン処理"""
+    """
+    メイン処理
+    """
     print("\n" + "=" * 80)
     print("🎨 色推薦システム - メイン実行スクリプト")
     print("=" * 80)
-
+    
     # 設定内容の表示
     print_config_summary()
-
+    
     # イラストレーターリストのセットアップ
     if config.DEBUG_MODE:
         illustrator_list = config.DEBUG_ILLUSTRATOR_LIST
     else:
         illustrator_list = setup_illustrator_list(config.ILLUSTRATOR_LIST)
-
+    
     print(f"\n✅ 処理対象イラストレーター: {len(illustrator_list)}名")
     if len(illustrator_list) <= 5:
         print(f"   → {illustrator_list}")
-
-    # アンケート結果グラフ生成
-    run_survey_result_graphs()
-
-    # 既存アプリとの比較
-    run_existing_app_comparison(illustrator_list)
-
-    # 主要グラフ生成
-    run_main_graphs(illustrator_list)
-
+    
     # 統計グラフ生成
     run_statistical_graphs(illustrator_list)
-
-    print("\n" + "=" * 80)
-    print("✅ 処理完了")
-    print("=" * 80 + "\n")
+    
+    # アンケート結果のグラフ化
+    if config.IS_PLOT_SURVEY_RESULTS:
+        plot_survey_results()
+    
+    # 既存アプリとの比較
+    if config.RUN_EXISTING_APP_COMPARISON:
+        run_existing_app_comparison(illustrator_list)
+    
 
 
 if __name__ == "__main__":

@@ -92,6 +92,7 @@ GENERATE_USED_HUES_VIOLIN = True  # 使用色相数のヴァイオリン図
 GENERATE_PCCS_DISTRIBUTION_VIOLIN = False  # PCCS色相分布のヴァイオリン図
 GENERATE_SCATTER_PLOTS = False  # 使用色の散布図（※多数のファイル生成）
 GENERATE_TONE_HEATMAPS = False  # トーン使用のヒートマップ（※多数のファイル生成）
+GENERATE_ANONYMOUS_GRAPHS = False  # 匿名版の統計グラフを生成するかどうか
 
 
 # ========== 既存アプリ比較設定 ==========

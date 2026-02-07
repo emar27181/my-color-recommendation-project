@@ -667,13 +667,14 @@ def _extract_used_achromatic_colors_average_rate_from_json(illustrator_name):
     return used_achromatic_colors_rate_sum / len(data)
 
 
-def save_plot_bar_from_used_achromatic_colors_average_rate_for_illustrators(illustrator_list):
+def save_plot_bar_from_used_achromatic_colors_average_rate_for_illustrators(illustrator_list, is_anonymous=False):
     """
     引数で受け取るリスト内のイラストレーターの使用無彩色の平均比率を
     棒グラフ（積み上げ棒グラフ）にプロットする関数
 
     引数:
         illustrator_list: 使用色を抽出させたいイラストレーターのリスト(文字列)
+        is_anonymous: 匿名化するかどうかのフラグ
 
     戻り値:
         None
@@ -694,19 +695,30 @@ def save_plot_bar_from_used_achromatic_colors_average_rate_for_illustrators(illu
     illustrators = list(used_achromatic_colors_average_rate_for_illustrators.keys())
     achromatic_rates = list(used_achromatic_colors_average_rate_for_illustrators.values())
 
+    # 匿名化処理
+    if is_anonymous:
+        anonymous_illustrators = [f"Illustrator {i+1}" for i in range(len(illustrators))]
+        x_labels = anonymous_illustrators
+        title = "Used Achromatic Colors Average Rate by Illustrator (Anonymous)"
+        output_file_path = 'src/color_recommendation/data/output/graph_pdf/bar_from_used_achromatic_colors_average_rate_anonymous.pdf'
+    else:
+        x_labels = illustrators
+        title = "Used Achromatic Colors Average Rate by Illustrator"
+        output_file_path = 'src/color_recommendation/data/output/graph_pdf/bar_from_used_achromatic_colors_average_rate.pdf'
+
     # 積み上げ棒グラフの描画
     fig = plt.figure(figsize=(20, 10))
     fig.patch.set_facecolor('white')  # 背景を明示的に白に設定
 
     # 無彩色部分（灰色）を描画
-    plt.bar(illustrators, achromatic_rates, color='#AAAAAA', label='achromatic_rate')
+    plt.bar(x_labels, achromatic_rates, color='#AAAAAA', label='achromatic_rate')
     # 有彩色部分（赤色）：高さは (1 - 無彩色の割合) で、bottom を無彩色の割合に指定
-    plt.bar(illustrators, [1 - rate for rate in achromatic_rates], bottom=achromatic_rates, color='#990000', label='choromatic_rate')
+    plt.bar(x_labels, [1 - rate for rate in achromatic_rates], bottom=achromatic_rates, color='#990000', label='choromatic_rate')
 
-    plt.title("Used Achromatic Colors Average Rate by Illustrator", color='black')
+    plt.title(title, color='black')
     plt.xlabel("Illustrator", color='black')
     plt.ylabel("achromatic rate vs chromatic rate", color='black')
-    plt.xticks(rotation=45, color='black')
+    plt.xticks(rotation=45, color='black', ha="right")
 
     # 軸の目盛り色を設定
     ax = plt.gca()
@@ -721,7 +733,6 @@ def save_plot_bar_from_used_achromatic_colors_average_rate_for_illustrators(illu
 
     plt.tight_layout()
 
-    output_file_path = 'src/color_recommendation/data/output/graph_pdf/bar_from_used_achromatic_colors_average_rate.pdf'
     plt.savefig(output_file_path, format='pdf', facecolor='white', edgecolor='white', transparent=False)
     plt.clf()
     print(f"{output_file_path} が保存されました．")
@@ -741,13 +752,13 @@ def _extract_mean_resultant_length_from_json(illstrator_name):
     return None
 
 
-def save_plot_violin_from_mean_resultant_length_count_for_illustrators(illustrator_list):
+def save_plot_violin_from_mean_resultant_length_count_for_illustrators(illustrator_list, is_anonymous=False):
     """
     引数で受け取るリスト内のイラストレーターの平均結果長の分布をヴァイオリン図にプロットする関数
 
     引数:
         illustrator_list: 使用色を抽出させたいイラストレーターのリスト(文字列)
-
+        is_anonymous: 匿名化するかどうかのフラグ
     戻り値:
         None
     """
@@ -771,6 +782,16 @@ def save_plot_violin_from_mean_resultant_length_count_for_illustrators(illustrat
 
     df = pd.DataFrame(records)
 
+    # 匿名化処理
+    if is_anonymous:
+        anonymous_names = {name: f"Illustrator {i+1}" for i, name in enumerate(illustrator_list)}
+        df["Illustrator"] = df["Illustrator"].map(anonymous_names)
+        output_file_path = 'src/color_recommendation/data/output/graph_pdf/violin_from_mean_resultant_length_anonymous.pdf'
+        title = "Violin Plot of Mean resultant length distribution by Illustrator (Anonymous)"
+    else:
+        output_file_path = 'src/color_recommendation/data/output/graph_pdf/violin_from_mean_resultant_length.pdf'
+        title = "Violin Plot of Mean resultant length distribution by Illustrator"
+
     # ヴァイオリン図を描画（横軸がElement、縦軸がIllustrator）
     fig = plt.figure(figsize=(10, 12))
     fig.patch.set_facecolor('white')  # 背景を明示的に白に設定
@@ -779,7 +800,7 @@ def save_plot_violin_from_mean_resultant_length_count_for_illustrators(illustrat
     sns.violinplot(x="Element", y="Illustrator", data=df, inner="quartile", cut=0, scale="count")
 
     # seabornが設定を上書きするため、violinplot後に再度色設定を適用
-    plt.title("Violin Plot of Mean resultant length distribution by Illustrator", color='black')
+    plt.title(title, color='black')
     plt.xlabel("Mean resultant length(0~12)", color='black')
     plt.ylabel("Illustrator", color='black')
 
@@ -796,19 +817,18 @@ def save_plot_violin_from_mean_resultant_length_count_for_illustrators(illustrat
 
     plt.tight_layout()
 
-    output_file_path = f'src/color_recommendation/data/output/graph_pdf/violin_from_mean_resultant_length.pdf'
     plt.savefig(output_file_path, format='pdf', facecolor='white', edgecolor='white', transparent=False)
     plt.clf()
     print(f"{output_file_path} が保存されました．")
 
 
-def save_plot_violin_from_used_hues_count_for_illustrators(illustrator_list):
+def save_plot_violin_from_used_hues_count_for_illustrators(illustrator_list, is_anonymous=False):
     """
     引数で受け取るリスト内のイラストレーターの使用色相(有彩色)の数の分布をヴァイオリン図にプロットする関数
 
     引数:
         illustrator_list: 使用色を抽出させたいイラストレーターのリスト(文字列)
-
+        is_anonymous: 匿名化するかどうかのフラグ
     戻り値:
         None
     """
@@ -833,6 +853,16 @@ def save_plot_violin_from_used_hues_count_for_illustrators(illustrator_list):
 
     df = pd.DataFrame(records)
 
+    # 匿名化処理
+    if is_anonymous:
+        anonymous_names = {name: f"Illustrator {i+1}" for i, name in enumerate(illustrator_list)}
+        df["Illustrator"] = df["Illustrator"].map(anonymous_names)
+        output_file_path = 'src/color_recommendation/data/output/graph_pdf/violin_from_used_hues_count_anonymous.pdf'
+        title = "Violin Plot of Used hues count by Illustrator (Anonymous)"
+    else:
+        output_file_path = 'src/color_recommendation/data/output/graph_pdf/violin_from_used_hues_count.pdf'
+        title = "Violin Plot of Used hues count by Illustrator"
+
     # ヴァイオリン図を描画（横軸がElement、縦軸がIllustrator）
     fig = plt.figure(figsize=(10, 12))
     fig.patch.set_facecolor('white')  # 背景を明示的に白に設定
@@ -841,7 +871,7 @@ def save_plot_violin_from_used_hues_count_for_illustrators(illustrator_list):
     sns.violinplot(x="Element", y="Illustrator", data=df, inner="quartile", cut=0, scale="count")
 
     # seabornが設定を上書きするため、violinplot後に再度色設定を適用
-    plt.title("Violin Plot of Used hues count by Illustrator", color='black')
+    plt.title(title, color='black')
     plt.xlabel("Used hues count", color='black')
     plt.ylabel("Illustrator", color='black')
 
@@ -858,7 +888,6 @@ def save_plot_violin_from_used_hues_count_for_illustrators(illustrator_list):
 
     plt.tight_layout()
 
-    output_file_path = f'src/color_recommendation/data/output/graph_pdf/violin_from_used_hues_count.pdf'
     plt.savefig(output_file_path, format='pdf', facecolor='white', edgecolor='white', transparent=False)
     plt.clf()
     print(f"{output_file_path} が保存されました．")
@@ -887,7 +916,7 @@ def _extract_used_pccs_count_sum_distribution_from_json():
     return used_pccs_count_sum_distributions_for_illustrators
 
 
-def save_plot_violin_from_used_pccs_distribution_for_illustrators():
+def save_plot_violin_from_used_pccs_distribution_for_illustrators(is_anonymous=False):
     """
     イラストレーターの使用PCCS(1~24)の分布をヴァイオリン図にプロットする関数。
     横軸の背景に色相のグラデーションを表示する。
@@ -900,10 +929,22 @@ def save_plot_violin_from_used_pccs_distribution_for_illustrators():
 
     # データを「Illustrator」「Element」の形に展開
     records = []
+    illustrator_list = list(used_pccs_count_sum_distributions_for_illustrators.keys())
     for illustrator, counts in used_pccs_count_sum_distributions_for_illustrators.items():
         for element_idx, count in enumerate(counts):
             records.extend([{"Illustrator": illustrator, "Element": element_idx}] * count)
     df = pd.DataFrame(records)
+
+    # 匿名化処理
+    if is_anonymous:
+        anonymous_names = {name: f"Illustrator {i+1}" for i, name in enumerate(illustrator_list)}
+        df["Illustrator"] = df["Illustrator"].map(anonymous_names)
+        output_file_path = 'src/color_recommendation/data/output/graph_pdf/violin_from_used_pccs_count_anonymous.pdf'
+        title = "Violin Plot of Used PCCS count by Illustrator (Anonymous)"
+    else:
+        output_file_path = 'src/color_recommendation/data/output/graph_pdf/violin_from_used_pccs_count.pdf'
+        title = "Violin Plot of Used PCCS count by Illustrator"
+
 
     # 図の準備
     fig, ax = plt.subplots(figsize=(10, 12))
@@ -925,12 +966,11 @@ def save_plot_violin_from_used_pccs_distribution_for_illustrators():
     # ヴァイオリンプロットの描画
     sns.violinplot(x="Element", y="Illustrator", data=df, inner="quartile", cut=0, scale="count", ax=ax)
 
-    ax.set_title("Violin Plot of Used PCCS count by Illustrator")
+    ax.set_title(title)
     ax.set_xlabel("Used PCCS (1~24)")
     ax.set_ylabel("Illustrator")
 
     plt.tight_layout()
-    output_file_path = 'src/color_recommendation/data/output/graph_pdf/violin_from_used_pccs_count.pdf'
     plt.savefig(output_file_path, format='pdf', facecolor='white', edgecolor='white', transparent=False)
     plt.clf()
     print(f"{output_file_path} が保存されました．")
@@ -979,12 +1019,14 @@ def _get_scatter_data_by_used_colors(data):
     return lightness_list, saturation_list, color_labels, sizes
 
 
-def plot_used_colors_scatter(illustrator_name):
+def plot_used_colors_scatter(illustrator_name, is_anonymous=False, anonymous_name=None):
     """
     引数で受け取るイラストレーターの使用色の散布図をプロットする関数
 
     引数:
         illustrator_name: イラストレーター名
+        is_anonymous: 匿名化するかどうかのフラグ
+        anonymous_name: 匿名化された名前
 
     戻り値:
         None
@@ -1004,7 +1046,14 @@ def plot_used_colors_scatter(illustrator_name):
     plt.scatter(saturation_list, lightness_list, s=sizes, c=color_labels, edgecolor=None)
 
     # グラフの設定
-    plt.title(f'{illustrator_name}', fontsize=14, color='black')
+    if is_anonymous:
+        title = f'{anonymous_name}'
+        output_file_path = f'src/color_recommendation/data/output/scatter_graph/scatter_plot_{anonymous_name}.pdf'
+    else:
+        title = f'{illustrator_name}'
+        output_file_path = f'src/color_recommendation/data/output/scatter_graph/scatter_plot_{illustrator_name}.pdf'
+        
+    plt.title(title, fontsize=14, color='black')
     plt.xlabel('Saturation', fontsize=12, color='black')
     plt.ylabel('Lightness', fontsize=12, color='black')
     plt.grid(True, color='gray', alpha=0.5)
@@ -1017,22 +1066,26 @@ def plot_used_colors_scatter(illustrator_name):
 
     # plt.show()
 
-    output_file_path = f'src/color_recommendation/data/output/scatter_graph/scatter_plot_{illustrator_name}.pdf'
-
     plt.savefig(output_file_path, format='pdf', facecolor='white', edgecolor='white', transparent=False)
     plt.clf()
     print(f"{output_file_path} が保存されました．")
-    print(f"イラスト:  src/color_recommendation/data/input/illustration/{illustrator_name}")
+    if not is_anonymous:
+        print(f"イラスト:  src/color_recommendation/data/input/illustration/{illustrator_name}")
 
     plt.close()
 
 
-def save_plot_scatter_for_illustrators(illustrater_list):
-    for illustrator in illustrater_list:
-        plot_used_colors_scatter(illustrator)
+def save_plot_scatter_for_illustrators(illustrater_list, is_anonymous=False):
+    if is_anonymous:
+        anonymous_names = {name: f"Illustrator {i+1}" for i, name in enumerate(illustrater_list)}
+        for illustrator in illustrater_list:
+            plot_used_colors_scatter(illustrator, is_anonymous=True, anonymous_name=anonymous_names[illustrator])
+    else:
+        for illustrator in illustrater_list:
+            plot_used_colors_scatter(illustrator)
 
 
-def save_plot_heatmap(illustrator_name, data):
+def save_plot_heatmap(illustrator_name, data, is_anonymous=False, anonymous_name=None):
     # PDF出力時にテキストが黒で表示されるようにスタイルを適用
     _apply_black_text_style()
 
@@ -1040,7 +1093,15 @@ def save_plot_heatmap(illustrator_name, data):
     fig.patch.set_facecolor('white')  # 背景を明示的に白に設定
 
     plt.imshow(data, origin='lower')
-    plt.title("Heatmap of Provided Data", color='black')
+    
+    if is_anonymous:
+        title = "Heatmap of Provided Data (Anonymous)"
+        output_file_path = f'src/color_recommendation/data/output/heatmap/heatmap_plot_{anonymous_name}.pdf'
+    else:
+        title = "Heatmap of Provided Data"
+        output_file_path = f'src/color_recommendation/data/output/heatmap/heatmap_plot_{illustrator_name}.pdf'
+
+    plt.title(title, color='black')
     plt.xlabel("Column Index", color='black')
     plt.ylabel("Row Index", color='black')
 
@@ -1055,16 +1116,21 @@ def save_plot_heatmap(illustrator_name, data):
     ax.tick_params(axis='x', colors='black')
     ax.tick_params(axis='y', colors='black')
 
-    output_file_path = f'src/color_recommendation/data/output/heatmap/heatmap_plot_{illustrator_name}.pdf'
     plt.savefig(output_file_path, format='pdf', facecolor='white', edgecolor='white', transparent=False)
     plt.clf()
     print(f"{output_file_path} が保存されました．")
 
 
-def save_plot_tone_heatmap_for_illustrators(illustrator_list):
-    for illustrator in illustrator_list:
-        data = get_statistics_by_illustrator(illustrator, 'saturation_lightness_count_distribution')
-        save_plot_heatmap(illustrator, data)
+def save_plot_tone_heatmap_for_illustrators(illustrator_list, is_anonymous=False):
+    if is_anonymous:
+        anonymous_names = {name: f"Illustrator {i+1}" for i, name in enumerate(illustrator_list)}
+        for illustrator in illustrator_list:
+            data = get_statistics_by_illustrator(illustrator, 'saturation_lightness_count_distribution')
+            save_plot_heatmap(illustrator, data, is_anonymous=True, anonymous_name=anonymous_names[illustrator])
+    else:
+        for illustrator in illustrator_list:
+            data = get_statistics_by_illustrator(illustrator, 'saturation_lightness_count_distribution')
+            save_plot_heatmap(illustrator, data)
 
 
 def main():
